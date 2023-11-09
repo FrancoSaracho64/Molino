@@ -1,5 +1,6 @@
 package ar.edu.unlu.poo.reglas;
 
+import ar.edu.unlu.poo.modelos.Participante;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 public class ReglasDelJuego {
@@ -22,5 +23,15 @@ public class ReglasDelJuego {
 
         // Si no se cumple ninguna de las condiciones anteriores, la casilla se considera válida.
         return true;
+    }
+
+    public boolean verificarPartidaFinalizada(Tablero t, Participante j1, Participante j2){
+        boolean estado = true;
+        /*
+        Casos de finalizacion de la partida:
+        
+         */
+
+        return estado;
     }
 }

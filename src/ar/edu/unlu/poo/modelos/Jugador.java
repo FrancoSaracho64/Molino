@@ -1,6 +1,6 @@
 package ar.edu.unlu.poo.modelos;
 
-import java.io.Serializable;
+import java.io.*;
 
 public class Jugador implements Serializable {
     private static Integer id_jugador = 0;

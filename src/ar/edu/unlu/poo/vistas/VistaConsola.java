@@ -1,43 +1,52 @@
-package ar.edu.unlu.poo.tipoJuego;
+package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.enumerados.Simbolo;
+import ar.edu.unlu.poo.interfaces.TableroImpl;
 import ar.edu.unlu.poo.modelos.Ficha;
-import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
-import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 
-public class JuegoConsola {
-    public JuegoConsola() {
-        ReglasDelJuego reglas = new ReglasDelJuego();
-        Jugador jugador_blancas = new Jugador("Jugador 1");
-        Jugador jugador_negras = new Jugador("Jugador 2");
-        Tablero molino = new Tablero(13, 13);
+public class VistaConsola implements TableroImpl {
+    public VistaConsola() {
 
-        Ficha blanca1 = new Ficha();
-        Ficha blanca2 = new Ficha();
-        Ficha blanca3 = new Ficha();
-        Ficha blanca4 = new Ficha();
-        Ficha blanca5 = new Ficha();
-        Ficha blanca6 = new Ficha();
-        Ficha blanca7 = new Ficha();
-        Ficha blanca8 = new Ficha();
-        Ficha blanca9 = new Ficha();
-
-        Ficha negra1 = new Ficha();
-        Ficha negra2 = new Ficha();
-        Ficha negra3 = new Ficha();
-        Ficha negra4 = new Ficha();
-        Ficha negra5 = new Ficha();
-        Ficha negra6 = new Ficha();
-        Ficha negra7 = new Ficha();
-        Ficha negra8 = new Ficha();
-        Ficha negra9 = new Ficha();
-
-        mostrarTablero(molino);
     }
 
-    private void mostrarTablero (Tablero tablero){
+    private int pedirOpcion (){
+        return 0;
+    }
+
+    private int pedirColumna(){
+        return 0;
+    }
+
+    private int pedirFila(){
+        return 0;
+    }
+
+    private String letraColumna (int columna){
+        return String.valueOf((char) ('A' + columna));
+    }
+
+    private String numeroFila (int fila){
+        return String.valueOf(fila + 1);
+    }
+
+    private String formatoCelda (String contenido){
+        return String.format("%1s", contenido);
+    }
+
+    public void limpiarConsola(){
+        try{
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/c", "cls");
+            Process process = processBuilder.inheritIO().start();
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void mostrarTablero(Tablero tablero) {
         int col = 0;
         int fil = 0;
         int filfin = 0;
@@ -103,16 +112,9 @@ public class JuegoConsola {
         System.out.println("\n-------------------------------------------------");
     }
 
-    private String letraColumna (int columna){
-        return String.valueOf((char) ('A' + columna));
-    }
+    @Override
+    public void mostrarMensaje() {
 
-    private String numeroFila (int fila){
-        return String.valueOf(fila + 1);
-    }
-
-    private String formatoCelda (String contenido){
-        return String.format("%1s", contenido);
     }
 }
 
