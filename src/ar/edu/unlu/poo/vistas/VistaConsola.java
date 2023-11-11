@@ -2,25 +2,22 @@ package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.enumerados.Simbolo;
+import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.TableroImpl;
+import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Ficha;
 import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
+
+import java.util.Scanner;
 
 public class VistaConsola implements TableroImpl {
-    public VistaConsola() {
+    private static final String CASILLA_DISPONIBLE = "#";
+    private static final String CASILLA_INVALIDA = "";
+    private ControladorImpl controlador;
 
-    }
-
-    private int pedirOpcion (){
-        return 0;
-    }
-
-    private int pedirColumna(){
-        return 0;
-    }
-
-    private int pedirFila(){
-        return 0;
+    public VistaConsola(ControladorImpl controlador){
+        this.controlador = controlador;
     }
 
     private String letraColumna (int columna){
@@ -35,16 +32,6 @@ public class VistaConsola implements TableroImpl {
         return String.format("%1s", contenido);
     }
 
-    public void limpiarConsola(){
-        try{
-            ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/c", "cls");
-            Process process = processBuilder.inheritIO().start();
-            process.waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void mostrarTablero(Tablero tablero) {
         int col = 0;
@@ -54,7 +41,7 @@ public class VistaConsola implements TableroImpl {
         System.out.println("-------------------------------------------------");
         // Muestra las letras de las columnas
         System.out.print("|    "); // Espacio inicial
-        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+        for (int columna = 0; columna < 13; columna++) {
             if ( columna!= 12) {
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(col)) + "    ");
@@ -65,19 +52,21 @@ public class VistaConsola implements TableroImpl {
             }
         }
         System.out.println();
-        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
+        for (int fila = 0; fila < 13; fila++) {
             System.out.print("|");
             if (fila % 2 == 0) {
                 System.out.print(" " + formatoCelda(numeroFila(fil)) + "  "); // Número de fila
                 fil++;
             }
-            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+            for (int columna = 0; columna < 13; columna++) {
+                // TODO: pedir al controlador ----------------------
                 Ficha ficha = tablero.obtenerFicha(fila, columna);
-                String contenidoCelda = "";
+                String contenidoCelda = CASILLA_INVALIDA;
                 if (ficha == null) {
                     if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() != EstadoCasilla.INVALIDA){
-                        contenidoCelda = "#";
+                        contenidoCelda = CASILLA_DISPONIBLE;
                     }
+
                 } else {
                     if (ficha.getSimbolo() == Simbolo.X) {
                         contenidoCelda = "X";
@@ -85,6 +74,7 @@ public class VistaConsola implements TableroImpl {
                         contenidoCelda = "O";
                     }
                 }
+                // TODO---------------------------------------------
                 System.out.print(" " + formatoCelda(contenidoCelda) + " ");
             }
             if (fila % 2 == 0) {
@@ -98,7 +88,7 @@ public class VistaConsola implements TableroImpl {
         }
         System.out.print("|    ");
 
-        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+        for (int columna = 0; columna < 13; columna++) {
             if(columna != 12){
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(colfin)) + "    ");
@@ -113,8 +103,27 @@ public class VistaConsola implements TableroImpl {
     }
 
     @Override
-    public void mostrarMensaje() {
+    public void mostrarMensaje(String mensaje) {
 
     }
-}
 
+    @Override
+    public void mostrarMensajeErrorCasilla() {
+        System.out.println("Ha introducido una coordenada incorrecta. Vuelva a intentar.");
+    }
+
+    @Override
+    public Coordenada pedirCasilla() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese la columna (A-G): ");
+        char columna = EntradaTeclado.pedirColumna();
+        System.out.print("Ingrese la fila (1-7): ");
+        int fila = EntradaTeclado.pedirFila();
+        return new Coordenada(fila, columna);
+    }
+
+    @Override
+    public void iniciarJuego() {
+        controlador.comenzarJuego();
+    }
+}

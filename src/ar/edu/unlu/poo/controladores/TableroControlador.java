@@ -1,70 +1,85 @@
 package ar.edu.unlu.poo.controladores;
 
+import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.TableroImpl;
-import ar.edu.unlu.poo.modelos.Ficha;
-import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Participante;
-import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.poo.modelos.*;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 
 import java.util.ArrayList;
 
-public class TableroControlador {
+public class TableroControlador implements ControladorImpl {
     private ArrayList<Jugador> jugadores;
     private Tablero tablero;
     private TableroImpl vista;
     private ReglasDelJuego reglas;
 
-    public TableroControlador(ArrayList<Jugador> jugadores, Tablero tablero, TableroImpl vista){
+    public TableroControlador(ArrayList<Jugador> jugadores, Tablero tablero){
         this.jugadores = jugadores;
         this.tablero = tablero;
-        this.vista = vista;
         this.reglas = new ReglasDelJuego();
     }
 
-    public void iniciarPartida(){
-        ArrayList<Ficha> fichasJ1 = generarFichas();
-        ArrayList<Ficha> fichasJ2 = generarFichas();
+    @Override
+    public void comenzarJuego(){
+        // Inicializaciones para comenzar el juego
+        Jugador j1 = jugadores.get(0);
+        Jugador j2 = jugadores.get(1);
+        j1.resetearFichasColocadas();
+        j2.resetearFichasColocadas();
+        ArrayList<Ficha> fichasJ1 = generarFichas(j1);
+        ArrayList<Ficha> fichasJ2 = generarFichas(j2);
 
-        Participante j1 = new Participante(jugadores.get(0), fichasJ1);
-        Participante j2 = new Participante(jugadores.get(1), fichasJ2);
-
-        boolean juegoActivo = true;
-        boolean turno_activo = true; // true: jugador1 --- false: jugador2
+        //Comienza el juego
+        boolean juegoActivo = true; // estado de la partida
+        boolean turno = true; // true: jugador1 --- false: jugador2
         boolean ganador;
 
         while (juegoActivo){
-            if(turno_activo){
-                if(j1.getFichasColocadas() < 9){
+            vista.mostrarTablero(tablero);
+            if(turno){
+                if (j1.getFichasColocadas() < 9) {
+                    colocarFicha(j1, fichasJ1);
+                } else {
                     juegoActivo = false;
                 }
-
-                turno_activo = false;
-                juegoActivo = reglas.verificarPartidaFinalizada(tablero, j1, j2);
+                turno = false;
+                //juegoActivo = reglas.verificarPartidaFinalizada(tablero, j1, j2);
             } else {
-                if(j2.getFichasColocadas() < 9){
-
+                if (j2.getFichasColocadas() < 9) {
+                    colocarFicha(j2, fichasJ2);
                 }
-                juegoActivo = false;
-                turno_activo = true;
+                turno = true;
             }
         }
         System.out.println("El juego ha terminado.");
         System.out.println("El ganador es: ");
-        vista.mostrarTablero(tablero);
     }
 
-    private ArrayList<Ficha> generarFichas(){
+    private void colocarFicha(Jugador j, ArrayList<Ficha> fichasJ){
+        boolean valida;
+        Coordenada coord;
+        do {
+            coord = vista.pedirCasilla();
+            valida = reglas.esCasillaValida(coord, tablero);
+            if (!valida){
+                vista.mostrarMensajeErrorCasilla();
+            }
+        } while (!valida);
+        tablero.colocarFicha(coord.getFila(), coord.getColumna(), fichasJ.get(j.getFichasColocadas()));
+        j.incFichasColocadas();
+    }
+
+    private ArrayList<Ficha> generarFichas(Jugador jugador){
         ArrayList<Ficha> fichas = new ArrayList<>();
-        Ficha f1 = new Ficha();
-        Ficha f2 = new Ficha();
-        Ficha f3 = new Ficha();
-        Ficha f4 = new Ficha();
-        Ficha f5 = new Ficha();
-        Ficha f6 = new Ficha();
-        Ficha f7 = new Ficha();
-        Ficha f8 = new Ficha();
-        Ficha f9 = new Ficha();
+        Ficha f1 = new Ficha(jugador);
+        Ficha f2 = new Ficha(jugador);
+        Ficha f3 = new Ficha(jugador);
+        Ficha f4 = new Ficha(jugador);
+        Ficha f5 = new Ficha(jugador);
+        Ficha f6 = new Ficha(jugador);
+        Ficha f7 = new Ficha(jugador);
+        Ficha f8 = new Ficha(jugador);
+        Ficha f9 = new Ficha(jugador);
         fichas.add(f1);
         fichas.add(f2);
         fichas.add(f3);
@@ -74,7 +89,10 @@ public class TableroControlador {
         fichas.add(f7);
         fichas.add(f8);
         fichas.add(f9);
-
         return fichas;
+    }
+
+    public void agregarVista(TableroImpl vista) {
+        this.vista = vista;
     }
 }

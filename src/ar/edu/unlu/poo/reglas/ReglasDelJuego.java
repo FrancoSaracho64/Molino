@@ -1,6 +1,7 @@
 package ar.edu.unlu.poo.reglas;
 
-import ar.edu.unlu.poo.modelos.Participante;
+import ar.edu.unlu.poo.modelos.Coordenada;
+import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 public class ReglasDelJuego {
@@ -8,8 +9,10 @@ public class ReglasDelJuego {
     public ReglasDelJuego() {
     }
 
-    public boolean esCasillaValida(int fila, int columna, Tablero tablero) {
+    public boolean esCasillaValida(Coordenada coordenada, Tablero tablero) {
         // Verifica si la casilla está dentro de los límites del tablero.
+        int fila = coordenada.getFila();
+        int columna = coordenada.getColumna();
         if (fila < 0 || fila >= tablero.getCountFilas() || columna < 0 || columna >= tablero.getCountColumnas()) {
             return false;
         }
@@ -25,7 +28,7 @@ public class ReglasDelJuego {
         return true;
     }
 
-    public boolean verificarPartidaFinalizada(Tablero t, Participante j1, Participante j2){
+    public boolean verificarPartidaFinalizada(Tablero t, Jugador j1, Jugador j2){
         boolean estado = true;
         /*
         Casos de finalizacion de la partida:

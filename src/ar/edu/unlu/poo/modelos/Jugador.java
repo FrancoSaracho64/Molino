@@ -10,22 +10,32 @@ public class Jugador implements Serializable {
     private int puntaje;
     private int victorias;
     private int derrotas;
+    private int fichasColocadas;
 
     public Jugador(String nombre) {
-        id_jugador++;
         this.id = id_jugador;
+        id_jugador++;
         this.nombre = nombre;
         this.puntaje = 0;
         this.victorias = 0;
         this.derrotas = 0;
+        this.fichasColocadas = 0;
     }
 
     public static void actualizarUltimoId(ArrayList<Jugador> jugadores) {
-        for (Jugador jugador : jugadores) {
-            if (jugador.getId() > id_jugador) {
-                id_jugador = jugador.getId();
-            }
-        }
+        id_jugador = jugadores.size();
+    }
+
+    public int getFichasColocadas() {
+        return fichasColocadas;
+    }
+
+    public void incFichasColocadas() {
+        this.fichasColocadas++;
+    }
+
+    public void resetearFichasColocadas(){
+        this.fichasColocadas = 0;
     }
 
     public int getId() {
@@ -62,10 +72,10 @@ public class Jugador implements Serializable {
 
     @Override
     public String toString() {
-        return "Jugador ---> " + nombre + "  //  ID: **" + id +"**\n" +
+        return "Jugador ---> " + nombre + "  /  ID: " + id +"\n" +
             "ESTADISTICAS:"+
             "\n     Puntaje: " + puntaje +
-            "\n     Victorias=" + victorias +
-            "\n     Derrotas=" + derrotas;
+            "\n     Victorias: " + victorias +
+            "\n     Derrotas: " + derrotas;
     }
 }

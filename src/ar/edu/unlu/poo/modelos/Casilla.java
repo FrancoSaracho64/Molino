@@ -3,31 +3,32 @@ package ar.edu.unlu.poo.modelos;
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 
 public class Casilla {
-    private final int fila;
-    private final int columna;
     private Ficha ficha;
-    private EstadoCasilla estadoCasilla;
+    private EstadoCasilla estado;
 
-    public Casilla(int fila, int columna, EstadoCasilla estadoCasilla) {
-        this.fila = fila;
-        this.columna = columna;
-        this.estadoCasilla = estadoCasilla;
+    public Casilla(EstadoCasilla estado) {
         this.ficha = null;
+        this.estado = estado;
     }
 
     public void setEstadoCasilla(EstadoCasilla estadoCasilla) {
-        this.estadoCasilla = estadoCasilla;
+        this.estado = estadoCasilla;
     }
 
     public EstadoCasilla getEstadoCasilla() {
-        return estadoCasilla;
+        return estado;
     }
 
     public Ficha getFicha() {
         return ficha;
     }
 
-    public void setFicha(Ficha ficha) {
+    public void colocarFicha(Ficha ficha) {
         this.ficha = ficha;
+        this.estado = EstadoCasilla.OCUPADA;
+    }
+
+    public boolean esValida(){
+        return estado != EstadoCasilla.INVALIDA;
     }
 }
