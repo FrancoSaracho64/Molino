@@ -1,6 +1,7 @@
 package ar.edu.unlu.poo.modelos;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class Jugador implements Serializable {
     private static Integer id_jugador = 0;
@@ -11,12 +12,20 @@ public class Jugador implements Serializable {
     private int derrotas;
 
     public Jugador(String nombre) {
-        this.id = id_jugador;
         id_jugador++;
+        this.id = id_jugador;
         this.nombre = nombre;
         this.puntaje = 0;
         this.victorias = 0;
         this.derrotas = 0;
+    }
+
+    public static void actualizarUltimoId(ArrayList<Jugador> jugadores) {
+        for (Jugador jugador : jugadores) {
+            if (jugador.getId() > id_jugador) {
+                id_jugador = jugador.getId();
+            }
+        }
     }
 
     public int getId() {
@@ -53,7 +62,7 @@ public class Jugador implements Serializable {
 
     @Override
     public String toString() {
-        return "Jugador ---> " + nombre + '\'' +
+        return "Jugador ---> " + nombre + "  //  ID: **" + id +"**\n" +
             "ESTADISTICAS:"+
             "\n     Puntaje: " + puntaje +
             "\n     Victorias=" + victorias +
