@@ -14,7 +14,7 @@ public class VistaInterfazGrafica implements TableroImpl {
     }
 
     @Override
-    public void mostrarMensaje(String mensaje) {
+    public void mostrarTurno(String mensaje) {
 
     }
 

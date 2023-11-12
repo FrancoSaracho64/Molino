@@ -1,8 +1,14 @@
 package ar.edu.unlu.poo.modelos;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
+import ar.edu.unlu.poo.interfaces.Observable;
+import ar.edu.unlu.poo.interfaces.Observer;
 
-public class Tablero {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Tablero implements Observable {
+    private List<Observer> observadores = new ArrayList<>();
     private Casilla[][] casillas;
     private final int columnas;
     private final int filas;
@@ -64,6 +70,7 @@ public class Tablero {
      */
     public void colocarFicha(int fila, int columna, Ficha ficha){
         casillas[fila][columna].colocarFicha(ficha);
+        notificarObservadores();
     }
 
     public Ficha obtenerFicha(int fila, int columna){
@@ -76,6 +83,23 @@ public class Tablero {
 
     public int getCountColumnas() {
         return columnas;
+    }
+
+    @Override
+    public void agregarObservador(Observer observador) {
+        observadores.add(observador);
+    }
+
+    @Override
+    public void quitarObservador(Observer observador) {
+        observadores.remove(observador);
+    }
+
+    @Override
+    public void notificarObservadores() {
+        for (Observer observador : observadores) {
+            observador.actualizar();
+        }
     }
 }
 

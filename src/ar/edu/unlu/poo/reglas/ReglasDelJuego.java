@@ -2,97 +2,96 @@ package ar.edu.unlu.poo.reglas;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.modelos.Coordenada;
+import ar.edu.unlu.poo.modelos.Ficha;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
-public class ReglasDelJuego {
+import java.util.ArrayList;
 
-    public ReglasDelJuego() {
+public class ReglasDelJuego {
+    private Tablero tablero;
+
+    public ReglasDelJuego(Tablero tablero) {
+        this.tablero = tablero;
     }
 
-    public boolean esCasillaValida(Coordenada coordenada, Tablero tablero) {
+    public boolean esCasillaValida(Coordenada coordenada) {
         // Verifica si la casilla está dentro de los límites del tablero.
         int fila = coordenada.getFila();
         int columna = coordenada.getColumna();
         if (fila < 0 || fila >= tablero.getCountFilas() || columna < 0 || columna >= tablero.getCountColumnas()) {
             return false;
         }
-
         if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla().equals(EstadoCasilla.INVALIDA)
                 || tablero.obtenerCasilla(fila, columna).getEstadoCasilla().equals(EstadoCasilla.OCUPADA))
             return false;
-
         // Si no se cumple ninguna de las condiciones anteriores, la casilla se considera válida.
         return true;
     }
 
     /**
-     * Se verifica si el jugador tiene 3 o mas fichas.
-     * @param t tablero
+     * Se verifica si el jugador tiene 3 o más fichas.
      * @param ju jugador
      * @return true si tiene fichas // false si no tiene fichas
      */
-    public boolean tienePiezasSuficientes(Tablero t, Jugador ju){
-        //Casos de finalizacion de la partida:
+    public boolean tienePiezasSuficientes(Jugador ju){
         //    --- Un jugador tiene 2 fichas vivas
-        int tamanio = t.getCountColumnas();
+        int tamanio = tablero.getCountColumnas();
         int cantJ = 0;
-        for (int i = 0; i < tamanio; i++){
-            for (int j = 0; j < tamanio; j++){
-                if (t.obtenerCasilla(i, j).getFicha().getJugador() == ju)
-                    cantJ++;
+        for (int fila = 0; fila < tamanio; fila++){
+            for (int columna = 0; columna < tamanio; columna++){
+                if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(fila, columna).getJugador() == ju)
+                        cantJ++;
+                }
             }
         }
-        return cantJ != 2;
+        return cantJ > 2;
     }
 
-    public boolean tieneMovimientosDisponibles(Tablero t, Jugador ju){
-        //Casos de finalizacion de la partida:
-        //    --- Un jugador tiene 2 fichas vivas
-        int tamanio = t.getCountColumnas();
-        int cantJ = 0;
-        for (int i = 0; i < tamanio; i++){
-            for (int j = 0; j < tamanio; j++){
-                if (t.obtenerCasilla(i, j).getFicha().getJugador() == ju)
-                    cantJ++;
+    public boolean jugadorTieneMovimientos(Jugador jugador) {
+        // Obtener las posiciones ocupadas por las fichas del jugador
+        ArrayList<Coordenada> posicionesOcupadas = obtenerPosicionesOcupadasPorJugador(jugador);
+
+        // Verificar movimientos posibles para cada posición ocupada
+        for (Coordenada posicion : posicionesOcupadas) {
+            if (hayMovimientosPosibles(posicion)) {
+                return true;  // El jugador tiene al menos un movimiento posible
             }
         }
-        return cantJ != 2;
+
+        // Si no se encontraron movimientos posibles
+        return false;
     }
+
+    private ArrayList<Coordenada> obtenerPosicionesOcupadasPorJugador(Jugador jugador) {
+        ArrayList<Coordenada> posicionesOcupadas = new ArrayList<>();
+        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
+            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+                if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    Ficha ficha = tablero.obtenerFicha(fila, columna);
+                    if (ficha.getJugador() == jugador) {
+                        posicionesOcupadas.add(new Coordenada(fila, columna));
+                    }
+                }
+            }
+        }
+        return posicionesOcupadas;
+    }
+
+    private boolean hayMovimientosPosibles(Coordenada posicion) {
+        // Implementa la lógica para verificar si hay movimientos posibles desde la posición dada
+        // Puedes revisar las posiciones adyacentes, o saltos, según las reglas del juego
+        // Devuelve true si hay al menos un movimiento posible, false si no hay movimientos
+        // ...
+        return false;
+    }
+    //Asegúrate de adaptar la lógica de hayMovimientosPosibles según las reglas específicas de tu implementación del juego del molino. Puedes considerar las posiciones adyacentes o cualquier otra regla específica que aplique. Además, puedes expandir esta lógica para tener en cuenta diferentes fases del juego, como la fase de colocación de fichas y la fase de movimiento.
+
+
     //    --- Un jugador NO tiene movimientos posibles.
 
-
-
-    /*public boolean verificarMolino(Tablero tablero, int fila, int columna, Jugador jugador) {
-        // Verificar si se ha formado un molino en la posición dada
-
-        // Verificar fila
-        if (verificarLinea(tablero.obtenerCasilla(fila), jugador)) {
-            return true;
-        }
-
-        // Verificar columna
-        Casilla[] columnaArray = new Casilla[filas];
-        for (int i = 0; i < filas; i++) {
-            columnaArray[i] = tablero[i][columna];
-        }
-        if (verificarLinea(columnaArray, jugador)) {
-            return true;
-        }
-
-        // Verificar diagonales solo si la posición está en una esquina o en el centro
-        if ((fila == 0 || fila == filas - 1 || fila == filas / 2) &&
-                (columna == 0 || columna == columnas - 1 || columna == columnas / 2)) {
-            // Verificar diagonales
-            if (verificarDiagonalPrincipal(jugador) || verificarDiagonalSecundaria(jugador)) {
-                return true;
-            }
-        }
-
-        return false;
-    }*/
-
-    public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador, Tablero tablero) {
+    public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador) {
         // Verifica si hay un molino en la fila
         switch (fila) {
             case 0, 12 -> {
@@ -205,7 +204,7 @@ public class ReglasDelJuego {
                 }
             }
         }
-        // Verifica si hay un molino en la diagonal principal
+        // Verifica si hay molino en las diagonales
         switch (fila){
             case 0, 2, 4 ->{
                 //Lado izquierdo arriba
@@ -253,5 +252,10 @@ public class ReglasDelJuego {
             }
         }
         return false;
+    }
+
+    public Jugador obtenerGanador(Jugador j1, Jugador j2) {
+
+        return j1; // j1 o j2
     }
 }

@@ -2,6 +2,7 @@ package ar.edu.unlu.poo.controladores;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
+import ar.edu.unlu.poo.interfaces.Observer;
 import ar.edu.unlu.poo.interfaces.TableroImpl;
 import ar.edu.unlu.poo.modelos.*;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
@@ -10,7 +11,7 @@ import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 import java.util.ArrayList;
 
 public class TableroControlador implements ControladorImpl {
-    private static final String CASILLA_DISPONIBLE = "#";
+    private static final String CASILLA_DISPONIBLE = "◉";
     private static final String CASILLA_INVALIDA = "";
     private ArrayList<Jugador> jugadores;
     private Tablero tablero;
@@ -20,7 +21,7 @@ public class TableroControlador implements ControladorImpl {
     public TableroControlador(ArrayList<Jugador> jugadores, Tablero tablero){
         this.jugadores = jugadores;
         this.tablero = tablero;
-        this.reglas = new ReglasDelJuego();
+        this.reglas = new ReglasDelJuego(tablero);
     }
 
     @Override
@@ -36,37 +37,28 @@ public class TableroControlador implements ControladorImpl {
         //Comienza el juego
         boolean juegoActivo = true; // estado de la partida
         boolean turno = true; // true: jugador1 --- false: jugador2
-
+        vista.mostrarTablero(tablero);
         while (juegoActivo){
-            vista.mostrarTablero(tablero);
             if(turno){
-                vista.mostrarMensaje("Turno de: " + j1.getNombre());
-                if (j1.getFichasColocadas() < 9) {
-                    Coordenada c = colocarFicha(j1, fichasJ1);
-                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j1, tablero)) {
-                        System.out.println("HAY MOLINO!");
-                        EntradaTeclado.presionarEnterParaContinuar();
-                    }
-
-                } else {
-                    juegoActivo = false;
-                }
+                juegoActivo = turnoJugador(j1, fichasJ1);
                 turno = false;
-                //juegoActivo = reglas.verificarPartidaFinalizada(tablero, j1, j2);
             } else {
-                vista.mostrarMensaje("Turno de: " + j2.getNombre());
-                if (j2.getFichasColocadas() < 9) {
-                    Coordenada c = colocarFicha(j2, fichasJ2);
-                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j2, tablero)) {
-                        System.out.println("HAY MOLINO!");
-                        EntradaTeclado.presionarEnterParaContinuar();
-                    }
-                }
+                juegoActivo = turnoJugador(j2, fichasJ2);
                 turno = true;
             }
         }
+        // TODO: detectar ganador
+        Jugador ganador = reglas.obtenerGanador(j1, j2);
+        // TODO: modificar sus estadisticas
+        /*
+            ++ aumentar partidas ganadas
+            ++ aumentar puntaje
+         */
+
+        // TODO: el ganador lo muestra la vista
         System.out.println("El juego ha terminado.");
-        System.out.println("El ganador es: ");
+        System.out.println("El ganador es: " + ganador.getNombre());
+
     }
 
     @Override
@@ -81,12 +73,45 @@ public class TableroControlador implements ControladorImpl {
             }
         } else {
             if (ficha.getJugador() == jugadores.get(0)) {
-                contenido = "X";
+                contenido = "◯";
             } else {
-                contenido = "O";
+                contenido = "x";
             }
         }
         return contenido;
+    }
+
+    @Override
+    public Tablero obtenerTablero() {
+        return tablero;
+    }
+
+    @Override
+    public void agregarObserver(TableroImpl vista) {
+        tablero.agregarObservador((Observer) vista);
+    }
+
+    private boolean turnoJugador(Jugador jugador, ArrayList<Ficha> fichas){
+        boolean juego_activo = true;
+        vista.mostrarTurno(jugador.getNombre());
+        if (jugador.getFichasColocadas() < 9) {
+            Coordenada c = colocarFicha(jugador, fichas);
+            if (jugador.getFichasColocadas() >= 3) {
+                if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), jugador)) {
+                    System.out.println("HAY MOLINO!");
+                    EntradaTeclado.presionarEnterParaContinuar();
+                }
+            }
+        } else {
+            juego_activo = reglas.tienePiezasSuficientes(jugador) && reglas.jugadorTieneMovimientos(jugador);
+            if (juego_activo){
+                //TODO: hacer movimiento de una ficha
+
+                //TODO: verificar si se hizo molino tras el movimiento realizado
+            }
+        }
+        //Finaliza el turno
+        return juego_activo;
     }
 
     private Coordenada colocarFicha(Jugador j, ArrayList<Ficha> fichasJ){
@@ -94,7 +119,7 @@ public class TableroControlador implements ControladorImpl {
         Coordenada coord;
         do {
             coord = vista.pedirCasilla();
-            valida = reglas.esCasillaValida(coord, tablero);
+            valida = reglas.esCasillaValida(coord);
             if (!valida){
                 vista.mostrarMensajeErrorCasilla();
             }

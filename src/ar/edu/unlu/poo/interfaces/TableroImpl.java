@@ -5,7 +5,7 @@ import ar.edu.unlu.poo.modelos.Tablero;
 
 public interface TableroImpl {
     void mostrarTablero(Tablero tablero);
-    void mostrarMensaje(String mensaje);
+    void mostrarTurno(String mensaje);
     void mostrarMensajeErrorCasilla();
     Coordenada pedirCasilla();
     void iniciarJuego();

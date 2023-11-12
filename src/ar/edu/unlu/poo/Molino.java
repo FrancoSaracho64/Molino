@@ -161,6 +161,4 @@ public class Molino {
         System.out.println("¿Cómo desea ejecutar el juego?\n\t1) Consola\n\t2) Interfaz gráfica\n\n\t0) Salir");
         return EntradaTeclado.pedirIntOpcion();
     }
-
-
 }

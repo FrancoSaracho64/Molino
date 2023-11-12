@@ -9,6 +9,11 @@ public class Coordenada {
         this.columna = columna;
     }
 
+    public Coordenada(int fila, int columna){
+        this.fila = fila;
+        this.columna = transformarEntradaColumna(columna);
+    }
+
     public int getFila() {
         return transformarEntradaFila(fila);
     }
@@ -27,6 +32,21 @@ public class Coordenada {
             case 'F' -> columna = 10;
             case 'G' -> columna = 12;
             default -> columna = -1;
+        }
+        return columna;
+    }
+
+    private char transformarEntradaColumna(int col){
+        char columna;
+        switch (col){
+            case 0 -> columna = 'A';
+            case 2 -> columna = 'B';
+            case 4 -> columna = 'C';
+            case 6 -> columna = 'D';
+            case 8 -> columna = 'E';
+            case 10 -> columna = 'F';
+            case 12 -> columna = 'G';
+            default -> columna = ' ';
         }
         return columna;
     }
