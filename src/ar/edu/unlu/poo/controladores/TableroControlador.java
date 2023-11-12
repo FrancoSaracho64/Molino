@@ -1,13 +1,17 @@
 package ar.edu.unlu.poo.controladores;
 
+import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.TableroImpl;
 import ar.edu.unlu.poo.modelos.*;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
+import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
 import java.util.ArrayList;
 
 public class TableroControlador implements ControladorImpl {
+    private static final String CASILLA_DISPONIBLE = "#";
+    private static final String CASILLA_INVALIDA = "";
     private ArrayList<Jugador> jugadores;
     private Tablero tablero;
     private TableroImpl vista;
@@ -32,21 +36,31 @@ public class TableroControlador implements ControladorImpl {
         //Comienza el juego
         boolean juegoActivo = true; // estado de la partida
         boolean turno = true; // true: jugador1 --- false: jugador2
-        boolean ganador;
 
         while (juegoActivo){
             vista.mostrarTablero(tablero);
             if(turno){
+                vista.mostrarMensaje("Turno de: " + j1.getNombre());
                 if (j1.getFichasColocadas() < 9) {
-                    colocarFicha(j1, fichasJ1);
+                    Coordenada c = colocarFicha(j1, fichasJ1);
+                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j1, tablero)) {
+                        System.out.println("HAY MOLINO!");
+                        EntradaTeclado.presionarEnterParaContinuar();
+                    }
+
                 } else {
                     juegoActivo = false;
                 }
                 turno = false;
                 //juegoActivo = reglas.verificarPartidaFinalizada(tablero, j1, j2);
             } else {
+                vista.mostrarMensaje("Turno de: " + j2.getNombre());
                 if (j2.getFichasColocadas() < 9) {
-                    colocarFicha(j2, fichasJ2);
+                    Coordenada c = colocarFicha(j2, fichasJ2);
+                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j1, tablero)) {
+                        System.out.println("HAY MOLINO!");
+                        EntradaTeclado.presionarEnterParaContinuar();
+                    }
                 }
                 turno = true;
             }
@@ -55,7 +69,27 @@ public class TableroControlador implements ControladorImpl {
         System.out.println("El ganador es: ");
     }
 
-    private void colocarFicha(Jugador j, ArrayList<Ficha> fichasJ){
+    @Override
+    public String contenidoCasilla(int fila, int columna) {
+        String contenido;
+        Ficha ficha = tablero.obtenerFicha(fila, columna);
+        if (ficha == null) {
+            if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() != EstadoCasilla.INVALIDA){
+                contenido = CASILLA_DISPONIBLE;
+            } else {
+                contenido = CASILLA_INVALIDA;
+            }
+        } else {
+            if (ficha.getJugador() == jugadores.get(0)) {
+                contenido = "X";
+            } else {
+                contenido = "O";
+            }
+        }
+        return contenido;
+    }
+
+    private Coordenada colocarFicha(Jugador j, ArrayList<Ficha> fichasJ){
         boolean valida;
         Coordenada coord;
         do {
@@ -67,6 +101,7 @@ public class TableroControlador implements ControladorImpl {
         } while (!valida);
         tablero.colocarFicha(coord.getFila(), coord.getColumna(), fichasJ.get(j.getFichasColocadas()));
         j.incFichasColocadas();
+        return coord;
     }
 
     private ArrayList<Ficha> generarFichas(Jugador jugador){

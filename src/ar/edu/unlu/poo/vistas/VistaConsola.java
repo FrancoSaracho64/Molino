@@ -12,8 +12,6 @@ import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 import java.util.Scanner;
 
 public class VistaConsola implements TableroImpl {
-    private static final String CASILLA_DISPONIBLE = "#";
-    private static final String CASILLA_INVALIDA = "";
     private ControladorImpl controlador;
 
     public VistaConsola(ControladorImpl controlador){
@@ -38,6 +36,7 @@ public class VistaConsola implements TableroImpl {
         int fil = 0;
         int filfin = 0;
         int colfin = 0;
+        System.out.println("\n\n");
         System.out.println("-------------------------------------------------");
         // Muestra las letras de las columnas
         System.out.print("|    "); // Espacio inicial
@@ -58,23 +57,9 @@ public class VistaConsola implements TableroImpl {
                 System.out.print(" " + formatoCelda(numeroFila(fil)) + "  "); // Número de fila
                 fil++;
             }
+            // Se representa el estado de la casilla
             for (int columna = 0; columna < 13; columna++) {
-                // TODO: pedir al controlador ----------------------
-                Ficha ficha = tablero.obtenerFicha(fila, columna);
-                String contenidoCelda = CASILLA_INVALIDA;
-                if (ficha == null) {
-                    if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() != EstadoCasilla.INVALIDA){
-                        contenidoCelda = CASILLA_DISPONIBLE;
-                    }
-
-                } else {
-                    if (ficha.getSimbolo() == Simbolo.X) {
-                        contenidoCelda = "X";
-                    } else if (ficha.getSimbolo() == Simbolo.O){
-                        contenidoCelda = "O";
-                    }
-                }
-                // TODO---------------------------------------------
+                String contenidoCelda = controlador.contenidoCasilla(fila, columna);
                 System.out.print(" " + formatoCelda(contenidoCelda) + " ");
             }
             if (fila % 2 == 0) {
@@ -104,7 +89,7 @@ public class VistaConsola implements TableroImpl {
 
     @Override
     public void mostrarMensaje(String mensaje) {
-
+        System.out.println(mensaje);
     }
 
     @Override
@@ -114,10 +99,7 @@ public class VistaConsola implements TableroImpl {
 
     @Override
     public Coordenada pedirCasilla() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese la columna (A-G): ");
         char columna = EntradaTeclado.pedirColumna();
-        System.out.print("Ingrese la fila (1-7): ");
         int fila = EntradaTeclado.pedirFila();
         return new Coordenada(fila, columna);
     }

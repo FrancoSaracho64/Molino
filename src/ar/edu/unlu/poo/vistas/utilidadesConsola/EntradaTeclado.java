@@ -34,6 +34,7 @@ public class EntradaTeclado {
         boolean entrada;
         Scanner teclado = new Scanner(System.in);
         do {
+            System.out.print("Ingrese la fila (1-7): ");
             try {
                 entrada = true;
                 numero = teclado.nextInt();
@@ -54,11 +55,9 @@ public class EntradaTeclado {
         char caracter = 0;
         String entradaUsuario;
         do {
-            System.out.println("Ingrese un solo carácter:");
-
+            System.out.print("Ingrese la columna (A-G): ");
             // Lee la entrada del usuario
-            entradaUsuario = scanner.nextLine();
-            entradaUsuario.toUpperCase();
+            entradaUsuario = scanner.nextLine().toUpperCase();
             // Validación: Verifica si la entrada es un solo carácter
             if (entradaUsuario.length() == 1) {
                 caracter = entradaUsuario.charAt(0);
