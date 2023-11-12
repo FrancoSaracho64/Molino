@@ -158,7 +158,7 @@ public class Molino {
     }
 
     private static int solicitarModo(){
-        System.out.println("¿Cómo desea ejecutar el juego?\n\t1) Consola\n\t2) Interfaz gráfica\n\n\t0) Salir");
+        System.out.println("¿Cómo desea ejecutar el juego?\n\t1) Consola\n\t2) Interfaz gráfica (NO FUNCIONA --- No implementado)\n\n\t0) Salir");
         return EntradaTeclado.pedirIntOpcion();
     }
 }
