@@ -31,4 +31,8 @@ public class Casilla {
     public boolean esValida(){
         return estado != EstadoCasilla.INVALIDA;
     }
+
+    public void quitarFicha() {
+        ficha = null;
+    }
 }

@@ -147,7 +147,7 @@ public class VistaConsola implements TableroImpl, Observer {
 
     @Override
     public void actualizar() {
-        limpiarConsola();
+        //limpiarConsola();
         mostrarTablero(controlador.obtenerTablero());
     }
 }

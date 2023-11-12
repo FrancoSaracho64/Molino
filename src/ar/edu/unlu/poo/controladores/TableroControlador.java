@@ -18,6 +18,7 @@ public class TableroControlador implements ControladorImpl {
     private TableroImpl vista;
     private ReglasDelJuego reglas;
 
+
     public TableroControlador(ArrayList<Jugador> jugadores, Tablero tablero){
         this.jugadores = jugadores;
         this.tablero = tablero;
@@ -30,7 +31,10 @@ public class TableroControlador implements ControladorImpl {
         Jugador j1 = jugadores.get(0);
         Jugador j2 = jugadores.get(1);
         j1.resetearFichasColocadas();
+        j1.resetearFichasEnTablero();
         j2.resetearFichasColocadas();
+        j2.resetearFichasEnTablero();
+
         ArrayList<Ficha> fichasJ1 = generarFichas(j1);
         ArrayList<Ficha> fichasJ2 = generarFichas(j2);
 
@@ -40,10 +44,10 @@ public class TableroControlador implements ControladorImpl {
         vista.mostrarTablero(tablero);
         while (juegoActivo){
             if(turno){
-                juegoActivo = turnoJugador(j1, fichasJ1);
+                juegoActivo = turnoJugador(j1, j2, fichasJ1);
                 turno = false;
             } else {
-                juegoActivo = turnoJugador(j2, fichasJ2);
+                juegoActivo = turnoJugador(j2, j1, fichasJ2);
                 turno = true;
             }
         }
@@ -58,7 +62,6 @@ public class TableroControlador implements ControladorImpl {
         // TODO: el ganador lo muestra la vista
         System.out.println("El juego ha terminado.");
         System.out.println("El ganador es: " + ganador.getNombre());
-
     }
 
     @Override
@@ -91,21 +94,23 @@ public class TableroControlador implements ControladorImpl {
         tablero.agregarObservador((Observer) vista);
     }
 
-    private boolean turnoJugador(Jugador jugador, ArrayList<Ficha> fichas){
+    private boolean turnoJugador(Jugador jugadorActual, Jugador oponente, ArrayList<Ficha> fichas){
         boolean juego_activo = true;
-        vista.mostrarTurno(jugador.getNombre());
-        if (jugador.getFichasColocadas() < 9) {
-            Coordenada c = colocarFicha(jugador, fichas);
-            if (jugador.getFichasColocadas() >= 3) {
-                if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), jugador)) {
+        vista.mostrarTurno(jugadorActual.getNombre());
+        if (jugadorActual.getFichasColocadas() < 9) {
+            Coordenada c = colocarFicha(jugadorActual, fichas);
+            if (jugadorActual.getFichasColocadas() >= 3) {
+                if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), jugadorActual)) {
                     System.out.println("HAY MOLINO!");
+                    eliminarFichaOponente(jugadorActual, oponente);
                     EntradaTeclado.presionarEnterParaContinuar();
                 }
             }
         } else {
-            juego_activo = reglas.tienePiezasSuficientes(jugador) && reglas.jugadorTieneMovimientos(jugador);
+            juego_activo = reglas.tienePiezasSuficientes(jugadorActual) && reglas.jugadorTieneMovimientos(jugadorActual);
             if (juego_activo){
                 //TODO: hacer movimiento de una ficha
+
 
                 //TODO: verificar si se hizo molino tras el movimiento realizado
             }
@@ -116,17 +121,48 @@ public class TableroControlador implements ControladorImpl {
 
     private Coordenada colocarFicha(Jugador j, ArrayList<Ficha> fichasJ){
         boolean valida;
+        boolean ocupada;
         Coordenada coord;
         do {
-            coord = vista.pedirCasilla();
-            valida = reglas.esCasillaValida(coord);
-            if (!valida){
+            do {
+                coord = vista.pedirCasilla();
+                valida = reglas.esCasillaValida(coord);
+                if (!valida) {
+                    vista.mostrarMensajeErrorCasilla();
+                }
+            } while (!valida);
+            ocupada = tablero.obtenerCasilla(coord.getFila(), coord.getColumna()).getEstadoCasilla()
+                    == EstadoCasilla.OCUPADA;
+            if (ocupada){
                 vista.mostrarMensajeErrorCasilla();
             }
-        } while (!valida);
+        } while (ocupada);
         tablero.colocarFicha(coord.getFila(), coord.getColumna(), fichasJ.get(j.getFichasColocadas()));
         j.incFichasColocadas();
         return coord;
+    }
+
+    private void eliminarFichaOponente(Jugador jugadorActual, Jugador jugadorPponente){
+        boolean valida;
+        boolean ocupada;
+        Coordenada coord;
+        do {
+            do {
+                coord = vista.pedirCasilla();
+                valida = reglas.esCasillaValida(coord);
+                if (!valida) {
+                    vista.mostrarMensajeErrorCasilla();
+                }
+            } while (!valida);
+            ocupada = tablero.obtenerCasilla(coord.getFila(), coord.getColumna()).getEstadoCasilla() ==
+                    EstadoCasilla.OCUPADA &&
+                    tablero.obtenerFicha(coord.getFila(), coord.getColumna()).getJugador() != jugadorActual;
+            if (!ocupada){
+                vista.mostrarMensajeErrorCasilla();
+            }
+        } while (!ocupada);
+        tablero.quitarFicha(coord.getFila(), coord.getColumna());
+        jugadorPponente.decFichasEnTablero();
     }
 
     private ArrayList<Ficha> generarFichas(Jugador jugador){

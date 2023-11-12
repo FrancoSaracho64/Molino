@@ -77,6 +77,12 @@ public class Tablero implements Observable {
         return casillas[fila][columna].getFicha();
     }
 
+    public void quitarFicha(int fila, int columna){
+        casillas[fila][columna].quitarFicha();
+        casillas[fila][columna].setEstadoCasilla(EstadoCasilla.LIBRE);
+        notificarObservadores();
+    }
+
     public int getCountFilas() {
         return filas;
     }

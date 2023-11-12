@@ -11,6 +11,7 @@ public class Jugador implements Serializable {
     private int victorias;
     private int derrotas;
     private int fichasColocadas;
+    private int fichasEnTablero;
 
     public Jugador(String nombre) {
         this.id = id_jugador;
@@ -20,10 +21,27 @@ public class Jugador implements Serializable {
         this.victorias = 0;
         this.derrotas = 0;
         this.fichasColocadas = 0;
+        this.fichasEnTablero = 0;
     }
 
     public static void actualizarUltimoId(ArrayList<Jugador> jugadores) {
         id_jugador = jugadores.size();
+    }
+
+    public int getFichasEnTablero() {
+        return fichasEnTablero;
+    }
+
+    public void resetearFichasEnTablero() {
+        this.fichasEnTablero = 0;
+    }
+
+    public void incFichasEnTablero(){
+        fichasEnTablero++;
+    }
+
+    public void decFichasEnTablero(){
+        fichasEnTablero--;
     }
 
     public int getFichasColocadas() {
