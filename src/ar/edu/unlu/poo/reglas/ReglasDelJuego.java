@@ -1,7 +1,6 @@
 package ar.edu.unlu.poo.reglas;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.modelos.Casilla;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
@@ -150,71 +149,109 @@ public class ReglasDelJuego {
                 }
             }
         }
-
         // Verifica si hay un molino en la columna
-        /*switch (columna) {
+        switch (columna) {
             case 0, 12 -> {
-                if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(2, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(4, columna).getJugador() == jugador) {
-                    return true;
+                if(tablero.obtenerCasilla(0, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(12, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(6, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(12, columna).getJugador() == jugador) {
+                        return true;
+                    }
                 }
             }
             case 2, 10 -> {
-                if (tablero.obtenerFicha(2, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(6, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(10, columna).getJugador() == jugador) {
-                    return true;
+                if(tablero.obtenerCasilla(2, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(10, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(2, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(6, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(10, columna).getJugador() == jugador) {
+                        return true;
+                    }
                 }
             }
             case 4, 8 -> {
-                if (tablero.obtenerFicha(4, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(6, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(8, columna).getJugador() == jugador) {
-                    return true;
+                if(tablero.obtenerCasilla(4, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(8, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(4, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(6, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(8, columna).getJugador() == jugador) {
+                        return true;
+                    }
                 }
             }
             case 6 -> {
-                if ((tablero.obtenerFicha(0, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(2, columna).getJugador() == jugador &&
-                        tablero.obtenerFicha(4, columna).getJugador() == jugador) ||
-                        (tablero.obtenerFicha(8, columna).getJugador() == jugador &&
-                                tablero.obtenerFicha(10, columna).getJugador() == jugador &&
-                                tablero.obtenerFicha(12, columna).getJugador() == jugador)) {
-                    return true;
+                if(tablero.obtenerCasilla(0, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(2, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(4, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(2, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(4, columna).getJugador() == jugador) {
+                        return true;
+                    }
+                }
+                if(tablero.obtenerCasilla(8, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(10, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(12, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerFicha(8, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(10, columna).getJugador() == jugador &&
+                            tablero.obtenerFicha(12, columna).getJugador() == jugador) {
+                        return true;
+                    }
                 }
             }
-        }*/
-
-        /*// Verifica si hay un molino en la diagonal principal
-        if (fila == columna && tablero[0][0] == jugador && tablero[1][1] == jugador && tablero[2][2] == jugador) {
-            return true;
         }
-
-        // Verifica si hay un molino en la diagonal secundaria
-        if (fila + columna == 2 && tablero[0][2] == jugador && tablero[1][1] == jugador && tablero[2][0] == jugador) {
-            return true;
-        }*/
-
-        return false;
-    }
-
-    /*private boolean verificarLinea(Casilla[] linea, Jugador jugador) {
-        for (Casilla casilla : linea) {
-            if (casilla == null || casilla.getJugador() != jugador) {
-                return false;
+        // Verifica si hay un molino en la diagonal principal
+        switch (fila){
+            case 0, 2, 4 ->{
+                //Lado izquierdo arriba
+                if(tablero.obtenerCasilla(0, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(2, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(4, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA){
+                    if (tablero.obtenerFicha(0, 0).getJugador() == jugador &&
+                            tablero.obtenerFicha(2, 2).getJugador() == jugador &&
+                            tablero.obtenerFicha(4, 4).getJugador() == jugador) {
+                        return true;
+                    }
+                }
+                //Lado derecho arriba
+                if(tablero.obtenerCasilla(0, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(2, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(4, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA){
+                    if (tablero.obtenerFicha(0, 12).getJugador() == jugador &&
+                            tablero.obtenerFicha(2, 10).getJugador() == jugador &&
+                            tablero.obtenerFicha(4, 8).getJugador() == jugador) {
+                        return true;
+                    }
+                }
+            }
+            case 12, 10, 8 ->{
+                //Lado izquierdo abajo
+                if(tablero.obtenerCasilla(12, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(10, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(8, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA){
+                    if (tablero.obtenerFicha(12, 0).getJugador() == jugador &&
+                            tablero.obtenerFicha(10, 2).getJugador() == jugador &&
+                            tablero.obtenerFicha(8, 4).getJugador() == jugador) {
+                        return true;
+                    }
+                }
+                //Lado derecho abajo
+                if(tablero.obtenerCasilla(12, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(10, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerCasilla(8, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA){
+                    if (tablero.obtenerFicha(12, 12).getJugador() == jugador &&
+                            tablero.obtenerFicha(10, 10).getJugador() == jugador &&
+                            tablero.obtenerFicha(8, 8).getJugador() == jugador) {
+                        return true;
+                    }
+                }
             }
         }
-        return true;
-    }*/
-
-    private boolean verificarDiagonalPrincipal(Jugador jugador) {
-        // Lógica para verificar la diagonal principal
-        return false;
-    }
-
-    private boolean verificarDiagonalSecundaria(Jugador jugador) {
-        // Lógica para verificar la diagonal secundaria
         return false;
     }
 }

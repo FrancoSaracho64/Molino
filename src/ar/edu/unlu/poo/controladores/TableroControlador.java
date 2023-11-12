@@ -57,7 +57,7 @@ public class TableroControlador implements ControladorImpl {
                 vista.mostrarMensaje("Turno de: " + j2.getNombre());
                 if (j2.getFichasColocadas() < 9) {
                     Coordenada c = colocarFicha(j2, fichasJ2);
-                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j1, tablero)) {
+                    if (reglas.hayMolinoEnPosicion(c.getFila(), c.getColumna(), j2, tablero)) {
                         System.out.println("HAY MOLINO!");
                         EntradaTeclado.presionarEnterParaContinuar();
                     }
