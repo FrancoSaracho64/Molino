@@ -83,6 +83,13 @@ public class Tablero implements Observable {
         notificarObservadores();
     }
 
+    public void moverFicha(Coordenada antigua, Coordenada nueva){
+        quitarFicha(antigua.getFila(), antigua.getColumna());
+        Ficha ficha = obtenerFicha(antigua.getFila(), antigua.getColumna());
+        colocarFicha(nueva.getFila(), nueva.getColumna(), ficha);
+        notificarObservadores();
+    }
+
     public int getCountFilas() {
         return filas;
     }

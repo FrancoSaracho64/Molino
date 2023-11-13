@@ -7,6 +7,7 @@ import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ReglasDelJuego {
     private Tablero tablero;
@@ -15,6 +16,11 @@ public class ReglasDelJuego {
         this.tablero = tablero;
     }
 
+    /**
+     *
+     * @param coordenada
+     * @return
+     */
     public boolean esCasillaValida(Coordenada coordenada) {
         // Verifica si la casilla está dentro de los límites del tablero.
         int fila = coordenada.getFila();
@@ -28,43 +34,21 @@ public class ReglasDelJuego {
         return true;
     }
 
-    /**
-     * Se verifica si el jugador tiene 3 o más fichas.
-     * @param ju jugador
-     * @return true si tiene fichas // false si no tiene fichas
-     */
-    public boolean tienePiezasSuficientes(Jugador ju){
-        //    --- Un jugador tiene 2 fichas vivas
-        int tamanio = tablero.getCountColumnas();
-        int cantJ = 0;
-        for (int fila = 0; fila < tamanio; fila++){
-            for (int columna = 0; columna < tamanio; columna++){
-                if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
-                    if (tablero.obtenerFicha(fila, columna).getJugador() == ju)
-                        cantJ++;
-                }
-            }
-        }
-        return cantJ > 2;
-    }
-
     public boolean jugadorTieneMovimientos(Jugador jugador) {
         // Obtener las posiciones ocupadas por las fichas del jugador
-        ArrayList<Coordenada> posicionesOcupadas = obtenerPosicionesOcupadasPorJugador(jugador);
-
+        List<Coordenada> posicionesOcupadas = obtenerPosicionesOcupadasPorJugador(jugador);
         // Verificar movimientos posibles para cada posición ocupada
         for (Coordenada posicion : posicionesOcupadas) {
             if (hayMovimientosPosibles(posicion)) {
                 return true;  // El jugador tiene al menos un movimiento posible
             }
         }
-
         // Si no se encontraron movimientos posibles
         return false;
     }
 
-    private ArrayList<Coordenada> obtenerPosicionesOcupadasPorJugador(Jugador jugador) {
-        ArrayList<Coordenada> posicionesOcupadas = new ArrayList<>();
+    private List<Coordenada> obtenerPosicionesOcupadasPorJugador(Jugador jugador) {
+        List<Coordenada> posicionesOcupadas = new ArrayList<>();
         for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
             for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
                 if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
@@ -78,17 +62,81 @@ public class ReglasDelJuego {
         return posicionesOcupadas;
     }
 
+    /**
+     * Con este metodo se debe obtener todos las sus casillas adyacentes.
+     * Luego, determinar si son validas o no.
+     * Si son validas, se debe analizar por si es posible o no moverse ahí.
+     * @param posicion La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
+     * @return Se retorna true si hay movimientos. False si no hay.
+     */
     private boolean hayMovimientosPosibles(Coordenada posicion) {
-        // Implementa la lógica para verificar si hay movimientos posibles desde la posición dada
-        // Puedes revisar las posiciones adyacentes, o saltos, según las reglas del juego
-        // Devuelve true si hay al menos un movimiento posible, false si no hay movimientos
-        // ...
+        // Verifica las posiciones adyacentes y verifica si se pueden mover a ellas
+        for (Coordenada adyacente : obtenerPosicionesAdyacentes(posicion)) {
+            if (esCasillaValida(adyacente)) {
+                if (tablero.obtenerCasilla(adyacente.getFila(), adyacente.getColumna()).getEstadoCasilla().
+                    equals(EstadoCasilla.LIBRE)) {
+                    return true;  // Hay al menos un movimiento posible
+                }
+            }
+        }
+        // Si no se encontraron movimientos posibles
         return false;
     }
-    // Asegúrate de adaptar la lógica de  hayMovimientosPosibles según las reglas específicas de tu
-    // implementación del juego del molino. Puedes considerar las posiciones adyacentes o cualquier
-    // otra regla específica que aplique.  Además, puedes expandir esta lógica para tener en cuenta
-    // diferentes fases del juego,  como  la  fase  de colocación de fichas y la fase de movimiento.
+
+    /**
+     * @param posicion
+     * @return Se retornan las posiciones adyacentes: ARRIBA, ABAJO, IZQUIERDA, DERECHA
+     */
+    public static Coordenada[] obtenerPosicionesAdyacentes(Coordenada posicion) {
+        int fila = posicion.getFila();
+        int columna = posicion.getColumna();
+
+        Coordenada arriba = new Coordenada(fila - 2, columna);
+        Coordenada abajo = new Coordenada(fila + 2, columna);
+        Coordenada izquierda = new Coordenada(fila, columna - 2);
+        Coordenada derecha = new Coordenada(fila, columna + 2);
+
+        // Definir las coordenadas de las posiciones adyacentes
+        // TODO---> Hay que analizar cada situacion. Desde cada lugar hay que avanzar mas o menos pasos.
+        switch (columna){
+            case 0, 12 -> {
+                arriba = new Coordenada(fila + 6, columna);
+                abajo = new Coordenada(fila - 6, columna);
+            }
+            case 2, 10 -> {
+                arriba = new Coordenada(fila + 4, columna);
+                abajo = new Coordenada(fila - 4, columna);
+            }
+            case 4, 8, 6 -> {
+                arriba = new Coordenada(fila + 2, columna);
+                abajo = new Coordenada(fila - 2, columna);
+            }
+        }
+        switch (fila){
+            case 0, 12 -> {
+                izquierda = new Coordenada(fila, columna + 6);
+                derecha = new Coordenada(fila, columna + 6);
+            }
+            case 2, 10 -> {
+                izquierda = new Coordenada(fila, columna + 4);
+                derecha = new Coordenada(fila, columna + 4);
+            }
+            case 4, 8, 6 -> {
+                izquierda = new Coordenada(fila, columna + 2);
+                derecha = new Coordenada(fila, columna + 2);
+            }
+        }
+        // Devolver un array con las coordenadas adyacentes
+        return new Coordenada[]{arriba, abajo, izquierda, derecha};
+    }
+
+    public boolean esPosAdyacente(Coordenada original, Coordenada destino){
+        boolean esAdyacente = false;
+
+        //TODO: queda pendiente hacer este
+
+        return esAdyacente;
+    }
 
     public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador) {
         // Verifica si hay un molino en la fila
@@ -260,7 +308,6 @@ public class ReglasDelJuego {
     }
 
     public Jugador obtenerGanador(Jugador j1, Jugador j2) {
-
         return j1; // j1 o j2
     }
 }
