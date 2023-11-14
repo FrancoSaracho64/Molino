@@ -1,4 +1,4 @@
-package ar.edu.unlu.poo.pantallas;
+package ar.edu.unlu.poo.vistas.pantallas;
 
 import javax.swing.*;
 

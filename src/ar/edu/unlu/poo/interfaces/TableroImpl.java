@@ -1,6 +1,5 @@
 package ar.edu.unlu.poo.interfaces;
 
-import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 public interface TableroImpl {
@@ -15,4 +14,10 @@ public interface TableroImpl {
     void juegoTerminado();
     void fichaSinMovimiento();
     void casillaNoAdyacente();
+    void mensajeCasillaFichaAMover();
+    void mensajePedirCasillaParaColocar();
+    void mensajePedirNuevaCasillaLibre();
+    void mostrarEmpate(String nombreJ1, String nombreJ2);
+    void mostrarMensajeCasillaOcupada();
+    void mensajeFichaFormaMolino();
 }

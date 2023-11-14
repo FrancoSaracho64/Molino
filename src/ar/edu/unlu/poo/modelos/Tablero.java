@@ -58,8 +58,8 @@ public class Tablero implements Observable {
         casillas[12][12].setEstadoCasilla(EstadoCasilla.LIBRE);
     }
 
-    public Casilla obtenerCasilla(int fila, int columna){
-        return casillas[fila][columna];
+    public EstadoCasilla obtenerEstadoCasilla(int fila, int columna){
+        return casillas[fila][columna].getEstadoCasilla();
     }
 
     /**
@@ -85,13 +85,13 @@ public class Tablero implements Observable {
      */
     public void quitarFicha(boolean notificar,int fila, int columna){
         casillas[fila][columna].quitarFicha();
-        casillas[fila][columna].setEstadoCasilla(EstadoCasilla.LIBRE);
         if (notificar)
             notificarObservadores();
     }
 
     public void moverFicha(Coordenada antigua, Coordenada nueva){
         Ficha ficha = obtenerFicha(antigua.getFila(), antigua.getColumna());
+        ficha.noFormaMolino();
         quitarFicha(false, antigua.getFila(), antigua.getColumna());
         colocarFicha(nueva.getFila(), nueva.getColumna(), ficha);
     }

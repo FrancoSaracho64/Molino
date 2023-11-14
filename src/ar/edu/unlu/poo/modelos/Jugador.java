@@ -91,13 +91,13 @@ public class Jugador implements Serializable {
         this.derrotas++;
     }
 
-
     @Override
     public String toString() {
-        return "Jugador ---> " + nombre + "  /  ID: " + id +"\n" +
+        return "Jugador ---> '" + nombre + "'  :  ID: " + id +"\n" +
             "ESTADISTICAS:"+
             "\n     Puntaje: " + puntaje +
             "\n     Victorias: " + victorias +
+            "\n     Derrotas: " + derrotas +
             "\n     Derrotas: " + derrotas;
     }
 }

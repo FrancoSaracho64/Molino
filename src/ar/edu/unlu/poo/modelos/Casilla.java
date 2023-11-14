@@ -28,11 +28,12 @@ public class Casilla {
         this.estado = EstadoCasilla.OCUPADA;
     }
 
-    public boolean esValida(){
-        return estado != EstadoCasilla.INVALIDA;
-    }
-
     public void quitarFicha() {
         ficha = null;
+        estado = EstadoCasilla.LIBRE;
+    }
+
+    public boolean esValida(){
+        return estado != EstadoCasilla.INVALIDA;
     }
 }

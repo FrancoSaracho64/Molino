@@ -16,11 +16,6 @@ public class ReglasDelJuego {
         this.tablero = tablero;
     }
 
-    /**
-     *
-     * @param coordenada
-     * @return
-     */
     public boolean esCasillaValida(Coordenada coordenada) {
         // Verifica si la casilla está dentro de los límites del tablero.
         int fila = coordenada.getFila();
@@ -28,10 +23,8 @@ public class ReglasDelJuego {
         if (fila < 0 || fila >= tablero.getCountFilas() || columna < 0 || columna >= tablero.getCountColumnas()) {
             return false;
         }
-        if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla().equals(EstadoCasilla.INVALIDA))
-            return false;
+        return !tablero.obtenerEstadoCasilla(fila, columna).equals(EstadoCasilla.INVALIDA);
         // Si no se cumple ninguna de las condiciones anteriores, la casilla se considera válida.
-        return true;
     }
 
     public boolean jugadorTieneMovimientos(Jugador jugador) {
@@ -51,7 +44,7 @@ public class ReglasDelJuego {
         List<Coordenada> posicionesOcupadas = new ArrayList<>();
         for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
             for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
-                if (tablero.obtenerCasilla(fila, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if (tablero.obtenerEstadoCasilla(fila, columna) == EstadoCasilla.OCUPADA) {
                     Ficha ficha = tablero.obtenerFicha(fila, columna);
                     if (ficha.getJugador() == jugador) {
                         posicionesOcupadas.add(new Coordenada(fila, columna));
@@ -63,9 +56,9 @@ public class ReglasDelJuego {
     }
 
     /**
-     * Con este metodo se debe obtener todos las sus casillas adyacentes.
-     * Luego, determinar si son validas o no.
-     * Si son validas, se debe analizar por si es posible o no moverse ahí.
+     * Con este metodo se debe obtener todas las sus casillas adyacentes.
+     * Luego, determinar si son válidas o no.
+     * Si son válidas, se debe analizar por si es posible o no moverse ahí.
      * @param posicion La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
      * @return Se retorna true si hay movimientos. False si no hay.
      */
@@ -73,7 +66,7 @@ public class ReglasDelJuego {
         // Verifica las posiciones adyacentes y verifica si se pueden mover a ellas
         for (Coordenada adyacente : obtenerPosicionesAdyacentes(posicion)) {
             if (esCasillaValida(adyacente)) {
-                if (tablero.obtenerCasilla(adyacente.getFila(), adyacente.getColumna()).getEstadoCasilla().
+                if (tablero.obtenerEstadoCasilla(adyacente.getFila(), adyacente.getColumna()).
                     equals(EstadoCasilla.LIBRE)) {
                     return true;  // Hay al menos un movimiento posible
                 }
@@ -97,7 +90,6 @@ public class ReglasDelJuego {
         Coordenada derecha = null;
 
         // Definir las coordenadas de las posiciones adyacentes
-        // TODO---> Hay que analizar cada situacion. Desde cada lugar hay que avanzar mas o menos pasos.
         switch (columna){
             case 0, 12 -> {
                 arriba = new Coordenada(fila + 6, columna);
@@ -114,15 +106,15 @@ public class ReglasDelJuego {
         }
         switch (fila){
             case 0, 12 -> {
-                izquierda = new Coordenada(fila, columna + 6);
+                izquierda = new Coordenada(fila, columna - 6);
                 derecha = new Coordenada(fila, columna + 6);
             }
             case 2, 10 -> {
-                izquierda = new Coordenada(fila, columna + 4);
+                izquierda = new Coordenada(fila, columna - 4);
                 derecha = new Coordenada(fila, columna + 4);
             }
             case 4, 8, 6 -> {
-                izquierda = new Coordenada(fila, columna + 2);
+                izquierda = new Coordenada(fila, columna - 2);
                 derecha = new Coordenada(fila, columna + 2);
             }
         }
@@ -130,43 +122,41 @@ public class ReglasDelJuego {
         return new Coordenada[]{arriba, abajo, izquierda, derecha};
     }
 
-    public boolean esPosAdyacente(Coordenada original, Coordenada destino){
-        boolean esAdyacente = false;
-
-        //TODO: queda pendiente hacer este
-
-        return esAdyacente;
-    }
-
     public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador) {
         // Verifica si hay un molino en la fila
         switch (fila) {
             case 0, 12 -> {
-                if(tablero.obtenerCasilla(fila, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 6).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(fila, 0) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 6) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 12) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(fila, 0).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 6).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 12).getJugador() == jugador) {
+                        tablero.obtenerFicha(fila, 0).formaMolino();
+                        tablero.obtenerFicha(fila, 12).formaMolino();
+                        tablero.obtenerFicha(fila, 12).formaMolino();
                         return true;
                     }
                 }
             }
             case 2, 10 -> {
-                if(tablero.obtenerCasilla(fila, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 6).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(fila, 2) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 6) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 10) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(fila, 2).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 6).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 10).getJugador() == jugador) {
+                        tablero.obtenerFicha(fila, 2).formaMolino();
+                        tablero.obtenerFicha(fila, 6).formaMolino();
+                        tablero.obtenerFicha(fila, 10).formaMolino();
                         return true;
                     }
                 }
             }
             case 4, 8 -> {
-                if(tablero.obtenerCasilla(fila, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 6).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(fila, 4) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 6) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 8) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(fila, 4).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 6).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 8).getJugador() == jugador) {
@@ -175,18 +165,18 @@ public class ReglasDelJuego {
                 }
             }
             case 6 -> {
-                if(tablero.obtenerCasilla(fila, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(fila, 0) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 2) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 4) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(fila, 0).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 2).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 4).getJugador() == jugador) {
                         return true;
                     }
                 }
-                if(tablero.obtenerCasilla(fila, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(fila, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(fila, 8) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 10) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(fila, 12) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(fila, 8).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 10).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 12).getJugador() == jugador) {
@@ -198,9 +188,9 @@ public class ReglasDelJuego {
         // Verifica si hay un molino en la columna
         switch (columna) {
             case 0, 12 -> {
-                if(tablero.obtenerCasilla(0, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(12, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(0, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(6, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(12, columna) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(6, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(12, columna).getJugador() == jugador) {
@@ -209,9 +199,9 @@ public class ReglasDelJuego {
                 }
             }
             case 2, 10 -> {
-                if(tablero.obtenerCasilla(2, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(10, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(2, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(6, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(10, columna) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(2, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(6, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(10, columna).getJugador() == jugador) {
@@ -220,9 +210,9 @@ public class ReglasDelJuego {
                 }
             }
             case 4, 8 -> {
-                if(tablero.obtenerCasilla(4, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(6, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(8, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(4, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(6, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(8, columna) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(4, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(6, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(8, columna).getJugador() == jugador) {
@@ -231,18 +221,18 @@ public class ReglasDelJuego {
                 }
             }
             case 6 -> {
-                if(tablero.obtenerCasilla(0, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(2, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(4, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(0, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(2, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(4, columna) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(2, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(4, columna).getJugador() == jugador) {
                         return true;
                     }
                 }
-                if(tablero.obtenerCasilla(8, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(10, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerCasilla(12, columna).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                if(tablero.obtenerEstadoCasilla(8, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(10, columna) == EstadoCasilla.OCUPADA &&
+                        tablero.obtenerEstadoCasilla(12, columna) == EstadoCasilla.OCUPADA) {
                     if (tablero.obtenerFicha(8, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(10, columna).getJugador() == jugador &&
                             tablero.obtenerFicha(12, columna).getJugador() == jugador) {
@@ -256,9 +246,9 @@ public class ReglasDelJuego {
             case 0, 2, 4 ->{
                 if(columna == 0 || columna == 2 || columna == 4) {
                     //Lado izquierdo arriba
-                    if (tablero.obtenerCasilla(0, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(2, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(4, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerEstadoCasilla(0, 0) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(2, 2) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(4, 4) == EstadoCasilla.OCUPADA) {
                         if (tablero.obtenerFicha(0, 0).getJugador() == jugador &&
                                 tablero.obtenerFicha(2, 2).getJugador() == jugador &&
                                 tablero.obtenerFicha(4, 4).getJugador() == jugador) {
@@ -267,9 +257,9 @@ public class ReglasDelJuego {
                     }
                 } else {
                     //Lado derecho arriba
-                    if (tablero.obtenerCasilla(0, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(2, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(4, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerEstadoCasilla(0, 12) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(2, 10) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(4, 8) == EstadoCasilla.OCUPADA) {
                         if (tablero.obtenerFicha(0, 12).getJugador() == jugador &&
                                 tablero.obtenerFicha(2, 10).getJugador() == jugador &&
                                 tablero.obtenerFicha(4, 8).getJugador() == jugador) {
@@ -281,9 +271,9 @@ public class ReglasDelJuego {
             case 12, 10, 8 ->{
                 //Lado izquierdo abajo
                 if(columna == 0 || columna == 2 || columna == 4) {
-                    if (tablero.obtenerCasilla(12, 0).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(10, 2).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(8, 4).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerEstadoCasilla(12, 0) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(10, 2)== EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(8, 4) == EstadoCasilla.OCUPADA) {
                         if (tablero.obtenerFicha(12, 0).getJugador() == jugador &&
                                 tablero.obtenerFicha(10, 2).getJugador() == jugador &&
                                 tablero.obtenerFicha(8, 4).getJugador() == jugador) {
@@ -292,9 +282,9 @@ public class ReglasDelJuego {
                     }
                 } else {
                     //Lado derecho abajo
-                    if (tablero.obtenerCasilla(12, 12).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(10, 10).getEstadoCasilla() == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerCasilla(8, 8).getEstadoCasilla() == EstadoCasilla.OCUPADA) {
+                    if (tablero.obtenerEstadoCasilla(12, 12) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(10, 10) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(8, 8) == EstadoCasilla.OCUPADA) {
                         if (tablero.obtenerFicha(12, 12).getJugador() == jugador &&
                                 tablero.obtenerFicha(10, 10).getJugador() == jugador &&
                                 tablero.obtenerFicha(8, 8).getJugador() == jugador) {
@@ -308,9 +298,9 @@ public class ReglasDelJuego {
     }
 
     public Jugador obtenerGanador(Jugador j1, Jugador j2) {
-        if (j1.getFichasColocadas() == 2)
+        if (j1.getFichasEnTablero() == 2)
             return j2;
-        if (j2.getFichasColocadas() == 2)
+        if (j2.getFichasEnTablero() == 2)
             return j1;
         if (!jugadorTieneMovimientos(j1))
             return j2;

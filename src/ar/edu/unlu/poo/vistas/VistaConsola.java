@@ -17,7 +17,6 @@ public class VistaConsola implements TableroImpl, Observer {
     private void limpiarConsola() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
-
             ProcessBuilder processBuilder;
             if (os.contains("win")) {
                 // Para Windows
@@ -26,7 +25,6 @@ public class VistaConsola implements TableroImpl, Observer {
                 // Para sistemas tipo Unix (Linux, macOS)
                 processBuilder = new ProcessBuilder("clear");
             }
-
             Process process = processBuilder.inheritIO().start();
             process.waitFor();
         } catch (Exception e) {
@@ -54,7 +52,7 @@ public class VistaConsola implements TableroImpl, Observer {
         int colfin = 0;
         System.out.println("\n\n");
         // Muestra las letras de las columnas
-        System.out.print("     "); // Espacio inicial
+        System.out.print("     ");  // Espacio inicial
         for (int columna = 0; columna < 13; columna++) {
             if ( columna!= 12) {
                 if (columna % 2 == 0) {
@@ -120,11 +118,34 @@ public class VistaConsola implements TableroImpl, Observer {
         }
         System.out.print(" ");
         System.out.println("\n");
+
+
+        /*
+        REPRESENTACIÓN DEL TABLERO
+        String tablero =
+        """
+                                    A     B     C     D     E     F     G
+                                1   ■  ─  ─  ─  ─  ─  ■  ─  ─  ─  ─  ─  ■   1
+                                    │                 │                 │
+                                2   │     ■  ─  ─  ─  ■  ─  ─  ─  ■     │   2
+                                    │     │           │           │     │
+                                3   │     │     ■  ─  ■  ─  ■     │     │   3
+                                    │     │     │           │     │     │
+                                4   ■  ─  ■  ─  ■           ■  ─  ■  ─  ■   4
+                                    │     │     │           │     │     │
+                                5   │     │     ■  ─  ■  ─  ■     │     │   5
+                                    │     │           │           │     │
+                                6   │     ■  ─  ─  ─  ■  ─  ─  ─  ■     │   6
+                                    │                 │                 │
+                                7   ■  ─  ─  ─  ─  ─  ■  ─  ─  ─  ─  ─  ■   7
+                                    A     B     C     D     E     F     G
+        """;
+        System.out.println(tablero);*/
     }
 
     @Override
-    public void mostrarTurno(String mensaje) {
-        System.out.println("Turno de: " +mensaje);
+    public void mostrarTurno(String nombreJugador) {
+        System.out.println("Turno de: " + nombreJugador);
     }
 
     @Override
@@ -134,7 +155,7 @@ public class VistaConsola implements TableroImpl, Observer {
 
     @Override
     public void avisoDeMolino(String nombreJugador) {
-        System.out.println("¡El jugador " + nombreJugador + " hizo molino!!");
+        System.out.println("¡El jugador " + nombreJugador + " hizo molino!");
         EntradaTeclado.presionarEnterParaContinuar();
     }
 
@@ -174,6 +195,36 @@ public class VistaConsola implements TableroImpl, Observer {
     @Override
     public void casillaNoAdyacente() {
         System.out.println("La casilla seleccionada no corresponde a una casilla adyacente. Intente con otra.");
+    }
+
+    @Override
+    public void mensajePedirCasillaParaColocar() {
+
+    }
+
+    @Override
+    public void mensajePedirNuevaCasillaLibre() {
+
+    }
+
+    @Override
+    public void mostrarEmpate(String nombreJ1, String nombreJ2) {
+
+    }
+
+    @Override
+    public void mostrarMensajeCasillaOcupada() {
+
+    }
+
+    @Override
+    public void mensajeFichaFormaMolino() {
+
+    }
+
+    @Override
+    public void mensajeCasillaFichaAMover() {
+
     }
 
     @Override

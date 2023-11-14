@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 public class EntradaTeclado {
     public static int pedirIntOpcion(){
-        //Funcion para pedir la opcion deseada por teclado
-        //Inicializaciones
+        // Método para pedir la opción deseada por teclado
+        // Inicializaciones
         int numero = 0;
         boolean entrada;
         Scanner teclado = new Scanner(System.in);
@@ -46,7 +46,7 @@ public class EntradaTeclado {
                 System.out.println("         Intente otra vez.");
                 System.out.println("**********************************\n");
             }
-        }while (!entrada);
+        } while (!entrada);
         return numero;
     }
 
@@ -72,12 +72,12 @@ public class EntradaTeclado {
     }
 
     public static int pedirIntID(){
-        //Funcion para pedir la opcion deseada por teclado
-        //Inicializaciones
+        // Funcion para pedir la opcion deseada por teclado
+        // Inicializaciones
         int numero = 0;
         boolean entrada;
         Scanner teclado = new Scanner(System.in);
-        //Funcion
+        // Funcion
         do {
             try {
                 System.out.print("     ID_JUGADOR:   ");
