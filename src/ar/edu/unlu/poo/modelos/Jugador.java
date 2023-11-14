@@ -9,6 +9,7 @@ public class Jugador implements Serializable {
     private final String nombre;
     private int puntaje;
     private int victorias;
+    private int empates;
     private int derrotas;
     private int fichasColocadas;
     private int fichasEnTablero;
@@ -76,17 +77,20 @@ public class Jugador implements Serializable {
         return derrotas;
     }
 
-    public void setPuntaje(int puntaje) {
-        this.puntaje = puntaje;
+    public void empataPartida(){
+        this.puntaje += 50;
+        this.empates++;
     }
 
-    public void setVictorias(int victorias) {
-        this.victorias = victorias;
+    public void ganaPartida(){
+        this.puntaje += 100;
+        this.victorias ++;
     }
 
-    public void setDerrotas(int derrotas) {
-        this.derrotas = derrotas;
+    public void pierdePartida(){
+        this.derrotas++;
     }
+
 
     @Override
     public String toString() {

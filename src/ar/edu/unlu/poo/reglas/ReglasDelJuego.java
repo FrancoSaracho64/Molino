@@ -91,10 +91,10 @@ public class ReglasDelJuego {
         int fila = posicion.getFila();
         int columna = posicion.getColumna();
 
-        Coordenada arriba = new Coordenada(fila - 2, columna);
-        Coordenada abajo = new Coordenada(fila + 2, columna);
-        Coordenada izquierda = new Coordenada(fila, columna - 2);
-        Coordenada derecha = new Coordenada(fila, columna + 2);
+        Coordenada arriba = null;
+        Coordenada abajo = null;
+        Coordenada izquierda = null;
+        Coordenada derecha = null;
 
         // Definir las coordenadas de las posiciones adyacentes
         // TODO---> Hay que analizar cada situacion. Desde cada lugar hay que avanzar mas o menos pasos.
@@ -308,6 +308,27 @@ public class ReglasDelJuego {
     }
 
     public Jugador obtenerGanador(Jugador j1, Jugador j2) {
-        return j1; // j1 o j2
+        if (j1.getFichasColocadas() == 2)
+            return j2;
+        if (j2.getFichasColocadas() == 2)
+            return j1;
+        if (!jugadorTieneMovimientos(j1))
+            return j2;
+        if (!jugadorTieneMovimientos(j2))
+            return j1;
+        // Si no se cumplen otras condiciones, se podría considerar un empate
+        return null; // No hay ganador definido
+    }
+
+    public boolean sonCasillasAdyacentes(Coordenada posFichaSelec, Coordenada nuevaPosFichaSelec) {
+        for (Coordenada adyacente : obtenerPosicionesAdyacentes(posFichaSelec)) {
+            if (adyacente.equals(nuevaPosFichaSelec))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean fichaTieneMovimiento(Coordenada posFichaSelec) {
+        return hayMovimientosPosibles(posFichaSelec);
     }
 }

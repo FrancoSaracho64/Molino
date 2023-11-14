@@ -1,13 +1,8 @@
 package ar.edu.unlu.poo.vistas;
 
-import ar.edu.unlu.poo.interfaces.TableroImpl;
-import ar.edu.unlu.poo.modelos.Casilla;
-import ar.edu.unlu.poo.modelos.Coordenada;
-import ar.edu.unlu.poo.modelos.Tablero;
+public class VistaInterfazGrafica /*implements TableroImpl*/ {
 
-public class VistaInterfazGrafica implements TableroImpl {
-
-
+/*
     @Override
     public void mostrarTablero(Tablero tablero) {
 
@@ -24,6 +19,11 @@ public class VistaInterfazGrafica implements TableroImpl {
     }
 
     @Override
+    public void avisoDeMolino(String nombreJugador) {
+
+    }
+
+    @Override
     public Coordenada pedirCasilla() {
         return null;
     }
@@ -32,4 +32,14 @@ public class VistaInterfazGrafica implements TableroImpl {
     public void iniciarJuego() {
 
     }
+
+    @Override
+    public void mostrarGanador(String nombreJugador) {
+
+    }
+
+    @Override
+    public void juegoTerminado() {
+
+    }*/
 }

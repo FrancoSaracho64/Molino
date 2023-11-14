@@ -7,6 +7,7 @@ public class Ficha {
     private Jugador jugador;
     private Simbolo simbolo;
     private EstadoFicha estadoFicha;
+    private boolean enMolino;
 
     public Ficha(Jugador jugador) {
         this.jugador = jugador;
@@ -30,5 +31,17 @@ public class Ficha {
 
     public void setEstadoFicha(EstadoFicha estadoFicha) {
         this.estadoFicha = estadoFicha;
+    }
+
+    public boolean isEnMolino() {
+        return enMolino;
+    }
+
+    public void formaUnMolino(){
+        enMolino = true;
+    }
+
+    public void invertirEnMolino(){
+        enMolino = !enMolino;
     }
 }

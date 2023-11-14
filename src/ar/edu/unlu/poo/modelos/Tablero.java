@@ -77,17 +77,23 @@ public class Tablero implements Observable {
         return casillas[fila][columna].getFicha();
     }
 
-    public void quitarFicha(int fila, int columna){
+    /**
+     * Se quita una ficha del tablero
+     * @param notificar TRUE para notificar el cambio, FALSE para no notificar
+     * @param fila fila de la ficha
+     * @param columna columna de la ficha
+     */
+    public void quitarFicha(boolean notificar,int fila, int columna){
         casillas[fila][columna].quitarFicha();
         casillas[fila][columna].setEstadoCasilla(EstadoCasilla.LIBRE);
-        notificarObservadores();
+        if (notificar)
+            notificarObservadores();
     }
 
     public void moverFicha(Coordenada antigua, Coordenada nueva){
-        quitarFicha(antigua.getFila(), antigua.getColumna());
         Ficha ficha = obtenerFicha(antigua.getFila(), antigua.getColumna());
+        quitarFicha(false, antigua.getFila(), antigua.getColumna());
         colocarFicha(nueva.getFila(), nueva.getColumna(), ficha);
-        notificarObservadores();
     }
 
     public int getCountFilas() {

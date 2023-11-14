@@ -3,7 +3,6 @@ package ar.edu.unlu.poo.vistas;
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.Observer;
 import ar.edu.unlu.poo.interfaces.TableroImpl;
-import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
@@ -134,10 +133,21 @@ public class VistaConsola implements TableroImpl, Observer {
     }
 
     @Override
-    public Coordenada pedirCasilla() {
+    public void avisoDeMolino(String nombreJugador) {
+        System.out.println("¡El jugador " + nombreJugador + " hizo molino!!");
+        EntradaTeclado.presionarEnterParaContinuar();
+    }
+
+    @Override
+    public Object[] pedirCasilla() {
         char columna = EntradaTeclado.pedirColumna();
         int fila = EntradaTeclado.pedirFila();
-        return new Coordenada(fila, columna);
+        return new Object[]{fila, columna};
+    }
+
+    @Override
+    public void fichaAEliminar() {
+        System.out.println("Introduzca la coordenada de la ficha a eliminar del oponente...");
     }
 
     @Override
@@ -146,8 +156,29 @@ public class VistaConsola implements TableroImpl, Observer {
     }
 
     @Override
+    public void mostrarGanador(String nombreJugador) {
+        System.out.println("\n\n\n");
+        System.out.println("El ganador es: " + nombreJugador);
+    }
+
+    @Override
+    public void juegoTerminado() {
+        System.out.println("El juego ha terminado.");
+    }
+
+    @Override
+    public void fichaSinMovimiento() {
+        System.out.println("La ficha seleccionada NO tiene movimientos. Intente con otra.");
+    }
+
+    @Override
+    public void casillaNoAdyacente() {
+        System.out.println("La casilla seleccionada no corresponde a una casilla adyacente. Intente con otra.");
+    }
+
+    @Override
     public void actualizar() {
-        //limpiarConsola();
+        limpiarConsola();
         mostrarTablero(controlador.obtenerTablero());
     }
 }
