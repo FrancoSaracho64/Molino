@@ -97,7 +97,7 @@ public class Jugador implements Serializable {
             "ESTADISTICAS:"+
             "\n     Puntaje: " + puntaje +
             "\n     Victorias: " + victorias +
-            "\n     Derrotas: " + derrotas +
+            "\n     Empates: " + empates +
             "\n     Derrotas: " + derrotas;
     }
 }

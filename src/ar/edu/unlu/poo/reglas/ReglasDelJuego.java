@@ -165,22 +165,26 @@ public class ReglasDelJuego {
                 }
             }
             case 6 -> {
-                if(tablero.obtenerEstadoCasilla(fila, 0) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(fila, 2) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(fila, 4) == EstadoCasilla.OCUPADA) {
-                    if (tablero.obtenerFicha(fila, 0).getJugador() == jugador &&
-                            tablero.obtenerFicha(fila, 2).getJugador() == jugador &&
-                            tablero.obtenerFicha(fila, 4).getJugador() == jugador) {
-                        return true;
+                if (columna == 0 || columna == 2 || columna == 4) {
+                    if (tablero.obtenerEstadoCasilla(fila, 0) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(fila, 2) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(fila, 4) == EstadoCasilla.OCUPADA) {
+                        if (tablero.obtenerFicha(fila, 0).getJugador() == jugador &&
+                                tablero.obtenerFicha(fila, 2).getJugador() == jugador &&
+                                tablero.obtenerFicha(fila, 4).getJugador() == jugador) {
+                            return true;
+                        }
                     }
                 }
-                if(tablero.obtenerEstadoCasilla(fila, 8) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(fila, 10) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(fila, 12) == EstadoCasilla.OCUPADA) {
-                    if (tablero.obtenerFicha(fila, 8).getJugador() == jugador &&
-                            tablero.obtenerFicha(fila, 10).getJugador() == jugador &&
-                            tablero.obtenerFicha(fila, 12).getJugador() == jugador) {
-                        return true;
+                else if (columna == 8 || columna == 10 || columna == 12) {
+                    if (tablero.obtenerEstadoCasilla(fila, 8) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(fila, 10) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(fila, 12) == EstadoCasilla.OCUPADA) {
+                        if (tablero.obtenerFicha(fila, 8).getJugador() == jugador &&
+                                tablero.obtenerFicha(fila, 10).getJugador() == jugador &&
+                                tablero.obtenerFicha(fila, 12).getJugador() == jugador) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -221,22 +225,26 @@ public class ReglasDelJuego {
                 }
             }
             case 6 -> {
-                if(tablero.obtenerEstadoCasilla(0, columna) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(2, columna) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(4, columna) == EstadoCasilla.OCUPADA) {
-                    if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
-                            tablero.obtenerFicha(2, columna).getJugador() == jugador &&
-                            tablero.obtenerFicha(4, columna).getJugador() == jugador) {
-                        return true;
+                if (fila == 0 || fila == 2 || fila == 4) {
+                    if (tablero.obtenerEstadoCasilla(0, columna) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(2, columna) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(4, columna) == EstadoCasilla.OCUPADA) {
+                        if (tablero.obtenerFicha(0, columna).getJugador() == jugador &&
+                                tablero.obtenerFicha(2, columna).getJugador() == jugador &&
+                                tablero.obtenerFicha(4, columna).getJugador() == jugador) {
+                            return true;
+                        }
                     }
                 }
-                if(tablero.obtenerEstadoCasilla(8, columna) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(10, columna) == EstadoCasilla.OCUPADA &&
-                        tablero.obtenerEstadoCasilla(12, columna) == EstadoCasilla.OCUPADA) {
-                    if (tablero.obtenerFicha(8, columna).getJugador() == jugador &&
-                            tablero.obtenerFicha(10, columna).getJugador() == jugador &&
-                            tablero.obtenerFicha(12, columna).getJugador() == jugador) {
-                        return true;
+                else if (fila == 8 || fila == 10 || fila == 12) {
+                    if (tablero.obtenerEstadoCasilla(8, columna) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(10, columna) == EstadoCasilla.OCUPADA &&
+                            tablero.obtenerEstadoCasilla(12, columna) == EstadoCasilla.OCUPADA) {
+                        if (tablero.obtenerFicha(8, columna).getJugador() == jugador &&
+                                tablero.obtenerFicha(10, columna).getJugador() == jugador &&
+                                tablero.obtenerFicha(12, columna).getJugador() == jugador) {
+                            return true;
+                        }
                     }
                 }
             }
