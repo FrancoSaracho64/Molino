@@ -2,11 +2,11 @@ package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.Observer;
-import ar.edu.unlu.poo.interfaces.TableroImpl;
+import ar.edu.unlu.poo.interfaces.VistaTableroI;
 import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
-public class VistaConsola implements TableroImpl, Observer {
+public class VistaConsola implements VistaTableroI, Observer {
     private ControladorImpl controlador;
 
     public VistaConsola(ControladorImpl controlador){
@@ -53,7 +53,7 @@ public class VistaConsola implements TableroImpl, Observer {
         System.out.println("\n\n");
         // Muestra las letras de las columnas
         System.out.print("     ");  // Espacio inicial
-        for (int columna = 0; columna < 13; columna++) {
+        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
             if ( columna!= 12) {
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(col)) + "    ");
@@ -64,7 +64,7 @@ public class VistaConsola implements TableroImpl, Observer {
             }
         }
         System.out.println();
-        for (int fila = 0; fila < 13; fila++) {
+        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
             System.out.print(" ");
             if (fila % 2 == 0) {
                 System.out.print(" " + formatoCelda(numeroFila(fil)) + "  "); // Número de fila
@@ -73,7 +73,7 @@ public class VistaConsola implements TableroImpl, Observer {
                 System.out.print("    ");
             }
             // Se representa el estado de la casilla
-            for (int columna = 0; columna < 13; columna++) {
+            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
                 String contenidoCelda = controlador.contenidoCasilla(fila, columna);
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -106,7 +106,7 @@ public class VistaConsola implements TableroImpl, Observer {
         }
         System.out.print("     ");
 
-        for (int columna = 0; columna < 13; columna++) {
+        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
             if(columna != 12){
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(colfin)) + "    ");
@@ -118,34 +118,11 @@ public class VistaConsola implements TableroImpl, Observer {
         }
         System.out.print(" ");
         System.out.println("\n");
-
-
-        /*
-        REPRESENTACIÓN DEL TABLERO
-        String tablero =
-        """
-                                    A     B     C     D     E     F     G
-                                1   ■  ─  ─  ─  ─  ─  ■  ─  ─  ─  ─  ─  ■   1
-                                    │                 │                 │
-                                2   │     ■  ─  ─  ─  ■  ─  ─  ─  ■     │   2
-                                    │     │           │           │     │
-                                3   │     │     ■  ─  ■  ─  ■     │     │   3
-                                    │     │     │           │     │     │
-                                4   ■  ─  ■  ─  ■           ■  ─  ■  ─  ■   4
-                                    │     │     │           │     │     │
-                                5   │     │     ■  ─  ■  ─  ■     │     │   5
-                                    │     │           │           │     │
-                                6   │     ■  ─  ─  ─  ■  ─  ─  ─  ■     │   6
-                                    │                 │                 │
-                                7   ■  ─  ─  ─  ─  ─  ■  ─  ─  ─  ─  ─  ■   7
-                                    A     B     C     D     E     F     G
-        """;
-        System.out.println(tablero);*/
     }
 
     @Override
     public void mostrarTurno(String nombreJugador) {
-        System.out.println("Turno de: " + nombreJugador);
+        System.out.println("** Turno de: " + nombreJugador + " **");
     }
 
     @Override
@@ -179,12 +156,12 @@ public class VistaConsola implements TableroImpl, Observer {
     @Override
     public void mostrarGanador(String nombreJugador) {
         System.out.println("\n\n\n");
-        System.out.println("El ganador es: " + nombreJugador);
+        System.out.println("¡El ganador es: " + nombreJugador + "! ¡Felicitaciones! :D");
     }
 
     @Override
     public void juegoTerminado() {
-        System.out.println("El juego ha terminado.");
+        System.out.println("------ ** El juego ha terminado ** ------");
     }
 
     @Override
@@ -198,33 +175,48 @@ public class VistaConsola implements TableroImpl, Observer {
     }
 
     @Override
-    public void mensajePedirCasillaParaColocar() {
-
-    }
-
-    @Override
-    public void mensajePedirNuevaCasillaLibre() {
-
+    public void mensajePedirNuevaCasillaLibreAdyacente() {
+        System.out.println("Ingrese una coordenada libre adyacente para colocar la ficha...");
     }
 
     @Override
     public void mostrarEmpate(String nombreJ1, String nombreJ2) {
-
+        System.out.println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 +"!");
     }
 
     @Override
     public void mostrarMensajeCasillaOcupada() {
-
+        System.out.println("La casilla que ha seleccionado está ocupada. Intente con otra.");
     }
 
     @Override
     public void mensajeFichaFormaMolino() {
+        System.out.println("La pieza seleccionada forma un molino. Intente con otra.");
+    }
 
+    @Override
+    public void mensajePedirNuevaCasillaLibre() {
+        System.out.println("Ingrese cualquier coordenada libre para colocar la ficha...");
+    }
+
+    @Override
+    public void avisoNoHayFichasParaEliminarDelOponente() {
+        System.out.println("No hay fichas disponibles para eliminar en este turno. Mala suerte :/");
+    }
+
+    @Override
+    public void jugadorSinMovimientos() {
+        System.out.println("¡Te quedaste sin movimientos posibles! :/\n");
+    }
+
+    @Override
+    public void jugadorSinFichas() {
+        System.out.println("¡Te quedaste sin fichas suficientes! :/\n");
     }
 
     @Override
     public void mensajeCasillaFichaAMover() {
-
+        System.out.println("Ingrese la coordenada de la ficha que desea mover...");
     }
 
     @Override

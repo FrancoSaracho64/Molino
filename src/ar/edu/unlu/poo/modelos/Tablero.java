@@ -14,7 +14,6 @@ public class Tablero implements Observable {
     private final int filas;
 
     public Tablero(int filas, int columnas) {
-        //Creo una matriz 13*13 para representar todas las fichas
         this.casillas = new Casilla[filas][columnas];
         this.filas = filas;
         this.columnas = columnas;
@@ -91,7 +90,6 @@ public class Tablero implements Observable {
 
     public void moverFicha(Coordenada antigua, Coordenada nueva){
         Ficha ficha = obtenerFicha(antigua.getFila(), antigua.getColumna());
-        ficha.noFormaMolino();
         quitarFicha(false, antigua.getFila(), antigua.getColumna());
         colocarFicha(nueva.getFila(), nueva.getColumna(), ficha);
     }
@@ -121,4 +119,3 @@ public class Tablero implements Observable {
         }
     }
 }
-

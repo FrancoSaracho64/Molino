@@ -3,20 +3,21 @@ package ar.edu.unlu.poo.controladores;
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.Observer;
-import ar.edu.unlu.poo.interfaces.TableroImpl;
+import ar.edu.unlu.poo.interfaces.VistaTableroI;
 import ar.edu.unlu.poo.modelos.*;
+import ar.edu.unlu.poo.persistencia.Persistencia;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 
 import java.util.ArrayList;
 
 public class TableroControlador implements ControladorImpl {
-    private static final String CASILLA_DISPONIBLE = "■";
+    private static final String CASILLA_DISPONIBLE = "#";
     private static final String CASILLA_INVALIDA = "";
     private static final String JUGADOR_1 = "X";
     private static final String JUGADOR_2 = "O";
     private ArrayList<Jugador> jugadores;
     private Tablero tablero;
-    private TableroImpl vista;
+    private VistaTableroI vista;
     private ReglasDelJuego reglas;
 
     public TableroControlador(ArrayList<Jugador> jugadores, Tablero tablero){
@@ -51,10 +52,8 @@ public class TableroControlador implements ControladorImpl {
                 turno = true;
             }
         }
-
         // Informar que el juego ha terminado.
         vista.juegoTerminado();
-
         Jugador ganador = reglas.obtenerGanador(j1, j2);
         if (ganador == null){
             vista.mostrarEmpate(j1.getNombre(), j2.getNombre());
@@ -68,6 +67,16 @@ public class TableroControlador implements ControladorImpl {
                 j1.pierdePartida();
             // Mostramos el ganador.
             vista.mostrarGanador(ganador.getNombre());
+            ArrayList<Jugador> jugadores_historicos = Persistencia.cargarJugadoresHistorico();
+
+            for (int i = 0; i < jugadores_historicos.size(); i++){
+                if (jugadores_historicos.get(i).getId() == j1.getId()){
+                    jugadores_historicos.set(i, j1);
+                } else if (jugadores_historicos.get(i).getId() == j2.getId()){
+                    jugadores_historicos.set(i, j2);
+                }
+            }
+            Persistencia.guardarJugadores(jugadores_historicos);
         }
     }
 
@@ -97,7 +106,7 @@ public class TableroControlador implements ControladorImpl {
     }
 
     @Override
-    public void agregarObserver(TableroImpl vista) {
+    public void agregarObserver(VistaTableroI vista) {
         tablero.agregarObservador((Observer) vista);
     }
 
@@ -109,13 +118,20 @@ public class TableroControlador implements ControladorImpl {
             colocarFicha(jugadorActual, oponente, fichas.get(jugadorActual.getFichasColocadas()));
         } else {
             //  Ya se han colocado las 9 fichas. Empiezan a mover las fichas.
-            juego_activo = jugadorActual.getFichasEnTablero() > 2 && reglas.jugadorTieneMovimientos(jugadorActual);
+            juego_activo = jugadorActual.getFichasEnTablero() > 2 && (jugadorActual.getFichasEnTablero() != 3 && reglas.jugadorTieneMovimientos(jugadorActual));
             if (juego_activo){
-                moverFicha(jugadorActual, oponente, fichas);
+                moverFicha(jugadorActual, oponente);
             }
-            juego_activo = oponente.getFichasEnTablero() > 2 && reglas.jugadorTieneMovimientos(jugadorActual);
         }
         //Finaliza el turno
+        if (!juego_activo){
+            if (jugadorActual.getFichasEnTablero() <= 2){
+                vista.jugadorSinFichas();
+            }
+            else if (!reglas.jugadorTieneMovimientos(jugadorActual)){
+                vista.jugadorSinMovimientos();
+            }
+        }
         return juego_activo;
     }
 
@@ -128,32 +144,28 @@ public class TableroControlador implements ControladorImpl {
         if (jugadorActual.getFichasColocadas() >= 3) {
             if (reglas.hayMolinoEnPosicion(coord.getFila(), coord.getColumna(), jugadorActual)) {
                 vista.avisoDeMolino(jugadorActual.getNombre());
-                eliminarFichaOponente(jugadorOponente);
+                if (reglas.hayFichasParaEliminar(jugadorOponente)){
+                    eliminarFichaOponente(jugadorOponente);
+                } else {
+                    vista.avisoNoHayFichasParaEliminarDelOponente();
+                }
             }
         }
     }
 
-    private void moverFicha(Jugador jugadorActual, Jugador jugadorOponente, ArrayList<Ficha> fichas){
+    private void moverFicha(Jugador jugadorActual, Jugador jugadorOponente){
         boolean sonAdyacentes;
         boolean tieneMovimiento;
         Coordenada posFichaSelec;
         Coordenada nuevaPosFichaSelec;
         if (jugadorActual.getFichasEnTablero() == 3){
             //  Movimiento de pieza a cualquier posición libre
-            vista.mensajeCasillaFichaAMover();
             posFichaSelec = pedir_coordenada_ocupada_por_jugador(jugadorActual);
             nuevaPosFichaSelec = pedir_coordenada_libre();
-            tablero.moverFicha(posFichaSelec, nuevaPosFichaSelec);
-            if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec.getFila(), nuevaPosFichaSelec.getColumna(), jugadorActual)) {
-                tablero.obtenerFicha(nuevaPosFichaSelec.getFila(), nuevaPosFichaSelec.getColumna()).formaMolino();
-                vista.avisoDeMolino(jugadorActual.getNombre());
-                eliminarFichaOponente(jugadorOponente);
-            }
         } else {
             //  Movimiento de pieza a una posición adyacente
             do {
                 do {
-                    vista.mensajeCasillaFichaAMover();
                     posFichaSelec = pedir_coordenada_ocupada_por_jugador(jugadorActual);
                     tieneMovimiento = reglas.fichaTieneMovimiento(posFichaSelec);
                     if (!tieneMovimiento) {
@@ -161,16 +173,20 @@ public class TableroControlador implements ControladorImpl {
                     }
                 } while (!tieneMovimiento);
 
-                nuevaPosFichaSelec = pedir_coordenada_libre();
+                nuevaPosFichaSelec = pedir_coordenada_libre_adyacente();
                 sonAdyacentes = reglas.sonCasillasAdyacentes(posFichaSelec, nuevaPosFichaSelec);
                 if (!sonAdyacentes) {
                     vista.casillaNoAdyacente();
                 }
             } while (!sonAdyacentes);
-            tablero.moverFicha(posFichaSelec, nuevaPosFichaSelec);
-            if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec.getFila(), nuevaPosFichaSelec.getColumna(), jugadorActual)) {
-                vista.avisoDeMolino(jugadorActual.getNombre());
+        }
+        tablero.moverFicha(posFichaSelec, nuevaPosFichaSelec);
+        if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec.getFila(), nuevaPosFichaSelec.getColumna(), jugadorActual)) {
+            vista.avisoDeMolino(jugadorActual.getNombre());
+            if (reglas.hayFichasParaEliminar(jugadorOponente)){
                 eliminarFichaOponente(jugadorOponente);
+            } else {
+                vista.avisoNoHayFichasParaEliminarDelOponente();
             }
         }
     }
@@ -197,6 +213,28 @@ public class TableroControlador implements ControladorImpl {
         return coord;
     }
 
+    private Coordenada pedir_coordenada_libre_adyacente(){
+        boolean valida;
+        boolean ocupada;
+        Coordenada coord;
+        do {
+            do {
+                vista.mensajePedirNuevaCasillaLibreAdyacente();
+                coord = solicitarCasillaVista();
+                valida = reglas.esCasillaValida(coord);
+                if (!valida) {
+                    vista.mostrarMensajeErrorCasilla();
+                }
+            } while (!valida);
+            ocupada = tablero.obtenerEstadoCasilla(coord.getFila(), coord.getColumna())
+                    == EstadoCasilla.OCUPADA;
+            if (ocupada){
+                vista.mostrarMensajeCasillaOcupada();
+            }
+        } while (ocupada);
+        return coord;
+    }
+
     private Coordenada pedir_coordenada_ocupada_por_jugador(Jugador jugador){
         boolean valida;
         boolean ocupada;
@@ -205,7 +243,7 @@ public class TableroControlador implements ControladorImpl {
         do { // verifico que la ficha corresponda al jugador pasado por parámetro.
             do { // verifico que la casilla esté ocupada.
                 do { // verifico que sea una casilla válida.
-                    vista.mensajePedirCasillaParaColocar();
+                    vista.mensajeCasillaFichaAMover();
                     coord = solicitarCasillaVista();
                     valida = reglas.esCasillaValida(coord);
                     if (!valida) {
@@ -250,7 +288,7 @@ public class TableroControlador implements ControladorImpl {
                     vista.mostrarMensajeErrorCasilla();
                 }
             } while (!ocupada);
-            formaMolino = ficha.isEnMolino();
+            formaMolino = reglas.hayMolinoEnPosicion(coord.getFila(), coord.getColumna(), jugadorOponente);
             if (formaMolino){
                 vista.mensajeFichaFormaMolino();
             }
@@ -282,7 +320,7 @@ public class TableroControlador implements ControladorImpl {
         return fichas;
     }
 
-    public void agregarVista(TableroImpl vista) {
+    public void agregarVista(VistaTableroI vista) {
         this.vista = vista;
     }
 

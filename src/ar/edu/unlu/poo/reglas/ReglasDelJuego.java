@@ -132,9 +132,6 @@ public class ReglasDelJuego {
                     if (tablero.obtenerFicha(fila, 0).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 6).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 12).getJugador() == jugador) {
-                        tablero.obtenerFicha(fila, 0).formaMolino();
-                        tablero.obtenerFicha(fila, 12).formaMolino();
-                        tablero.obtenerFicha(fila, 12).formaMolino();
                         return true;
                     }
                 }
@@ -146,9 +143,6 @@ public class ReglasDelJuego {
                     if (tablero.obtenerFicha(fila, 2).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 6).getJugador() == jugador &&
                             tablero.obtenerFicha(fila, 10).getJugador() == jugador) {
-                        tablero.obtenerFicha(fila, 2).formaMolino();
-                        tablero.obtenerFicha(fila, 6).formaMolino();
-                        tablero.obtenerFicha(fila, 10).formaMolino();
                         return true;
                     }
                 }
@@ -328,5 +322,20 @@ public class ReglasDelJuego {
 
     public boolean fichaTieneMovimiento(Coordenada posFichaSelec) {
         return hayMovimientosPosibles(posFichaSelec);
+    }
+
+    public boolean hayFichasParaEliminar(Jugador jugadorOponente) {
+        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
+            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+                if (tablero.obtenerEstadoCasilla(fila, columna) == EstadoCasilla.OCUPADA) {
+                    Ficha ficha = tablero.obtenerFicha(fila, columna);
+                    if (ficha.getJugador() == jugadorOponente) {
+                        if (!hayMolinoEnPosicion(fila, columna, jugadorOponente))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

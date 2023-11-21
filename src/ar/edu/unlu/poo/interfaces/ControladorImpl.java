@@ -6,5 +6,5 @@ public interface ControladorImpl {
     void comenzarJuego();
     String contenidoCasilla(int fila, int columna);
     Tablero obtenerTablero();
-    void agregarObserver(TableroImpl vista);
+    void agregarObserver(VistaTableroI vista);
 }
