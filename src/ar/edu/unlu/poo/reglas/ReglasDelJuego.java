@@ -1,10 +1,7 @@
 package ar.edu.unlu.poo.reglas;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.modelos.Coordenada;
-import ar.edu.unlu.poo.modelos.Ficha;
-import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.poo.modelos.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +26,10 @@ public class ReglasDelJuego {
 
     public boolean jugadorTieneMovimientos(Jugador jugador) {
         // Obtener las posiciones ocupadas por las fichas del jugador
-        List<Coordenada> posicionesOcupadas = obtenerPosicionesOcupadasPorJugador(jugador);
+        List<Casilla> posicionesOcupadas = tablero.obtenerCasillasOcupadasPorJugador(jugador);
         // Verificar movimientos posibles para cada posición ocupada
-        for (Coordenada posicion : posicionesOcupadas) {
-            if (hayMovimientosPosibles(posicion)) {
+        for (Casilla casilla : posicionesOcupadas) {
+            if (hayMovimientosPosibles(casilla)) {
                 return true;  // El jugador tiene al menos un movimiento posible
             }
         }
@@ -40,33 +37,19 @@ public class ReglasDelJuego {
         return false;
     }
 
-    private List<Coordenada> obtenerPosicionesOcupadasPorJugador(Jugador jugador) {
-        List<Coordenada> posicionesOcupadas = new ArrayList<>();
-        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
-            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
-                if (tablero.obtenerEstadoCasilla(fila, columna) == EstadoCasilla.OCUPADA) {
-                    Ficha ficha = tablero.obtenerFicha(fila, columna);
-                    if (ficha.getJugador() == jugador) {
-                        posicionesOcupadas.add(new Coordenada(fila, columna));
-                    }
-                }
-            }
-        }
-        return posicionesOcupadas;
-    }
-
     /**
      * Con este metodo se debe obtener todas las sus casillas adyacentes.
      * Luego, determinar si son válidas o no.
      * Si son válidas, se debe analizar por si es posible o no moverse ahí.
-     * @param posicion La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
+     * @param casilla La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
      * @return Se retorna true si hay movimientos. False si no hay.
      */
-    private boolean hayMovimientosPosibles(Coordenada posicion) {
+    private boolean hayMovimientosPosibles(Casilla casilla) {
         // Verifica las posiciones adyacentes y verifica si se pueden mover a ellas
-        for (Coordenada adyacente : obtenerPosicionesAdyacentes(posicion)) {
-            if (esCasillaValida(adyacente)) {
-                if (tablero.obtenerEstadoCasilla(adyacente.getFila(), adyacente.getColumna()).
+        ArrayList<Coordenada> coordAdyacentes = casilla.getCoordenadasAdyacentes();
+        for (Coordenada coordenada : coordAdyacentes) {
+            if (esCasillaValida(coordenada)) {
+                if (tablero.obtenerEstadoCasilla(coordenada.getFila(), coordenada.getColumna()).
                     equals(EstadoCasilla.LIBRE)) {
                     return true;  // Hay al menos un movimiento posible
                 }
@@ -76,53 +59,81 @@ public class ReglasDelJuego {
         return false;
     }
 
-    /**
-     * @param posicion
-     * @return Se retornan las posiciones adyacentes: ARRIBA, ABAJO, IZQUIERDA, DERECHA
-     */
-    public static Coordenada[] obtenerPosicionesAdyacentes(Coordenada posicion) {
-        int fila = posicion.getFila();
-        int columna = posicion.getColumna();
 
-        Coordenada arriba = null;
-        Coordenada abajo = null;
-        Coordenada izquierda = null;
-        Coordenada derecha = null;
 
-        // Definir las coordenadas de las posiciones adyacentes
-        switch (columna){
-            case 0, 12 -> {
-                arriba = new Coordenada(fila + 6, columna);
-                abajo = new Coordenada(fila - 6, columna);
-            }
-            case 2, 10 -> {
-                arriba = new Coordenada(fila + 4, columna);
-                abajo = new Coordenada(fila - 4, columna);
-            }
-            case 4, 8, 6 -> {
-                arriba = new Coordenada(fila + 2, columna);
-                abajo = new Coordenada(fila - 2, columna);
+
+
+
+
+
+
+
+    public boolean hayMolinoEnPosicion(Coordenada coordenada, Jugador jugador) {
+        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(coordenada).getCoordenadasAdyacentes();
+
+        // Verificar en cada dirección si se forma un molino
+        for (Coordenada adyacente : casillasAdyacentes) {
+            if (esFichaDelJugador(adyacente, jugador)) {
+                Coordenada siguienteAdyacente = obtenerSiguienteCasillaEnDireccion(coordenada, adyacente);
+                if (siguienteAdyacente != null && esFichaDelJugador(siguienteAdyacente, jugador)) {
+                    return true;
+                }
             }
         }
-        switch (fila){
-            case 0, 12 -> {
-                izquierda = new Coordenada(fila, columna - 6);
-                derecha = new Coordenada(fila, columna + 6);
-            }
-            case 2, 10 -> {
-                izquierda = new Coordenada(fila, columna - 4);
-                derecha = new Coordenada(fila, columna + 4);
-            }
-            case 4, 8, 6 -> {
-                izquierda = new Coordenada(fila, columna - 2);
-                derecha = new Coordenada(fila, columna + 2);
-            }
-        }
-        // Devolver un array con las coordenadas adyacentes
-        return new Coordenada[]{arriba, abajo, izquierda, derecha};
+        return false;
     }
 
-    public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador) {
+    private boolean esFichaDelJugador(Coordenada coordenada, Jugador jugador) {
+        Ficha ficha = tablero.getCasilla(coordenada).getFicha();
+        if (ficha == null){
+            return false;
+        } else {
+            return ficha.getJugador() == jugador;
+        }
+    }
+
+    private Coordenada obtenerSiguienteCasillaEnDireccion(Coordenada origen, Coordenada adyacente) {
+        int filOri = origen.getFila();
+        int filAdy = adyacente.getFila();
+        int columna = origen.getColumna();
+        int filaComun = -1;
+        if (filOri == filAdy) {
+            // Las filas son iguales, entonces tomas el valor de la fila
+            filaComun = filOri;
+        }  // Las columnas son iguales, entonces tomas el valor de la columna
+
+        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(adyacente).getCoordenadasAdyacentes();
+        if (filaComun != -1){
+            for (Coordenada co: casillasAdyacentes){
+                if (co.getFila() == filaComun){
+                    return co;
+                }
+            }
+        } else {
+            for (Coordenada co: casillasAdyacentes){
+                if (co.getColumna() == columna){
+                    return co;
+                }
+            }
+        }
+
+        // Calcula la siguiente casilla en la misma dirección formada por origen y adyacente
+        // Retorna la coordenada de esa casilla o null si no es válida (fuera del tablero o no existe)
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /*public boolean hayMolinoEnPosicion(int fila, int columna, Jugador jugador) {
         // Verifica si hay un molino en la fila
         switch (fila) {
             case 0, 12 -> {
@@ -243,61 +254,8 @@ public class ReglasDelJuego {
                 }
             }
         }
-        // Verifica si hay molino en las diagonales
-        switch (fila){
-            case 0, 2, 4 ->{
-                if(columna == 0 || columna == 2 || columna == 4) {
-                    //Lado izquierdo arriba
-                    if (tablero.obtenerEstadoCasilla(0, 0) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(2, 2) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(4, 4) == EstadoCasilla.OCUPADA) {
-                        if (tablero.obtenerFicha(0, 0).getJugador() == jugador &&
-                                tablero.obtenerFicha(2, 2).getJugador() == jugador &&
-                                tablero.obtenerFicha(4, 4).getJugador() == jugador) {
-                            return true;
-                        }
-                    }
-                } else {
-                    //Lado derecho arriba
-                    if (tablero.obtenerEstadoCasilla(0, 12) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(2, 10) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(4, 8) == EstadoCasilla.OCUPADA) {
-                        if (tablero.obtenerFicha(0, 12).getJugador() == jugador &&
-                                tablero.obtenerFicha(2, 10).getJugador() == jugador &&
-                                tablero.obtenerFicha(4, 8).getJugador() == jugador) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            case 12, 10, 8 ->{
-                //Lado izquierdo abajo
-                if(columna == 0 || columna == 2 || columna == 4) {
-                    if (tablero.obtenerEstadoCasilla(12, 0) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(10, 2)== EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(8, 4) == EstadoCasilla.OCUPADA) {
-                        if (tablero.obtenerFicha(12, 0).getJugador() == jugador &&
-                                tablero.obtenerFicha(10, 2).getJugador() == jugador &&
-                                tablero.obtenerFicha(8, 4).getJugador() == jugador) {
-                            return true;
-                        }
-                    }
-                } else {
-                    //Lado derecho abajo
-                    if (tablero.obtenerEstadoCasilla(12, 12) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(10, 10) == EstadoCasilla.OCUPADA &&
-                            tablero.obtenerEstadoCasilla(8, 8) == EstadoCasilla.OCUPADA) {
-                        if (tablero.obtenerFicha(12, 12).getJugador() == jugador &&
-                                tablero.obtenerFicha(10, 10).getJugador() == jugador &&
-                                tablero.obtenerFicha(8, 8).getJugador() == jugador) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
         return false;
-    }
+    }*/
 
     public Jugador obtenerGanador(Jugador j1, Jugador j2) {
         if (j1.getFichasEnTablero() == 2)
@@ -313,15 +271,13 @@ public class ReglasDelJuego {
     }
 
     public boolean sonCasillasAdyacentes(Coordenada posFichaSelec, Coordenada nuevaPosFichaSelec) {
-        for (Coordenada adyacente : obtenerPosicionesAdyacentes(posFichaSelec)) {
-            if (adyacente.equals(nuevaPosFichaSelec))
-                return true;
-        }
-        return false;
+        Casilla casillaSelec = tablero.getCasilla(posFichaSelec);
+        ArrayList<Coordenada> coordenadas = casillaSelec.getCoordenadasAdyacentes();
+        return coordenadas.contains(nuevaPosFichaSelec);
     }
 
     public boolean fichaTieneMovimiento(Coordenada posFichaSelec) {
-        return hayMovimientosPosibles(posFichaSelec);
+        return hayMovimientosPosibles(tablero.getCasilla(posFichaSelec));
     }
 
     public boolean hayFichasParaEliminar(Jugador jugadorOponente) {
@@ -330,7 +286,7 @@ public class ReglasDelJuego {
                 if (tablero.obtenerEstadoCasilla(fila, columna) == EstadoCasilla.OCUPADA) {
                     Ficha ficha = tablero.obtenerFicha(fila, columna);
                     if (ficha.getJugador() == jugadorOponente) {
-                        if (!hayMolinoEnPosicion(fila, columna, jugadorOponente))
+                        if (!hayMolinoEnPosicion(new Coordenada(fila, columna), jugadorOponente))
                             return true;
                     }
                 }

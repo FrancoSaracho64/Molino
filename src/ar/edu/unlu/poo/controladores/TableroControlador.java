@@ -136,13 +136,13 @@ public class TableroControlador implements ControladorImpl {
     }
 
     private void colocarFicha(Jugador jugadorActual, Jugador jugadorOponente, Ficha ficha){
-        Coordenada coord = pedir_coordenada_libre();
-        tablero.colocarFicha(coord.getFila(), coord.getColumna(), ficha);
+        Coordenada coord = pedirCoordenadaLibre();
+        tablero.colocarFicha(coord, ficha);
         jugadorActual.incFichasEnTablero();
         jugadorActual.incFichasColocadas();
 
         if (jugadorActual.getFichasColocadas() >= 3) {
-            if (reglas.hayMolinoEnPosicion(coord.getFila(), coord.getColumna(), jugadorActual)) {
+            if (reglas.hayMolinoEnPosicion(coord, jugadorActual)) {
                 vista.avisoDeMolino(jugadorActual.getNombre());
                 if (reglas.hayFichasParaEliminar(jugadorOponente)){
                     eliminarFichaOponente(jugadorOponente);
@@ -160,20 +160,20 @@ public class TableroControlador implements ControladorImpl {
         Coordenada nuevaPosFichaSelec;
         if (jugadorActual.getFichasEnTablero() == 3){
             //  Movimiento de pieza a cualquier posición libre
-            posFichaSelec = pedir_coordenada_ocupada_por_jugador(jugadorActual);
-            nuevaPosFichaSelec = pedir_coordenada_libre();
+            posFichaSelec = pedirCoordenadaOcupadaPorJugador(jugadorActual);
+            nuevaPosFichaSelec = pedirCoordenadaLibre();
         } else {
             //  Movimiento de pieza a una posición adyacente
             do {
                 do {
-                    posFichaSelec = pedir_coordenada_ocupada_por_jugador(jugadorActual);
+                    posFichaSelec = pedirCoordenadaOcupadaPorJugador(jugadorActual);
                     tieneMovimiento = reglas.fichaTieneMovimiento(posFichaSelec);
                     if (!tieneMovimiento) {
                         vista.fichaSinMovimiento();
                     }
                 } while (!tieneMovimiento);
 
-                nuevaPosFichaSelec = pedir_coordenada_libre_adyacente();
+                nuevaPosFichaSelec = pedirCoordenadaLibreAdyacente();
                 sonAdyacentes = reglas.sonCasillasAdyacentes(posFichaSelec, nuevaPosFichaSelec);
                 if (!sonAdyacentes) {
                     vista.casillaNoAdyacente();
@@ -181,7 +181,7 @@ public class TableroControlador implements ControladorImpl {
             } while (!sonAdyacentes);
         }
         tablero.moverFicha(posFichaSelec, nuevaPosFichaSelec);
-        if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec.getFila(), nuevaPosFichaSelec.getColumna(), jugadorActual)) {
+        if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec, jugadorActual)) {
             vista.avisoDeMolino(jugadorActual.getNombre());
             if (reglas.hayFichasParaEliminar(jugadorOponente)){
                 eliminarFichaOponente(jugadorOponente);
@@ -191,7 +191,7 @@ public class TableroControlador implements ControladorImpl {
         }
     }
 
-    private Coordenada pedir_coordenada_libre(){
+    private Coordenada pedirCoordenadaLibre(){
         boolean valida;
         boolean ocupada;
         Coordenada coord;
@@ -213,7 +213,7 @@ public class TableroControlador implements ControladorImpl {
         return coord;
     }
 
-    private Coordenada pedir_coordenada_libre_adyacente(){
+    private Coordenada pedirCoordenadaLibreAdyacente(){
         boolean valida;
         boolean ocupada;
         Coordenada coord;
@@ -235,7 +235,7 @@ public class TableroControlador implements ControladorImpl {
         return coord;
     }
 
-    private Coordenada pedir_coordenada_ocupada_por_jugador(Jugador jugador){
+    private Coordenada pedirCoordenadaOcupadaPorJugador(Jugador jugador){
         boolean valida;
         boolean ocupada;
         boolean esDeJugador;
@@ -288,7 +288,7 @@ public class TableroControlador implements ControladorImpl {
                     vista.mostrarMensajeErrorCasilla();
                 }
             } while (!ocupada);
-            formaMolino = reglas.hayMolinoEnPosicion(coord.getFila(), coord.getColumna(), jugadorOponente);
+            formaMolino = reglas.hayMolinoEnPosicion(coord, jugadorOponente);
             if (formaMolino){
                 vista.mensajeFichaFormaMolino();
             }
@@ -330,22 +330,22 @@ public class TableroControlador implements ControladorImpl {
         char columna = (char) coordenada[1];
         switch (fila){
             case 1 -> fila = 0;
-            case 2 -> fila = 2;
-            case 3 -> fila = 4;
-            case 4 -> fila = 6;
-            case 5 -> fila = 8;
-            case 6 -> fila = 10;
-            case 7 -> fila = 12;
+            case 2 -> fila = 1;
+            case 3 -> fila = 2;
+            case 4 -> fila = 3;
+            case 5 -> fila = 4;
+            case 6 -> fila = 5;
+            case 7 -> fila = 6;
         }
         int columnaResultado;
         switch (columna){
             case 'A' -> columnaResultado = 0;
-            case 'B' -> columnaResultado = 2;
-            case 'C' -> columnaResultado = 4;
-            case 'D' -> columnaResultado = 6;
-            case 'E' -> columnaResultado = 8;
-            case 'F' -> columnaResultado = 10;
-            case 'G' -> columnaResultado = 12;
+            case 'B' -> columnaResultado = 1;
+            case 'C' -> columnaResultado = 2;
+            case 'D' -> columnaResultado = 3;
+            case 'E' -> columnaResultado = 4;
+            case 'F' -> columnaResultado = 5;
+            case 'G' -> columnaResultado = 6;
             default -> columnaResultado = -1;
         }
         return new Coordenada(fila, columnaResultado);

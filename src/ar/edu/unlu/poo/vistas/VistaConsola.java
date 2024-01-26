@@ -3,6 +3,7 @@ package ar.edu.unlu.poo.vistas;
 import ar.edu.unlu.poo.interfaces.ControladorImpl;
 import ar.edu.unlu.poo.interfaces.Observer;
 import ar.edu.unlu.poo.interfaces.VistaTableroI;
+import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
@@ -53,7 +54,7 @@ public class VistaConsola implements VistaTableroI, Observer {
         System.out.println("\n\n");
         // Muestra las letras de las columnas
         System.out.print("     ");  // Espacio inicial
-        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+        for (int columna = 0; columna < 13; columna++) {
             if ( columna!= 12) {
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(col)) + "    ");
@@ -64,7 +65,7 @@ public class VistaConsola implements VistaTableroI, Observer {
             }
         }
         System.out.println();
-        for (int fila = 0; fila < tablero.getCountFilas(); fila++) {
+        for (int fila = 0; fila < 13; fila++) {
             System.out.print(" ");
             if (fila % 2 == 0) {
                 System.out.print(" " + formatoCelda(numeroFila(fil)) + "  "); // Número de fila
@@ -73,25 +74,31 @@ public class VistaConsola implements VistaTableroI, Observer {
                 System.out.print("    ");
             }
             // Se representa el estado de la casilla
-            for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
-                String contenidoCelda = controlador.contenidoCasilla(fila, columna);
+            for (int columna = 0; columna < 13; columna++) {
+                // TODO: VOLVER A COMO ESTABA --> Descomentar y borrar la 81
+                //String contenidoCelda = controlador.contenidoCasilla(fila, columna);
+
+                String contenidoCelda = "";
+                if(fila % 2 == 0 && columna % 2 == 0){
+                    contenidoCelda = controlador.contenidoCasilla(fila/2, columna/2);
+                }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
-                        contenidoCelda = "─";
+                        contenidoCelda = "-";
                     if ((fila == 2 || fila == 10) && (columna >= 2 && columna <= 10))
-                        contenidoCelda = "─";
+                        contenidoCelda = "-";
                     if ((fila == 4 || fila == 8) && (columna >= 4 && columna <= 8))
-                        contenidoCelda = "─";
+                        contenidoCelda = "-";
                     if ((fila == 6) && ((columna == 1) || (columna == 3) || (columna == 9) || (columna == 11)))
-                        contenidoCelda = "─";
+                        contenidoCelda = "-";
                     if ((columna == 0 || columna == 12))
-                        contenidoCelda = "│";
+                        contenidoCelda = "|";
                     if ((columna == 2 || columna == 10) && (fila >= 2 && fila <= 10))
-                        contenidoCelda = "│";
+                        contenidoCelda = "|";
                     if ((columna == 4 || columna == 8) && (fila >= 4 && fila <= 8))
-                        contenidoCelda = "│";
+                        contenidoCelda = "|";
                     if ((columna == 6) && ((fila == 1) || (fila == 3) || (fila == 9) || (fila == 11)))
-                        contenidoCelda = "│";
+                        contenidoCelda = "|";
                 }
                 System.out.print(" " + formatoCelda(contenidoCelda) + " ");
             }
@@ -106,7 +113,7 @@ public class VistaConsola implements VistaTableroI, Observer {
         }
         System.out.print("     ");
 
-        for (int columna = 0; columna < tablero.getCountColumnas(); columna++) {
+        for (int columna = 0; columna < 13; columna++) {
             if(columna != 12){
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(colfin)) + "    ");
