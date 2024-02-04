@@ -11,6 +11,7 @@ import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 import java.util.ArrayList;
 
 public class TableroControlador implements ControladorImpl {
+    private static final int CANTIDAD_FICHAS = 9;
     private static final String CASILLA_DISPONIBLE = "#";
     private static final String CASILLA_INVALIDA = "";
     private static final String JUGADOR_1 = "X";
@@ -114,11 +115,11 @@ public class TableroControlador implements ControladorImpl {
         boolean juego_activo = true;
         vista.mostrarTurno(jugadorActual.getNombre());
         //  Si el jugador todavía no colocó 9 fichas, procede a colocar fichas.
-        if (jugadorActual.getFichasColocadas() < 9) {
+        if (jugadorActual.getFichasColocadas() < CANTIDAD_FICHAS) {
             colocarFicha(jugadorActual, oponente, fichas.get(jugadorActual.getFichasColocadas()));
         } else {
             //  Ya se han colocado las 9 fichas. Empiezan a mover las fichas.
-            juego_activo = jugadorActual.getFichasEnTablero() > 2 && (jugadorActual.getFichasEnTablero() != 3 && reglas.jugadorTieneMovimientos(jugadorActual));
+            juego_activo = jugadorActual.getFichasEnTablero() > 2 && reglas.jugadorTieneMovimientos(jugadorActual);
             if (juego_activo){
                 moverFicha(jugadorActual, oponente);
             }
@@ -141,7 +142,7 @@ public class TableroControlador implements ControladorImpl {
         jugadorActual.incFichasEnTablero();
         jugadorActual.incFichasColocadas();
 
-        if (jugadorActual.getFichasColocadas() >= 3) {
+        if (jugadorActual.getFichasEnTablero() >= 3) {
             if (reglas.hayMolinoEnPosicion(coord, jugadorActual)) {
                 vista.avisoDeMolino(jugadorActual.getNombre());
                 if (reglas.hayFichasParaEliminar(jugadorOponente)){

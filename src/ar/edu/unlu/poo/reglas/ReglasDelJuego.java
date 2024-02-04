@@ -59,29 +59,6 @@ public class ReglasDelJuego {
         return false;
     }
 
-
-
-
-
-
-
-
-
-
-    public boolean hayMolinoEnPosicion(Coordenada coordenada, Jugador jugador) {
-        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(coordenada).getCoordenadasAdyacentes();
-        // Verificar en cada dirección si se forma un molino
-        for (Coordenada adyacente : casillasAdyacentes) {
-            if (esFichaDelJugador(adyacente, jugador)) {
-                Coordenada siguienteAdyacente = obtenerSiguienteCasillaEnDireccion(coordenada, adyacente);
-                if (siguienteAdyacente != null && esFichaDelJugador(siguienteAdyacente, jugador)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private boolean esFichaDelJugador(Coordenada coordenada, Jugador jugador) {
         Ficha ficha = tablero.getCasilla(coordenada).getFicha();
         if (ficha == null){
@@ -115,21 +92,46 @@ public class ReglasDelJuego {
                 }
             }
         }
-        // Calcula la siguiente casilla en la misma dirección formada por origen y adyacente
         // Retorna la coordenada de esa casilla o null si no es válida (fuera del tablero o no existe)
         return null;
     }
 
+    public boolean hayMolinoEnPosicion(Coordenada coordenada, Jugador jugador) {
+        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(coordenada).getCoordenadasAdyacentes();
+        // Verificar en cada dirección si se forma un molino
+        for (Coordenada adyacente : casillasAdyacentes) {
+            if (esFichaDelJugador(adyacente, jugador)) {
+                // Busca la siguiente casilla en la misma dirección formada por la coordenada y su adyacente
+                Coordenada siguienteAdyacente = obtenerSiguienteCasillaEnDireccion(coordenada, adyacente);
+                if (siguienteAdyacente != null && esFichaDelJugador(siguienteAdyacente, jugador)) {
+                    return true; // Se encontró un molino en una dirección
+                }
+                // Buscar en la dirección opuesta
+                Coordenada adyacenteOpuesta = obtenerCasillaOpuesta(coordenada, adyacente);
+                if (adyacenteOpuesta != null && esFichaDelJugador(adyacenteOpuesta, jugador)) {
+                    return true; // Se encontró un molino en la dirección opuesta
+                }
+            }
+        }
+        return false;
+    }
 
+    private Coordenada obtenerCasillaOpuesta(Coordenada origen, Coordenada adyacente) {
+        // Calcula la dirección opuesta basándose en la diferencia entre origen y adyacente
+        int deltaFil = origen.getFila() - adyacente.getFila();
+        int deltaCol = origen.getColumna() - adyacente.getColumna();
 
+        // Calcula la coordenada opuesta usando la dirección opuesta
+        int filaOpuesta = origen.getFila() + deltaFil;
+        int columnaOpuesta = origen.getColumna() + deltaCol;
 
-
-
-
-
-
-
-
+        // Verifica si la coordenada opuesta es válida dentro del tablero
+        if (filaOpuesta >= 0 && filaOpuesta < tablero.getCountFilas() &&
+                columnaOpuesta >= 0 && columnaOpuesta < tablero.getCountColumnas()) {
+            return new Coordenada(filaOpuesta, columnaOpuesta);
+        }
+        return null;
+    }
 
     public Jugador obtenerGanador(Jugador j1, Jugador j2) {
         if (j1.getFichasEnTablero() == 2)

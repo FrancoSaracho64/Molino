@@ -65,14 +65,16 @@ public class Tablero implements Observable {
         casillas[1][3].agregarAdyacentes(Arrays.asList(casillas[1][1], casillas[0][3], casillas[2][3], casillas[1][5]));
         casillas[1][5].agregarAdyacentes(Arrays.asList(casillas[1][3], casillas[3][5]));
         casillas[2][2].agregarAdyacentes(Arrays.asList(casillas[2][3], casillas[3][2]));
+        casillas[2][3].agregarAdyacentes(Arrays.asList(casillas[2][2], casillas[1][3], casillas[2][4]));
         casillas[2][4].agregarAdyacentes(Arrays.asList(casillas[2][3], casillas[3][4]));
-        casillas[3][0].agregarAdyacentes(Arrays.asList(casillas[0][0], casillas[3][1], casillas[0][6]));
+        casillas[3][0].agregarAdyacentes(Arrays.asList(casillas[0][0], casillas[3][1], casillas[6][0]));
         casillas[3][1].agregarAdyacentes(Arrays.asList(casillas[3][0], casillas[1][1], casillas[5][1], casillas[3][2]));
         casillas[3][2].agregarAdyacentes(Arrays.asList(casillas[3][1], casillas[2][2], casillas[4][2]));
         casillas[3][4].agregarAdyacentes(Arrays.asList(casillas[2][4], casillas[4][4], casillas[3][5]));
         casillas[3][5].agregarAdyacentes(Arrays.asList(casillas[3][4], casillas[1][5], casillas[5][5], casillas[3][6]));
         casillas[3][6].agregarAdyacentes(Arrays.asList(casillas[3][5], casillas[0][6], casillas[6][6]));
         casillas[4][2].agregarAdyacentes(Arrays.asList(casillas[3][2], casillas[4][3]));
+        casillas[4][3].agregarAdyacentes(Arrays.asList(casillas[4][2], casillas[4][4], casillas[5][3]));
         casillas[4][4].agregarAdyacentes(Arrays.asList(casillas[4][3], casillas[3][4]));
         casillas[5][1].agregarAdyacentes(Arrays.asList(casillas[3][1], casillas[5][3]));
         casillas[5][3].agregarAdyacentes(Arrays.asList(casillas[5][1], casillas[4][3], casillas[6][3], casillas[5][5]));
