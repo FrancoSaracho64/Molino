@@ -6,6 +6,7 @@ import ar.edu.unlu.poo.interfaces.IObserver;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -160,7 +161,11 @@ public class Tablero extends ObservableRemoto implements IObservable, Serializab
     @Override
     public void notificarObservadores() {
         for (IObserver observador : observadores) {
-            observador.actualizar();
+            try {
+                observador.actualizar();
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

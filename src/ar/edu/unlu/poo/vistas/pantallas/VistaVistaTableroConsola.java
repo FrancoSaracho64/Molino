@@ -36,7 +36,7 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void mostrarTablero(Tablero taba) {
+    public void mostrarTablero(Tablero taba) throws RemoteException {
         StringBuilder tablero = new StringBuilder();
         String letras = "          A        B        C        D        E        F        G\n";
         tablero.append("\n\n");
@@ -226,7 +226,7 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void actualizar() {
+    public void actualizar() throws RemoteException {
         textArea.setText("");
         mostrarTablero(controlador.obtenerTablero());
     }
