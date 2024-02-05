@@ -172,8 +172,8 @@ public class Controlador implements IControlador, IControladorRemoto {
     }
 
     @Override
-    public String contenidoCasilla(int fila, int columna) {
-        return null;
+    public String contenidoCasilla(Coordenada coordenada) throws RemoteException {
+        return modelo.contenidoCasilla(coordenada);
     }
 
     @Override

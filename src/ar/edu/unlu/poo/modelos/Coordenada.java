@@ -1,6 +1,8 @@
 package ar.edu.unlu.poo.modelos;
 
-public class Coordenada {
+import java.io.Serializable;
+
+public class Coordenada implements Serializable {
     private final int fila;
     private final int columna;
 

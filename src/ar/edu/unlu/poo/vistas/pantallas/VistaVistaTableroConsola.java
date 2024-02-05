@@ -3,6 +3,7 @@ package ar.edu.unlu.poo.vistas.pantallas;
 import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.interfaces.IObserver;
 import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
@@ -48,7 +49,7 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
                 tablero.append("   ");
             }
             for (int columna = 0; columna < 13; columna++) {
-                String contenidoCelda = controlador.contenidoCasilla(fila, columna);
+                String contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila, columna));
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
                         contenidoCelda = "-";

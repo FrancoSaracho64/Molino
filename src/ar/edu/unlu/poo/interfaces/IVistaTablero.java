@@ -6,7 +6,7 @@ import ar.edu.unlu.poo.modelos.Tablero;
 import java.rmi.RemoteException;
 
 public interface IVistaTablero {
-    void mostrarTablero(Tablero tablero);
+    void mostrarTablero(Tablero tablero) throws RemoteException;
     void mostrarTurno(String mensaje);
     void mostrarMensajeErrorCasilla();
     void avisoDeMolino(String nombreJugador);

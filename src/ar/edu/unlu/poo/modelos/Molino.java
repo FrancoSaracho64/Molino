@@ -37,11 +37,12 @@ public class Molino extends ObservableRemoto implements IMolino {
         this.reglas = new ReglasDelJuego(tablero);
     }
 
-    public String contenidoCasilla(int fila, int columna) {
+    @Override
+    public String contenidoCasilla(Coordenada coordenada) {
         String contenido;
-        Ficha ficha = tablero.obtenerFicha(fila, columna);
+        Ficha ficha = tablero.obtenerFicha(coordenada.getFila(), coordenada.getColumna());
         if (ficha == null) {
-            if (tablero.obtenerEstadoCasilla(fila, columna) != EstadoCasilla.INVALIDA) {
+            if (tablero.obtenerEstadoCasilla(coordenada.getFila(), coordenada.getColumna()) != EstadoCasilla.INVALIDA) {
                 contenido = CASILLA_DISPONIBLE;
             } else {
                 contenido = CASILLA_INVALIDA;

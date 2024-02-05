@@ -3,6 +3,7 @@ package ar.edu.unlu.poo.vistas;
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IObserver;
 import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
@@ -49,7 +50,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void mostrarTablero(Tablero tablero) {
+    public void mostrarTablero(Tablero tablero) throws RemoteException {
         int col = 0;
         int fil = 0;
         int filfin = 0;
@@ -80,7 +81,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
             for (int columna = 0; columna < 13; columna++) {
                 String contenidoCelda = "";
                 if (fila % 2 == 0 && columna % 2 == 0) {
-                    contenidoCelda = controlador.contenidoCasilla(fila / 2, columna / 2);
+                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila/2, columna/2));
                 }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -236,7 +237,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void actualizar() {
+    public void actualizar() throws RemoteException {
         limpiarConsola();
         mostrarTablero(controlador.obtenerTablero());
     }

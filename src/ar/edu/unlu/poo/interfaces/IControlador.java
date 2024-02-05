@@ -1,5 +1,6 @@
 package ar.edu.unlu.poo.interfaces;
 
+import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
@@ -7,7 +8,7 @@ import java.rmi.RemoteException;
 
 public interface IControlador {
     void comenzarJuego() throws RemoteException;
-    String contenidoCasilla(int fila, int columna);
+    String contenidoCasilla(Coordenada coordenada) throws RemoteException;
     Tablero obtenerTablero();
     void agregarObserver(IVistaTablero vista);
     void enviarMovimiento();

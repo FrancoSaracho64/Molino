@@ -2,10 +2,11 @@ package ar.edu.unlu.poo.modelos;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Casilla {
+public class Casilla implements Serializable {
     private final Coordenada coordenada;
     private Ficha ficha;
     private EstadoCasilla estado;

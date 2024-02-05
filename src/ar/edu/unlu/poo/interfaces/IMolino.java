@@ -17,6 +17,7 @@ public interface IMolino extends IObservableRemoto {
     Jugador obtenerJ1() throws RemoteException;
     Jugador obtenerJ2() throws RemoteException;
     Tablero getTablero() throws RemoteException;
+    String contenidoCasilla(Coordenada coordenada) throws RemoteException;
     void colocarFicha(Coordenada coordenada, Jugador jugadorActual, Jugador jugadorOponente, Ficha ficha) throws RemoteException;
     void quitarFicha(Coordenada coordenada) throws RemoteException;
     void moverFicha(Coordenada antCoord, Coordenada nueCoord) throws RemoteException;
