@@ -1,5 +1,5 @@
 package ar.edu.unlu.poo.interfaces;
 
-public interface Observer {
+public interface IObserver {
     void actualizar();
 }

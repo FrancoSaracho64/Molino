@@ -1,13 +1,11 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
-import ar.edu.unlu.poo.controladores.TableroControlador;
-import ar.edu.unlu.poo.interfaces.VistaTableroI;
+import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.persistencia.Persistencia;
-import ar.edu.unlu.poo.vistas.VistaConsola;
 
 import javax.swing.*;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +27,7 @@ public class MenuPrincipal {
     private ArrayList<Jugador> jugadoresActivos;
     private ArrayList<Jugador> jugadoresRegistrados;
 
-    public MenuPrincipal() {
+    public MenuPrincipal(Controlador controlador) {
         frame = new JFrame();
         frame.setContentPane(panel1);
         frame.setTitle("Juego del Molino - Menú principal");
@@ -40,12 +38,19 @@ public class MenuPrincipal {
         jugadoresRegistrados = Persistencia.cargarJugadoresHistorico();
 
         iniciarPartidaButton.addActionListener(e -> {
+            try {
+                controlador.agregarJugador(jugadoresActivos.get(0));
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            /*
             limpiarPantalla();
             println("\n\nSeleccione con los RadioButton como quiere ejecutar el juego.\nLuego presione en 'Comenzar juego'.");
             btnSiguiente.setVisible(true);
             radioConsola.setVisible(true);
             radioConsolaGrafica.setVisible(true);
-            iniciarPartidaButton.setVisible(false);
+            iniciarPartidaButton.setVisible(false); */
         });
 
         crearNuevoJugadorButton.addActionListener(e -> {
@@ -56,7 +61,7 @@ public class MenuPrincipal {
             Jugador jugador = new Jugador(nombre);
             jugadoresActivos.add(jugador);
             jugadoresRegistrados.add(jugador);
-            if (jugadoresActivos.size() == 2) {
+            if (jugadoresActivos.size() == 1) {
                 crearNuevoJugadorButton.setVisible(false);
                 seleccionarJugadorPorIDButton.setVisible(false);
                 iniciarPartidaButton.setVisible(true);
@@ -94,7 +99,7 @@ public class MenuPrincipal {
 
                 }
             }
-            if (jugadoresActivos.size() == 2) {
+            if (jugadoresActivos.size() == 1) {
                 crearNuevoJugadorButton.setVisible(false);
                 seleccionarJugadorPorIDButton.setVisible(false);
                 iniciarPartidaButton.setVisible(true);
@@ -165,6 +170,7 @@ public class MenuPrincipal {
             }
         });
 
+        /*
         btnSiguiente.addActionListener(e -> {
             editText.setText("");
             Tablero tablero = new Tablero();
@@ -194,16 +200,24 @@ public class MenuPrincipal {
             switch (opcion) {
                 case 1 -> {
                     println("Ejecutando juego por consola...");
-                    VistaTableroI vista = new VistaConsola(controlador);
+                    IVistaTablero vista = new VistaConsola(controlador);
                     controlador.agregarVista(vista);
-                    vista.iniciarJuego();
+                    try {
+                        vista.iniciarJuego();
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
                 case 2 -> {
                     println("Ejecutando juego por Consola/Interfaz grafica");
 
-                    VistaTableroI vista = new VistaVistaTableroConsola(controlador);
+                    IVistaTablero vista = new VistaVistaTableroConsola(controlador);
                     controlador.agregarVista(vista);
-                    vista.iniciarJuego();
+                    try {
+                        vista.iniciarJuego();
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
                 case 3 -> {
                     println("Interfaz grafica");
@@ -212,6 +226,8 @@ public class MenuPrincipal {
             }
 
         });
+
+         */
         println("\t\t¡Bienvenid@ al Juego del Molino!\n\n");
         mostrar_menu();
     }

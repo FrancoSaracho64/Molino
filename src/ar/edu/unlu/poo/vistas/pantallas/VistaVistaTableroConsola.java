@@ -1,19 +1,21 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
-import ar.edu.unlu.poo.interfaces.ControladorImpl;
-import ar.edu.unlu.poo.interfaces.Observer;
-import ar.edu.unlu.poo.interfaces.VistaTableroI;
+import ar.edu.unlu.poo.interfaces.IControlador;
+import ar.edu.unlu.poo.interfaces.IObserver;
+import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 import javax.swing.*;
+import java.rmi.RemoteException;
 
-public class VistaVistaTableroConsola implements VistaTableroI, Observer {
+public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
     private final JFrame frame1;
     private JPanel paneJ;
-    private ControladorImpl controlador;
+    private IControlador controlador;
     private JTextArea textArea;
 
-    public VistaVistaTableroConsola(ControladorImpl controlador) {
+    public VistaVistaTableroConsola(IControlador controlador) {
             this.controlador = controlador;
             this.controlador.agregarObserver(this);
             frame1 = new JFrame();
@@ -148,7 +150,7 @@ public class VistaVistaTableroConsola implements VistaTableroI, Observer {
     }
 
     @Override
-    public void iniciarJuego() {
+    public void iniciarJuego() throws RemoteException {
         controlador.comenzarJuego();
     }
 
@@ -210,6 +212,11 @@ public class VistaVistaTableroConsola implements VistaTableroI, Observer {
     @Override
     public void jugadorSinFichas() {
         println("¡Te quedaste sin fichas suficientes! :/\n");
+    }
+
+    @Override
+    public void mostrarJugadorConectado(Jugador jugador) {
+
     }
 
     @Override

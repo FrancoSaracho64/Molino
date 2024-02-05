@@ -1,9 +1,10 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
-import ar.edu.unlu.poo.interfaces.VistaTableroI;
+import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
-public class VistaVistaTableroInterfazGrafica implements VistaTableroI {
+public class VistaVistaTableroInterfazGrafica implements IVistaTablero {
     @Override
     public void mostrarTablero(Tablero tablero) {
 
@@ -101,6 +102,11 @@ public class VistaVistaTableroInterfazGrafica implements VistaTableroI {
 
     @Override
     public void jugadorSinFichas() {
+
+    }
+
+    @Override
+    public void mostrarJugadorConectado(Jugador jugador) {
 
     }
 }

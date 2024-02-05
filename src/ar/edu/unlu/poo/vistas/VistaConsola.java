@@ -1,18 +1,23 @@
 package ar.edu.unlu.poo.vistas;
 
-import ar.edu.unlu.poo.interfaces.ControladorImpl;
-import ar.edu.unlu.poo.interfaces.Observer;
-import ar.edu.unlu.poo.interfaces.VistaTableroI;
-import ar.edu.unlu.poo.modelos.Coordenada;
+import ar.edu.unlu.poo.controladores.Controlador;
+import ar.edu.unlu.poo.interfaces.IControlador;
+import ar.edu.unlu.poo.interfaces.IObserver;
+import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.poo.vistas.pantallas.MenuPrincipal;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
-public class VistaConsola implements VistaTableroI, Observer {
-    private ControladorImpl controlador;
+import java.rmi.RemoteException;
 
-    public VistaConsola(ControladorImpl controlador){
+public class VistaConsola implements IVistaTablero, IObserver {
+    private Controlador controlador;
+
+    public VistaConsola(Controlador controlador){
         this.controlador = controlador;
-        this.controlador.agregarObserver(this);
+        this.controlador.setVista(this);
+        //this.controlador.agregarObserver(this);
     }
 
     private void limpiarConsola() {
@@ -157,7 +162,11 @@ public class VistaConsola implements VistaTableroI, Observer {
 
     @Override
     public void iniciarJuego() {
-        controlador.comenzarJuego();
+        try {
+            controlador.comenzarJuego();
+        } catch (RemoteException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -219,6 +228,11 @@ public class VistaConsola implements VistaTableroI, Observer {
     @Override
     public void jugadorSinFichas() {
         System.out.println("¡Te quedaste sin fichas suficientes! :/\n");
+    }
+
+    @Override
+    public void mostrarJugadorConectado(Jugador jugador) {
+        System.out.println("Se ha conectado: " + jugador.getNombre());
     }
 
     @Override

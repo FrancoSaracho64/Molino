@@ -1,17 +1,18 @@
 package ar.edu.unlu.poo.modelos;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.interfaces.Observable;
-import ar.edu.unlu.poo.interfaces.Observer;
+import ar.edu.unlu.poo.interfaces.IObservable;
+import ar.edu.unlu.poo.interfaces.IObserver;
+import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Tablero implements Observable {
+public class Tablero extends ObservableRemoto implements IObservable {
     private static final int CANT_COLUMNAS = 7;
     private static final int CANT_FILAS = 7;
-    private List<Observer> observadores = new ArrayList<>();
+    private List<IObserver> observadores = new ArrayList<>();
     private final Casilla[][] casillas;
 
     public Tablero() {
@@ -146,18 +147,18 @@ public class Tablero implements Observable {
     }
 
     @Override
-    public void agregarObservador(Observer observador) {
+    public void agregarObservador(IObserver observador) {
         observadores.add(observador);
     }
 
     @Override
-    public void quitarObservador(Observer observador) {
+    public void quitarObservador(IObserver observador) {
         observadores.remove(observador);
     }
 
     @Override
     public void notificarObservadores() {
-        for (Observer observador : observadores) {
+        for (IObserver observador : observadores) {
             observador.actualizar();
         }
     }

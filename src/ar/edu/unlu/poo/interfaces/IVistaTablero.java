@@ -1,15 +1,18 @@
 package ar.edu.unlu.poo.interfaces;
 
+import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
-public interface VistaTableroI {
+import java.rmi.RemoteException;
+
+public interface IVistaTablero {
     void mostrarTablero(Tablero tablero);
     void mostrarTurno(String mensaje);
     void mostrarMensajeErrorCasilla();
     void avisoDeMolino(String nombreJugador);
     Object[] pedirCasilla();
     void fichaAEliminar();
-    void iniciarJuego();
+    void iniciarJuego() throws RemoteException;
     void mostrarGanador(String nombreJugador);
     void juegoTerminado();
     void fichaSinMovimiento();
@@ -23,4 +26,5 @@ public interface VistaTableroI {
     void avisoNoHayFichasParaEliminarDelOponente();
     void jugadorSinMovimientos();
     void jugadorSinFichas();
+    void mostrarJugadorConectado(Jugador jugador);
 }
