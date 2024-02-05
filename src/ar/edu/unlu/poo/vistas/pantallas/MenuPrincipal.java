@@ -1,6 +1,7 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
+import ar.edu.unlu.poo.interfaces.IVistaTablero;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.persistencia.Persistencia;
 
@@ -27,7 +28,7 @@ public class MenuPrincipal {
     private ArrayList<Jugador> jugadoresActivos;
     private ArrayList<Jugador> jugadoresRegistrados;
 
-    public MenuPrincipal(Controlador controlador) {
+    public MenuPrincipal(IVistaTablero vista, Controlador controlador) {
         frame = new JFrame();
         frame.setContentPane(panel1);
         frame.setTitle("Juego del Molino - Menú principal");
@@ -40,6 +41,7 @@ public class MenuPrincipal {
         iniciarPartidaButton.addActionListener(e -> {
             try {
                 controlador.agregarJugador(jugadoresActivos.get(0));
+                vista.iniciarJuego();
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }
@@ -96,7 +98,6 @@ public class MenuPrincipal {
                             break;
                         }
                     }
-
                 }
             }
             if (jugadoresActivos.size() == 1) {

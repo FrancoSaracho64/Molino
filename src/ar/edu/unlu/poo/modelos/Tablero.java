@@ -5,11 +5,12 @@ import ar.edu.unlu.poo.interfaces.IObservable;
 import ar.edu.unlu.poo.interfaces.IObserver;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Tablero extends ObservableRemoto implements IObservable {
+public class Tablero extends ObservableRemoto implements IObservable, Serializable {
     private static final int CANT_COLUMNAS = 7;
     private static final int CANT_FILAS = 7;
     private List<IObserver> observadores = new ArrayList<>();

@@ -1,12 +1,10 @@
 package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
-import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.interfaces.IObserver;
 import ar.edu.unlu.poo.interfaces.IVistaTablero;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
-import ar.edu.unlu.poo.vistas.pantallas.MenuPrincipal;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
 import java.rmi.RemoteException;
@@ -14,7 +12,7 @@ import java.rmi.RemoteException;
 public class VistaConsola implements IVistaTablero, IObserver {
     private Controlador controlador;
 
-    public VistaConsola(Controlador controlador){
+    public VistaConsola(Controlador controlador) {
         this.controlador = controlador;
         this.controlador.setVista(this);
         //this.controlador.agregarObserver(this);
@@ -38,15 +36,15 @@ public class VistaConsola implements IVistaTablero, IObserver {
         }
     }
 
-    private String letraColumna (int columna){
+    private String letraColumna(int columna) {
         return String.valueOf((char) ('A' + columna));
     }
 
-    private String numeroFila (int fila){
+    private String numeroFila(int fila) {
         return String.valueOf(fila + 1);
     }
 
-    private String formatoCelda (String contenido){
+    private String formatoCelda(String contenido) {
         return String.format("%1s", contenido);
     }
 
@@ -60,7 +58,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
         // Muestra las letras de las columnas
         System.out.print("     ");  // Espacio inicial
         for (int columna = 0; columna < 13; columna++) {
-            if ( columna!= 12) {
+            if (columna != 12) {
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(col)) + "    ");
                     col++;
@@ -80,12 +78,9 @@ public class VistaConsola implements IVistaTablero, IObserver {
             }
             // Se representa el estado de la casilla
             for (int columna = 0; columna < 13; columna++) {
-                // TODO: VOLVER A COMO ESTABA --> Descomentar y borrar la 81
-                //String contenidoCelda = controlador.contenidoCasilla(fila, columna);
-
                 String contenidoCelda = "";
-                if(fila % 2 == 0 && columna % 2 == 0){
-                    contenidoCelda = controlador.contenidoCasilla(fila/2, columna/2);
+                if (fila % 2 == 0 && columna % 2 == 0) {
+                    contenidoCelda = controlador.contenidoCasilla(fila / 2, columna / 2);
                 }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -119,7 +114,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
         System.out.print("     ");
 
         for (int columna = 0; columna < 13; columna++) {
-            if(columna != 12){
+            if (columna != 12) {
                 if (columna % 2 == 0) {
                     System.out.print(" " + formatoCelda(letraColumna(colfin)) + "    ");
                     colfin++;
@@ -164,7 +159,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
     public void iniciarJuego() {
         try {
             controlador.comenzarJuego();
-        } catch (RemoteException e){
+        } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
@@ -197,7 +192,7 @@ public class VistaConsola implements IVistaTablero, IObserver {
 
     @Override
     public void mostrarEmpate(String nombreJ1, String nombreJ2) {
-        System.out.println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 +"!");
+        System.out.println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 + "!");
     }
 
     @Override

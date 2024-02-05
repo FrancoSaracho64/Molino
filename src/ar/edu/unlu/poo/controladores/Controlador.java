@@ -209,7 +209,7 @@ public class Controlador implements IControlador, IControladorRemoto {
     @Override
     public void agregarJugador(Jugador jugador) throws RemoteException {
         this.jugador = jugador;
-        this.modelo.conectarJugador(jugador.getNombre());
+        this.modelo.conectarJugador(jugador);
         this.vista.mostrarJugadorConectado(jugador);
     }
 

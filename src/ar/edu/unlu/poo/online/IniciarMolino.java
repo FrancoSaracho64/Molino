@@ -55,13 +55,8 @@ public class IniciarMolino {
 
         try {
             cliente.iniciar(controlador);
-            new MenuPrincipal(controlador);
-            vista.iniciarJuego();
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RMIMVCException e) {
-            // TODO Auto-generated catch block
+            new MenuPrincipal(vista, controlador);
+        } catch (RemoteException | RMIMVCException e) {
             e.printStackTrace();
         }
     }

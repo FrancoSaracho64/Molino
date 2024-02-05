@@ -31,12 +31,11 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     }*/
 
-
-    public Molino(){
+    public Molino() {
+        this.jugadores = new ArrayList<>();
         this.tablero = new Tablero();
         this.reglas = new ReglasDelJuego(tablero);
     }
-
 
     public String contenidoCasilla(int fila, int columna) {
         String contenido;
@@ -65,7 +64,7 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
-    public void quitarFicha(Coordenada coordenada){
+    public void quitarFicha(Coordenada coordenada) {
         tablero.quitarFicha(true, coordenada.getFila(), coordenada.getColumna());
     }
 
@@ -98,13 +97,13 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
-    public Jugador conectarJugador(String nombre) throws RemoteException {
-        return null;
+    public void conectarJugador(Jugador jugador) throws RemoteException {
+        jugadores.add(jugador);
     }
 
     @Override
-    public void desconectarJugador(String nombre) throws RemoteException {
-
+    public void desconectarJugador(Jugador jugador) throws RemoteException {
+        jugadores.remove(jugador);
     }
 
     @Override

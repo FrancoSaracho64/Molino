@@ -11,8 +11,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public interface IMolino extends IObservableRemoto {
-    Jugador conectarJugador(String nombre) throws RemoteException;
-    void desconectarJugador(String nombre) throws RemoteException;
+    void conectarJugador(Jugador jugador) throws RemoteException;
+    void desconectarJugador(Jugador jugador) throws RemoteException;
     ArrayList<Jugador> getJugadores() throws RemoteException;
     Jugador obtenerJ1() throws RemoteException;
     Jugador obtenerJ2() throws RemoteException;

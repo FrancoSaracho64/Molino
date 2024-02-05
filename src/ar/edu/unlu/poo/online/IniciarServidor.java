@@ -5,7 +5,7 @@ import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.servidor.Servidor;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
@@ -32,11 +32,7 @@ public class IniciarServidor {
         Servidor servidor = new Servidor(ip, Integer.parseInt(port));
         try {
             servidor.iniciar(modelo);
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RMIMVCException e) {
-            // TODO Auto-generated catch block
+        } catch (RemoteException | RMIMVCException e) {
             e.printStackTrace();
         }
     }
