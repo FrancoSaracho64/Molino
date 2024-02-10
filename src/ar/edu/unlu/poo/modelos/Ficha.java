@@ -1,6 +1,8 @@
 package ar.edu.unlu.poo.modelos;
 
-public class Ficha {
+import java.io.Serializable;
+
+public class Ficha implements Serializable {
     private final Jugador jugador;
 
     public Ficha(Jugador jugador) {
