@@ -31,6 +31,7 @@ public class Controlador implements IControlador, IControladorRemoto {
     @Override
     public void comenzarJuego() throws RemoteException {
         // Inicializaciones para comenzar el juego
+        this.reglas = new ReglasDelJuego(modelo.getTablero());
         Jugador j1 = modelo.obtenerJ1();
         Jugador j2 = modelo.obtenerJ2();
         j1.resetearFichasColocadas();
