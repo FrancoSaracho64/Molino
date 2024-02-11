@@ -2,8 +2,10 @@ package ar.edu.unlu.poo.modelos;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Jugador implements Serializable {
+    private ArrayList<Ficha> fichas;
     private static Integer id_jugador = 0;
     private final Integer id;
     private final String nombre;
@@ -23,10 +25,23 @@ public class Jugador implements Serializable {
         this.derrotas = 0;
         this.fichasColocadas = 0;
         this.fichasEnTablero = 0;
+        this.fichas = new ArrayList<>();
     }
 
     public static void actualizarUltimoId(ArrayList<Jugador> jugadores) {
         id_jugador = jugadores.size();
+    }
+
+    public ArrayList<Ficha> getFichas() {
+        return fichas;
+    }
+
+    public Ficha getFichaParaColocar() {
+        return fichas.get(fichasColocadas);
+    }
+
+    public void setFichas(ArrayList<Ficha> fichas){
+        this.fichas = fichas;
     }
 
     public int getFichasEnTablero() {
@@ -99,5 +114,18 @@ public class Jugador implements Serializable {
             "\n     Victorias: " + victorias +
             "\n     Empates: " + empates +
             "\n     Derrotas: " + derrotas;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Jugador jugador = (Jugador) o;
+        return id.equals(jugador.id) && nombre.equals(jugador.nombre);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, nombre);
     }
 }

@@ -5,14 +5,14 @@ import ar.edu.unlu.poo.modelos.Tablero;
 
 import java.rmi.RemoteException;
 
-public interface IVistaTablero {
+public interface IVista {
+    void iniciar();
     void mostrarTablero(Tablero tablero) throws RemoteException;
     void mostrarTurno(String mensaje);
     void mostrarMensajeErrorCasilla();
     void avisoDeMolino(String nombreJugador);
     Object[] pedirCasilla();
     void fichaAEliminar();
-    void iniciarJuego() throws RemoteException;
     void mostrarGanador(String nombreJugador);
     void juegoTerminado();
     void fichaSinMovimiento();
@@ -26,5 +26,8 @@ public interface IVistaTablero {
     void avisoNoHayFichasParaEliminarDelOponente();
     void jugadorSinMovimientos();
     void jugadorSinFichas();
-    void mostrarJugadorConectado(Jugador jugador);
+    void mostrarJugadorConectado();
+    void mostrarTurnoActual(Jugador jugadorActual);
+    void mostrarMensajeError(String mensaje);
+    void actualizar() throws RemoteException;
 }

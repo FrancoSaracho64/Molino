@@ -1,10 +1,17 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
-import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
-public class VistaVistaTableroInterfazGrafica implements IVistaTablero {
+import java.rmi.RemoteException;
+
+public class VistaTableroInterfazGrafica implements IVista {
+    @Override
+    public void iniciar() {
+
+    }
+
     @Override
     public void mostrarTablero(Tablero tablero) {
 
@@ -32,11 +39,6 @@ public class VistaVistaTableroInterfazGrafica implements IVistaTablero {
 
     @Override
     public void fichaAEliminar() {
-
-    }
-
-    @Override
-    public void iniciarJuego() {
 
     }
 
@@ -106,7 +108,22 @@ public class VistaVistaTableroInterfazGrafica implements IVistaTablero {
     }
 
     @Override
-    public void mostrarJugadorConectado(Jugador jugador) {
+    public void mostrarJugadorConectado() {
+
+    }
+
+    @Override
+    public void mostrarTurnoActual(Jugador jugadorActual) {
+
+    }
+
+    @Override
+    public void mostrarMensajeError(String mensaje) {
+
+    }
+
+    @Override
+    public void actualizar() throws RemoteException {
 
     }
 }

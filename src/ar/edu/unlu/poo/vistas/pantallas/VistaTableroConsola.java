@@ -1,38 +1,54 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
-import ar.edu.unlu.poo.interfaces.IControlador;
-import ar.edu.unlu.poo.interfaces.IObserver;
-import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.controladores.Controlador;
+import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 
-public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
+public class VistaTableroConsola implements IVista {
     private final JFrame frame1;
     private JPanel paneJ;
-    private IControlador controlador;
+    private Controlador controlador;
     private JTextArea textArea;
+    private JButton button;
 
-    public VistaVistaTableroConsola(IControlador controlador) {
-            this.controlador = controlador;
-            this.controlador.agregarObserver(this);
-            frame1 = new JFrame();
-            frame1.setContentPane(paneJ);
-            frame1.setTitle("Juego del Molino - Nueve hombres de Morris");
-            frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame1.setSize(600, 800);
-            frame1.setVisible(true);
-        }
+    public VistaTableroConsola(Controlador controlador) {
+        this.controlador = controlador;
+        this.controlador.setVista(this);
 
-    private String numeroFila (int fila){
+        frame1 = new JFrame();
+        frame1.setContentPane(paneJ);
+        frame1.setTitle("Juego del Molino - Nueve hombres de Morris");
+        frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame1.setSize(600, 800);
+        frame1.setVisible(true);
+
+        //Eventos
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controlador.realizarAccion();
+            }
+        });
+    }
+
+    private String numeroFila(int fila) {
         return String.valueOf(fila + 1);
     }
 
-    private String formatoCelda (String contenido){
+    private String formatoCelda(String contenido) {
         return String.format("%1s", contenido);
+    }
+
+    @Override
+    public void iniciar() {
+        new MenuPrincipal(this, controlador);
     }
 
     @Override
@@ -49,7 +65,10 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
                 tablero.append("   ");
             }
             for (int columna = 0; columna < 13; columna++) {
-                String contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila, columna));
+                String contenidoCelda ="";
+                if (fila % 2 == 0 && columna % 2 == 0) {
+                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila/2, columna/2));
+                }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
                         contenidoCelda = "-";
@@ -70,8 +89,8 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
                     if ((columna == 6) && ((fila == 1) || (fila == 3) || (fila == 9) || (fila == 11)))
                         contenidoCelda = "    |";
                 }
-                if (fila != 6){
-                    if ((fila == 0 || fila == 12) && columna == 6){
+                if (fila != 6) {
+                    if ((fila == 0 || fila == 12) && columna == 6) {
                         tablero.append(" ").append(formatoCelda(contenidoCelda)).append(" ");
                     } else {
                         if ((fila == 1 || fila == 11) && columna == 12) tablero.append(" ");
@@ -151,11 +170,6 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void iniciarJuego() throws RemoteException {
-        controlador.comenzarJuego();
-    }
-
-    @Override
     public void mostrarGanador(String nombreJugador) {
         println("\n\nEl ganador es: " + nombreJugador);
     }
@@ -182,7 +196,7 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
 
     @Override
     public void mostrarEmpate(String nombreJ1, String nombreJ2) {
-        println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 +"!");
+        println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 + "!");
     }
 
     @Override
@@ -216,7 +230,17 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void mostrarJugadorConectado(Jugador jugador) {
+    public void mostrarJugadorConectado() {
+
+    }
+
+    @Override
+    public void mostrarTurnoActual(Jugador jugadorActual) {
+
+    }
+
+    @Override
+    public void mostrarMensajeError(String mensaje) {
 
     }
 
@@ -225,11 +249,11 @@ public class VistaVistaTableroConsola implements IVistaTablero, IObserver {
         println("Ingrese la coordenada de la ficha que desea mover...");
     }
 
-    @Override
     public void actualizar() throws RemoteException {
         textArea.setText("");
         mostrarTablero(controlador.obtenerTablero());
     }
+
     private void println(String texto) {
         textArea.append(texto + "\n");
     }

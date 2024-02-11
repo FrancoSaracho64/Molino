@@ -1,8 +1,7 @@
 package ar.edu.unlu.poo.modelos;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.interfaces.IObservable;
-import ar.edu.unlu.poo.interfaces.IObserver;
+import ar.edu.unlu.poo.enumerados.EventosTablero;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
 import java.io.Serializable;
@@ -11,19 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Tablero extends ObservableRemoto implements IObservable, Serializable {
+public class Tablero extends ObservableRemoto implements Serializable {
     private static final int CANT_COLUMNAS = 7;
     private static final int CANT_FILAS = 7;
-    private List<IObserver> observadores = new ArrayList<>();
     private final Casilla[][] casillas;
 
     public Tablero() {
         this.casillas = new Casilla[CANT_FILAS][CANT_COLUMNAS];
-        //Inicializo todas las casillas en INVÁLIDA
-        for (int i = 0; i < CANT_FILAS; i++) {
-            for (int j = 0; j < CANT_COLUMNAS; j++) {
-                casillas[i][j] = new Casilla(new Coordenada(i, j));
-                //Esto se hace para después inicializar correctamente a aquellas casillas que son validas para el juego.
+        for (int fila = 0; fila < CANT_FILAS; fila++) {
+            for (int columna = 0; columna < CANT_COLUMNAS; columna++) {
+                casillas[fila][columna] = new Casilla(new Coordenada(fila, columna));
             }
         }
         inicializarCasillasValidas();
@@ -87,8 +83,12 @@ public class Tablero extends ObservableRemoto implements IObservable, Serializab
         casillas[6][6].agregarAdyacentes(Arrays.asList(casillas[6][3], casillas[3][6]));
     }
 
-    public EstadoCasilla obtenerEstadoCasilla(int fila, int columna) {
-        return casillas[fila][columna].getEstadoCasilla();
+    public EstadoCasilla obtenerEstadoCasilla(Coordenada coordenada) {
+        return casillas[coordenada.getFila()][coordenada.getColumna()].getEstadoCasilla();
+    }
+
+    public Casilla getCasilla(Coordenada coordenada) {
+        return casillas[coordenada.getFila()][coordenada.getColumna()];
     }
 
     /**
@@ -97,32 +97,32 @@ public class Tablero extends ObservableRemoto implements IObservable, Serializab
      * @param coordenada Coordenada de la nueva ubicación.
      * @param ficha      Ficha a colocar en el tablero.
      */
-    public void colocarFicha(Coordenada coordenada, Ficha ficha) {
+    public void colocarFicha(Coordenada coordenada, Ficha ficha) throws RemoteException {
         casillas[coordenada.getFila()][coordenada.getColumna()].colocarFicha(ficha);
-        notificarObservadores();
-    }
-
-    public Ficha obtenerFicha(int fila, int columna) {
-        return casillas[fila][columna].getFicha();
+        notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
     }
 
     /**
      * Se quita una ficha del tablero
      *
      * @param notificar TRUE para notificar el cambio, FALSE para no notificar
-     * @param fila      fila de la ficha
-     * @param columna   columna de la ficha
+     * @param coordenada de la ficha
      */
-    public void quitarFicha(boolean notificar, int fila, int columna) {
-        casillas[fila][columna].quitarFicha();
-        if (notificar)
-            notificarObservadores();
+    public void quitarFicha(boolean notificar, Coordenada coordenada) throws RemoteException {
+        casillas[coordenada.getFila()][coordenada.getColumna()].quitarFicha();
+        if (notificar) {
+            notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
+        }
     }
 
-    public void moverFicha(Coordenada antiguaCoord, Coordenada nuevaCoord) {
-        Ficha ficha = obtenerFicha(antiguaCoord.getFila(), antiguaCoord.getColumna());
-        quitarFicha(false, antiguaCoord.getFila(), antiguaCoord.getColumna());
+    public void moverFicha(Coordenada antiguaCoord, Coordenada nuevaCoord) throws RemoteException {
+        Ficha ficha = obtenerFicha(antiguaCoord);
+        quitarFicha(false, antiguaCoord);
         colocarFicha(nuevaCoord, ficha);
+    }
+
+    public Ficha obtenerFicha(Coordenada coordenada) {
+        return casillas[coordenada.getFila()][coordenada.getColumna()].getFicha();
     }
 
     public List<Casilla> obtenerCasillasOcupadasPorJugador(Jugador jugador) {
@@ -130,8 +130,8 @@ public class Tablero extends ObservableRemoto implements IObservable, Serializab
         for (int i = 0; i < CANT_FILAS; i++) {
             for (int j = 0; j < CANT_COLUMNAS; j++) {
                 Casilla casillaActual = casillas[i][j];
-                if (casillaActual.getEstadoCasilla().equals(EstadoCasilla.OCUPADA)){
-                    if (casillaActual.getFicha().getJugador().equals(jugador)){
+                if (casillaActual.getEstadoCasilla().equals(EstadoCasilla.OCUPADA)) {
+                    if (casillaActual.getFicha().getJugador().equals(jugador)) {
                         casillasOcupadas.add(casillaActual);
                     }
                 }
@@ -146,30 +146,5 @@ public class Tablero extends ObservableRemoto implements IObservable, Serializab
 
     public int getCountColumnas() {
         return CANT_COLUMNAS;
-    }
-
-    @Override
-    public void agregarObservador(IObserver observador) {
-        observadores.add(observador);
-    }
-
-    @Override
-    public void quitarObservador(IObserver observador) {
-        observadores.remove(observador);
-    }
-
-    @Override
-    public void notificarObservadores() {
-        for (IObserver observador : observadores) {
-            try {
-                observador.actualizar();
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public Casilla getCasilla(Coordenada coordenada) {
-        return casillas[coordenada.getFila()][coordenada.getColumna()];
     }
 }

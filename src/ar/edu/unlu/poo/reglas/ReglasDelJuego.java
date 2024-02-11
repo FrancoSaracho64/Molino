@@ -20,7 +20,7 @@ public class ReglasDelJuego {
         if (fila < 0 || fila >= tablero.getCountFilas() || columna < 0 || columna >= tablero.getCountColumnas()) {
             return false;
         }
-        return !tablero.obtenerEstadoCasilla(fila, columna).equals(EstadoCasilla.INVALIDA);
+        return !tablero.obtenerEstadoCasilla(new Coordenada(fila, columna)).equals(EstadoCasilla.INVALIDA);
         // Si no se cumple ninguna de las condiciones anteriores, la casilla se considera válida.
     }
 
@@ -49,7 +49,7 @@ public class ReglasDelJuego {
         ArrayList<Coordenada> coordAdyacentes = casilla.getCoordenadasAdyacentes();
         for (Coordenada coordenada : coordAdyacentes) {
             if (esCasillaValida(coordenada)) {
-                if (tablero.obtenerEstadoCasilla(coordenada.getFila(), coordenada.getColumna()).
+                if (tablero.obtenerEstadoCasilla(coordenada).
                     equals(EstadoCasilla.LIBRE)) {
                     return true;  // Hay al menos un movimiento posible
                 }

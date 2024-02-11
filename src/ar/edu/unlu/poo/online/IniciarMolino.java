@@ -1,9 +1,9 @@
 package ar.edu.unlu.poo.online;
 
 import ar.edu.unlu.poo.controladores.Controlador;
-import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.vistas.VistaConsola;
-import ar.edu.unlu.poo.vistas.pantallas.MenuPrincipal;
+import ar.edu.unlu.poo.vistas.pantallas.VistaTableroConsola;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
@@ -13,7 +13,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class IniciarMolino {
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) {
         ArrayList<String> ips = Util.getIpDisponibles();
         String ip = (String) JOptionPane.showInputDialog(
                 null,
@@ -49,13 +49,12 @@ public class IniciarMolino {
         );
         Controlador controlador = new Controlador();
 
-        //TODO: tipo de vista
-        IVistaTablero vista = new VistaConsola(controlador);
+        // TODO: tipo de vista
+        IVista vista  = new VistaTableroConsola(controlador);
         Cliente cliente = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
-
+        vista.iniciar();
         try {
             cliente.iniciar(controlador);
-            new MenuPrincipal(vista, controlador);
         } catch (RemoteException | RMIMVCException e) {
             e.printStackTrace();
         }

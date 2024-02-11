@@ -1,22 +1,21 @@
 package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
-import ar.edu.unlu.poo.interfaces.IObserver;
-import ar.edu.unlu.poo.interfaces.IVistaTablero;
+import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.poo.vistas.pantallas.MenuPrincipal;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
 import java.rmi.RemoteException;
 
-public class VistaConsola implements IVistaTablero, IObserver {
+public class VistaConsola implements IVista {
     private Controlador controlador;
 
     public VistaConsola(Controlador controlador) {
         this.controlador = controlador;
         this.controlador.setVista(this);
-        //this.controlador.agregarObserver(this);
     }
 
     private void limpiarConsola() {
@@ -47,6 +46,11 @@ public class VistaConsola implements IVistaTablero, IObserver {
 
     private String formatoCelda(String contenido) {
         return String.format("%1s", contenido);
+    }
+
+    @Override
+    public void iniciar() {
+        new MenuPrincipal(this, controlador);
     }
 
     @Override
@@ -157,15 +161,6 @@ public class VistaConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void iniciarJuego() {
-        try {
-            controlador.comenzarJuego();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
     public void mostrarGanador(String nombreJugador) {
         System.out.println("\n\n\n");
         System.out.println("¡El ganador es: " + nombreJugador + "! ¡Felicitaciones! :D");
@@ -227,8 +222,18 @@ public class VistaConsola implements IVistaTablero, IObserver {
     }
 
     @Override
-    public void mostrarJugadorConectado(Jugador jugador) {
-        System.out.println("Se ha conectado: " + jugador.getNombre());
+    public void mostrarJugadorConectado() {
+        System.out.println("Se ha conectado un jugador");
+    }
+
+    @Override
+    public void mostrarTurnoActual(Jugador jugadorActual) {
+
+    }
+
+    @Override
+    public void mostrarMensajeError(String mensaje) {
+
     }
 
     @Override

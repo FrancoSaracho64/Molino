@@ -1,7 +1,10 @@
 package ar.edu.unlu.poo.modelos;
 
+import ar.edu.unlu.poo.enumerados.Accion;
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
+import ar.edu.unlu.poo.enumerados.EventosTablero;
 import ar.edu.unlu.poo.interfaces.IMolino;
+import ar.edu.unlu.poo.persistencia.Persistencia;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 import ar.edu.unlu.rmimvc.observer.IObservadorRemoto;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
@@ -15,7 +18,9 @@ public class Molino extends ObservableRemoto implements IMolino {
     private static final String CASILLA_INVALIDA = "";
     private static final String JUGADOR_1 = "X";
     private static final String JUGADOR_2 = "O";
-
+    private Jugador jugadorActual;
+    private Jugador jugador1;
+    private Jugador jugador2;
     private ArrayList<Jugador> jugadores;
     private Tablero tablero;
     private ReglasDelJuego reglas;
@@ -28,7 +33,6 @@ public class Molino extends ObservableRemoto implements IMolino {
          * Acá se le podría preguntar al usuario.
 
         //new MenuPrincipal();
-
     }*/
 
     public Molino() {
@@ -38,17 +42,97 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
+    public void comenzarJuego() throws RemoteException {
+        partidaMolino();
+    }
+
+    @Override
+    public Jugador getOponente(Jugador jugadorLocal) {
+        if (jugadorLocal.equals(jugador1)) {
+            return jugador2;
+        } else {
+            return jugador1;
+        }
+    }
+
+    @Override
+    public boolean estaListoParaComenzar() throws RemoteException {
+        return jugadores.size() == 2;
+    }
+
+    private void partidaMolino() throws RemoteException {
+        boolean juegoActivo = true;     // estado de la partida
+        boolean turno = true;           // true: jugador1 --- false: jugador2
+        while (juegoActivo) {
+            if (turno) {
+                turno = false;
+                alternarTurno();
+            } else {
+                turno = true;
+                alternarTurno();
+            }
+        }
+        finPartida();
+    }
+
+    private void prepararFichas(){
+        jugador1.resetearFichasColocadas();
+        jugador1.resetearFichasEnTablero();
+        jugador1.setFichas(Molino.generarFichas(jugador1));
+        jugador2.resetearFichasColocadas();
+        jugador2.resetearFichasEnTablero();
+        jugador2.setFichas(Molino.generarFichas(jugador2));
+    }
+
+    private boolean turnoJugador(Jugador jugadorActual, Jugador oponente) throws RemoteException {
+        boolean juego_activo = true;
+        //Finaliza el turno
+        alternarTurno();
+
+        return juego_activo;
+    }
+
+    public void finPartida() {
+        // Informar que el juego ha terminado.
+        //todo: vista.juegoTerminado();
+        Jugador ganador = reglas.obtenerGanador(jugador1, jugador2);
+        if (ganador == null) {
+            //todo: vista.mostrarEmpate(j1.getNombre(), j2.getNombre());
+            jugador1.empataPartida();
+            jugador2.empataPartida();
+        } else {
+            ganador.ganaPartida();
+            if (jugador1 == ganador)
+                jugador2.pierdePartida();
+            else
+                jugador1.pierdePartida();
+            // Mostramos el ganador.
+            //todo: vista.mostrarGanador(ganador.getNombre());
+            ArrayList<Jugador> jugadores_historicos = Persistencia.cargarJugadoresHistorico();
+
+            for (int i = 0; i < jugadores_historicos.size(); i++) {
+                if (jugadores_historicos.get(i).getId() == jugador1.getId()) {
+                    jugadores_historicos.set(i, jugador1);
+                } else if (jugadores_historicos.get(i).getId() == jugador2.getId()) {
+                    jugadores_historicos.set(i, jugador2);
+                }
+            }
+            Persistencia.guardarJugadores(jugadores_historicos);
+        }
+    }
+
+    @Override
     public String contenidoCasilla(Coordenada coordenada) {
         String contenido;
-        Ficha ficha = tablero.obtenerFicha(coordenada.getFila(), coordenada.getColumna());
+        Ficha ficha = tablero.obtenerFicha(coordenada);
         if (ficha == null) {
-            if (tablero.obtenerEstadoCasilla(coordenada.getFila(), coordenada.getColumna()) != EstadoCasilla.INVALIDA) {
+            if (tablero.obtenerEstadoCasilla(coordenada) != EstadoCasilla.INVALIDA) {
                 contenido = CASILLA_DISPONIBLE;
             } else {
                 contenido = CASILLA_INVALIDA;
             }
         } else {
-            if (ficha.getJugador() == jugadores.get(0)) {
+            if (ficha.getJugador().equals(jugador1)) {
                 contenido = JUGADOR_1;
             } else {
                 contenido = JUGADOR_2;
@@ -58,23 +142,40 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
-    public void colocarFicha(Coordenada coordenada, Jugador jugadorActual, Jugador jugadorOponente, Ficha ficha) {
-        tablero.colocarFicha(coordenada, ficha);
-        jugadorActual.incFichasEnTablero();
-        jugadorActual.incFichasColocadas();
+    public void colocarFicha(Coordenada coordenada, Jugador jugador) throws RemoteException {
+        if (jugador.equals(jugadorActual)) {
+            tablero.colocarFicha(coordenada, jugadorActual.getFichaParaColocar());
+            jugadorActual.incFichasEnTablero();
+            jugadorActual.incFichasColocadas();
+            alternarTurno();
+            notificarObservadores(); // Mostramos el cambio de la nueva ficha ingresada
+        } else {
+            throw new RemoteException("No es tu turno.");
+        }
     }
 
     @Override
-    public void quitarFicha(Coordenada coordenada) {
-        tablero.quitarFicha(true, coordenada.getFila(), coordenada.getColumna());
+    public void quitarFicha(Coordenada coordenada) throws RemoteException {
+        tablero.quitarFicha(true, coordenada);
     }
 
     @Override
-    public void moverFicha(Coordenada antCoord, Coordenada nueCoord) {
+    public void moverFicha(Coordenada antCoord, Coordenada nueCoord) throws RemoteException {
         tablero.moverFicha(antCoord, nueCoord);
+        if (reglas.hayMolinoEnPosicion(nueCoord, jugadorActual)) {
+            //todo: vista.avisoDeMolino(jugadorActual.getNombre());
+
+            /*
+            todo
+                if (reglas.hayFichasParaEliminar(jugadorOponente)) {
+                    eliminarFichaOponente(jugadorOponente);
+                } else {
+                    vista.avisoNoHayFichasParaEliminarDelOponente();
+                }*/
+        }
     }
 
-    public static ArrayList<Ficha> generarFichas(Jugador jugador) {
+    private static ArrayList<Ficha> generarFichas(Jugador jugador) {
         ArrayList<Ficha> fichas = new ArrayList<>();
         Ficha f1 = new Ficha(jugador);
         Ficha f2 = new Ficha(jugador);
@@ -99,27 +200,18 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     @Override
     public void conectarJugador(Jugador jugador) throws RemoteException {
+        //TODO: El primer jugador comienza.
+        if (jugadores.isEmpty()) {
+            jugadorActual = jugador;
+        }
         jugadores.add(jugador);
-    }
-
-    @Override
-    public void desconectarJugador(Jugador jugador) throws RemoteException {
-        jugadores.remove(jugador);
-    }
-
-    @Override
-    public ArrayList<Jugador> getJugadores() throws RemoteException {
-        return jugadores;
-    }
-
-    @Override
-    public Jugador obtenerJ1() throws RemoteException {
-        return jugadores.get(0);
-    }
-
-    @Override
-    public Jugador obtenerJ2() throws RemoteException {
-        return jugadores.get(1);
+        notificarObservadores(EventosTablero.JUGADOR_CONECTADO);
+        if (jugadores.size() == 2) {
+            jugador1 = obtenerJ1();
+            jugador2 = obtenerJ2();
+            prepararFichas();
+            notificarObservadores(EventosTablero.INICIO_PARTIDA);
+        }
     }
 
     public Tablero getTablero() {
@@ -134,5 +226,84 @@ public class Molino extends ObservableRemoto implements IMolino {
     @Override
     public void cerrar(IObservadorRemoto controlador, Jugador jugador) throws RemoteException {
 
+    }
+
+    @Override
+    public Jugador obtenerJugadorActual() throws RemoteException {
+        return jugadorActual;
+    }
+
+    @Override
+    public Jugador obtenerJugadorOponente() throws RemoteException {
+        if (jugadorActual.equals(jugador1)) {
+            return jugador2;
+        } else {
+            return jugador1;
+        }
+    }
+
+    @Override
+    public void establecerTurnoInicial(Jugador jugador) {
+        jugadorActual = jugador;
+    }
+
+    @Override
+    public boolean esTurnoDe(Jugador jugador) throws RemoteException {
+        return obtenerJugadorActual().equals(jugador);
+    }
+
+    @Override
+    public void alternarTurno() throws RemoteException {
+        if (jugadorActual.equals(jugador1)) {
+            jugadorActual = jugador2;
+        } else {
+            jugadorActual = jugador1;
+        }
+    }
+
+    @Override
+    public boolean esCasillaValida(Coordenada coordenada) throws RemoteException {
+        return reglas.esCasillaValida(coordenada);
+    }
+
+    @Override
+    public boolean hayFichasParaEliminar(Jugador oponente) throws RemoteException {
+        return reglas.hayFichasParaEliminar(oponente);
+    }
+
+    @Override
+    public boolean hayMolinoEnPosicion(Coordenada coord, Jugador jugadorOponente) {
+        return reglas.hayMolinoEnPosicion(coord, jugadorOponente);
+    }
+
+    public Accion determinarAccionJugador(Jugador jugador) {
+        // Aquí puedes añadir más lógica, por ejemplo, si el jugador puede mover una ficha o si debe quitar una ficha del oponente
+        if (jugador.getFichasColocadas() < CANTIDAD_FICHAS) {
+            return Accion.COLOCAR_FICHA;
+        } else {
+            if (jugador.getFichasEnTablero() > 3) {
+                return Accion.MOVER_FICHA;
+            } else {
+                return Accion.MOVER_FICHA_SUPER;
+            }
+        }
+    }
+
+    @Override
+    public boolean fichaTieneMovimientos(Coordenada coordenada) {
+        return reglas.fichaTieneMovimiento(coordenada);
+    }
+
+    @Override
+    public boolean sonCasillasAdyacentes(Coordenada cOrigen, Coordenada cDestino) {
+        return reglas.sonCasillasAdyacentes(cOrigen, cDestino);
+    }
+
+    public Jugador obtenerJ1() throws RemoteException {
+        return jugadores.get(0);
+    }
+
+    public Jugador obtenerJ2() throws RemoteException {
+        return jugadores.get(1);
     }
 }
