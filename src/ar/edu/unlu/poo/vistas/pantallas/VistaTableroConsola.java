@@ -131,13 +131,14 @@ public class VistaTableroConsola implements IVista {
         println("¡El jugador " + nombreJugador + " hizo molino!");
     }
 
+    @Override
     public Object[] pedirCasilla() {
         boolean inputValido = false;
         int fila = -1;
         char columna = '\0';
         while (!inputValido) {
-            String inputFila = JOptionPane.showInputDialog(null, "Ingrese la fila (1-7): ");
             String inputColumna = JOptionPane.showInputDialog(null, "Ingrese la columna (A-G): ");
+            String inputFila = JOptionPane.showInputDialog(null, "Ingrese la fila (1-7): ");
             try {
                 fila = Integer.parseInt(inputFila);
                 if (fila >= 1 && fila <= 7) {

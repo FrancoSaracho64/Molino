@@ -37,7 +37,10 @@ public class Jugador implements Serializable {
     }
 
     public Ficha getFichaParaColocar() {
-        return fichas.get(fichasColocadas);
+        Ficha ficha = fichas.get(fichasColocadas);
+        incFichasEnTablero();
+        incFichasColocadas();
+        return ficha;
     }
 
     public void setFichas(ArrayList<Ficha> fichas){

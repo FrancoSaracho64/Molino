@@ -2,8 +2,8 @@ package ar.edu.unlu.poo.online;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
-import ar.edu.unlu.poo.vistas.VistaConsola;
 import ar.edu.unlu.poo.vistas.pantallas.VistaTableroConsola;
+import ar.edu.unlu.poo.vistas.pantallas.VistaTableroInterfazGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 
 public class IniciarMolino {
     public static void main(String[] args) {
+        ArrayList<String> opciones = new ArrayList<>();
+        opciones.add("Consola");
+        opciones.add("Interfáz gráfica");
         ArrayList<String> ips = Util.getIpDisponibles();
         String ip = (String) JOptionPane.showInputDialog(
                 null,
@@ -47,10 +50,21 @@ public class IniciarMolino {
                 null,
                 8888
         );
+        String interfaz = (String) JOptionPane.showInputDialog(
+                null,
+                "Seleccione como quiere visualizar el juego", "Interfaz gráfica",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opciones.toArray(),
+                null
+        );
         Controlador controlador = new Controlador();
-
-        // TODO: tipo de vista
-        IVista vista  = new VistaTableroConsola(controlador);
+        IVista vista;
+        if (interfaz.equals("Consola")) {
+            vista = new VistaTableroConsola(controlador);
+        } else {
+            vista = new VistaTableroInterfazGrafica(controlador);
+        }
         Cliente cliente = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
         vista.iniciar();
         try {

@@ -32,87 +32,51 @@ public class Controlador implements IControladorRemoto {
     public void realizarAccion() {
         try {
             if (modelo.esTurnoDe(jugadorLocal)) {
-                // Aquí iría la lógica para realizar la acción
-                // Por ejemplo, modelo.realizarMovimiento(coordenada, jugador);
                 switch (modelo.determinarAccionJugador(jugadorLocal)) {
                     case COLOCAR_FICHA -> {
-                        modelo.colocarFicha(pedirCoordenadaLibre(), jugadorLocal);
-                        /*
-                        todo: implementar en el modelo
-                        if (jugadorActual.getFichasEnTablero() >= 3) {
-                            if (reglas.hayMolinoEnPosicion(coordenada, jugadorActual)) {
-                                vista.avisoDeMolino(jugadorActual.getNombre());
-                                if (reglas.hayFichasParaEliminar(oponente)) {
-                                    eliminarFichaOponente(oponente);
-                                } else {
-                                    vista.avisoNoHayFichasParaEliminarDelOponente();
-                                }
-                            }
+                        Coordenada coordenada = pedirCoordenadaLibre();
+                        modelo.colocarFicha(coordenada, jugadorLocal);
+                        if (modelo.verificarMolinoTrasMovimiento(coordenada, jugadorLocal)) {
+                            // Si se da la condición, eliminamos una ficha.
+                            eliminarFichaOponente(oponente);
                         }
-                         */
-                        finalizarTurno(); // Cambiar el turno si la acción fue exitosa
+                        finalizarTurno();
                     }
                     case MOVER_FICHA -> {
                         Coordenada origen = pedirCoordenadaFichaAMover(jugadorLocal);
                         if (modelo.fichaTieneMovimientos(origen)) {
-                            Coordenada destino = pedirCoordenadaLibreAdyacente();
-                            if (modelo.sonCasillasAdyacentes(origen, destino)) {
-                                modelo.moverFicha(origen, destino);
-                            } else {
-                                vista.casillaNoAdyacente();
+                            Coordenada destino = pedirCoordenadaLibreAdyacente(origen);
+                            modelo.moverFicha(origen, destino);
+                            if (modelo.verificarMolinoTrasMovimiento(destino, jugadorLocal)) {
+                                eliminarFichaOponente(oponente);
                             }
                         } else {
                             vista.fichaSinMovimiento();
                         }
-
-                        // Verificamos si hay molino despues de hacer movimiento.
-                        // Esto se hace desde el modelo.
-                        /*if (reglas.hayMolinoEnPosicion(nuevaPosFichaSelec, jugadorActual)) {
-                            vista.avisoDeMolino(jugadorActual.getNombre());
-
-                            if (reglas.hayFichasParaEliminar(oponente)) {
-                                eliminarFichaOponente(oponente);
-                            } else {
-                                vista.avisoNoHayFichasParaEliminarDelOponente();
-                            }
-                        }*/
-                        // ---------------------------------------------------------------------------------------------
-                        finalizarTurno(); // Cambiar el turno si la acción fue exitosa
+                        finalizarTurno();
                     }
                     case MOVER_FICHA_SUPER -> {
                         Coordenada origen = pedirCoordenadaFichaAMover(jugadorLocal);
                         Coordenada destino = pedirCoordenadaLibre();
                         modelo.moverFicha(origen, destino);
+                        if (modelo.verificarMolinoTrasMovimiento(destino, jugadorLocal)) {
+                            eliminarFichaOponente(oponente);
+                        }
+                        finalizarTurno();
                     }
                 }
-                /*vista.avisoDeMolino(jugadorLocal.getNombre());
-                if (modelo.hayFichasParaEliminar(oponente)) {
-                    eliminarFichaOponente(oponente);
-                } else {
-                    vista.avisoNoHayFichasParaEliminarDelOponente();
-                }*/
-
-
-                    /*if (jugadorActual.getFichasEnTablero() <= 2) {
-                        vista.jugadorSinFichas();
-                    } else if (!reglas.jugadorTieneMovimientos(jugadorActual)) {
-                        vista.jugadorSinMovimientos();
-                    }*/
             } else {
                 vista.mostrarTurno("Es turno de: " + oponente.getNombre());
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (IndexOutOfBoundsException e){
+        } catch (RemoteException | IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
     }
 
     private void finalizarTurno() {
         try {
-            this.modelo.alternarTurno();
+            modelo.finalizarTurno();
             Jugador jugadorActual = modelo.obtenerJugadorActual();
-            // Notificar a la vista que el turno ha cambiado
             vista.mostrarTurnoActual(jugadorActual);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -132,8 +96,8 @@ public class Controlador implements IControladorRemoto {
     }
 
     public void agregarJugador(Jugador jugador) throws RemoteException {
-        this.jugadorLocal = jugador;
-        this.modelo.conectarJugador(jugador);
+        jugadorLocal = jugador;
+        modelo.conectarJugador(jugador);
     }
 
     public Coordenada solicitarCasillaVista() {
@@ -163,40 +127,42 @@ public class Controlador implements IControladorRemoto {
         return new Coordenada(fila, columnaResultado);
     }
 
-    private void eliminarFichaOponente(Jugador jugadorOponente) {
-        try {
-            boolean valida;
-            boolean ocupada;
-            boolean formaMolino;
-            Coordenada coord;
-            Ficha ficha;
-            do { //La ficha no tiene que estar en molino
-                do { // La casilla está ocupada por el oponente
-                    do { // Casilla valida
-                        vista.fichaAEliminar();
-                        coord = solicitarCasillaVista();
-                        valida = modelo.esCasillaValida(coord);
-                        if (!valida) {
+    private void eliminarFichaOponente(Jugador jugadorOponente) throws RemoteException {
+        if (modelo.esTurnoDe(jugadorLocal)) {
+            try {
+                boolean valida;
+                boolean ocupada;
+                boolean formaMolino;
+                Coordenada coord;
+                Ficha ficha;
+                do { //La ficha no tiene que estar en molino
+                    do { // La casilla está ocupada por el oponente
+                        do { // Casilla valida
+                            vista.fichaAEliminar();
+                            coord = solicitarCasillaVista();
+                            valida = modelo.esCasillaValida(coord);
+                            if (!valida) {
+                                vista.mostrarMensajeErrorCasilla();
+                            }
+                        } while (!valida);
+                        ficha = modelo.getTablero().obtenerFicha(coord);
+                        ocupada = modelo.getTablero().obtenerEstadoCasilla(coord) ==
+                                EstadoCasilla.OCUPADA &&
+                                ficha.getJugador().equals(jugadorOponente);
+                        if (!ocupada) {
                             vista.mostrarMensajeErrorCasilla();
                         }
-                    } while (!valida);
-                    ficha = modelo.getTablero().obtenerFicha(coord);
-                    ocupada = modelo.getTablero().obtenerEstadoCasilla(coord) ==
-                            EstadoCasilla.OCUPADA &&
-                            ficha.getJugador() == jugadorOponente;
-                    if (!ocupada) {
-                        vista.mostrarMensajeErrorCasilla();
+                    } while (!ocupada);
+                    formaMolino = modelo.hayMolinoEnPosicion(coord, jugadorOponente);
+                    if (formaMolino) {
+                        vista.mensajeFichaFormaMolino();
                     }
-                } while (!ocupada);
-                formaMolino = modelo.hayMolinoEnPosicion(coord, jugadorOponente);
-                if (formaMolino) {
-                    vista.mensajeFichaFormaMolino();
-                }
-            } while (formaMolino);
-            modelo.quitarFicha(coord);
-            jugadorOponente.decFichasEnTablero();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+                } while (formaMolino);
+                // Eliminamos la ficha del tablero
+                modelo.quitarFicha(coord, jugadorOponente);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -227,27 +193,34 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
-    private Coordenada pedirCoordenadaLibreAdyacente() {
+    private Coordenada pedirCoordenadaLibreAdyacente(Coordenada origen) {
         try {
             boolean valida;
             boolean ocupada;
-            Coordenada coord;
-            do {
-                do {
-                    vista.mensajePedirNuevaCasillaLibreAdyacente();
-                    coord = solicitarCasillaVista();
-                    valida = modelo.esCasillaValida(coord);
-                    if (!valida) {
-                        vista.mostrarMensajeErrorCasilla();
+            boolean esAdyacente;
+            Coordenada destino;
+            do { // es adyacente
+                do { // casilla libre
+                    do { // casilla valida
+                        vista.mensajePedirNuevaCasillaLibreAdyacente();
+                        destino = solicitarCasillaVista();
+                        valida = modelo.esCasillaValida(destino);
+                        if (!valida) {
+                            vista.mostrarMensajeErrorCasilla();
+                        }
+                    } while (!valida);
+                    ocupada = modelo.getTablero().obtenerEstadoCasilla(destino)
+                            == EstadoCasilla.OCUPADA;
+                    if (ocupada) {
+                        vista.mostrarMensajeCasillaOcupada();
                     }
-                } while (!valida);
-                ocupada = modelo.getTablero().obtenerEstadoCasilla(coord)
-                        == EstadoCasilla.OCUPADA;
-                if (ocupada) {
-                    vista.mostrarMensajeCasillaOcupada();
+                } while (ocupada);
+                esAdyacente = modelo.sonCasillasAdyacentes(origen, destino);
+                if (!esAdyacente) {
+                    vista.casillaNoAdyacente();
                 }
-            } while (ocupada);
-            return coord;
+            } while (!esAdyacente);
+            return destino;
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
@@ -276,7 +249,7 @@ public class Controlador implements IControladorRemoto {
                         vista.mostrarMensajeErrorCasilla();
                     }
                 } while (!ocupada);
-                esDeJugador = modelo.getTablero().obtenerFicha(coord).getJugador() == jugador;
+                esDeJugador = modelo.getTablero().obtenerFicha(coord).getJugador().equals(jugador);
                 if (!esDeJugador) {
                     vista.mostrarMensajeErrorCasilla();
                 }
@@ -285,6 +258,18 @@ public class Controlador implements IControladorRemoto {
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void finDePartida() throws RemoteException {
+        vista.juegoTerminado();
+        switch (modelo.obtenerMotivoFinPartida()) {
+            case JUGADOR_SIN_MOVIMIENTOS -> {
+                vista.jugadorSinMovimientos();
+            }
+            case JUGADOR_SIN_FICHAS -> {
+                vista.jugadorSinFichas();
+            }
         }
     }
 
@@ -310,28 +295,16 @@ public class Controlador implements IControladorRemoto {
     public void actualizar(IObservableRemoto iObservableRemoto, Object o) throws RemoteException {
         if (o instanceof EventosTablero) {
             switch ((EventosTablero) o) {
-                case JUGADOR_CONECTADO -> {
-                    vista.mostrarJugadorConectado();
-                }
-                case INICIO_PARTIDA -> {
-                    iniciarPartida();
-                }
-                case MOLINO -> {
-                    vista.avisoDeMolino(jugadorLocal.getNombre());
-                    //this.vista.insertarFicha();
-                    //this.modelo.getTablero();
-                    break;
-                }
-                case CAMBIO_EN_EL_TABLERO -> {
-                    this.vista.actualizar();
-                }
+                case JUGADOR_CONECTADO -> vista.mostrarJugadorConectado();
+                case INICIO_PARTIDA -> iniciarPartida();
+                case MOLINO -> vista.avisoDeMolino(modelo.getNombreMolino());
+                case CAMBIO_EN_EL_TABLERO -> vista.actualizar();
                 case TURNO_JUGADOR -> {
-
                 }
-
-                default -> {
-                    System.out.println("MENSAJE DE PRUEBA");
-                }
+                case JUGADOR_SIN_FICHAS -> vista.jugadorSinFichas();
+                case JUGADOR_SIN_MOVIMIENTOS -> vista.jugadorSinMovimientos();
+                case FIN_PARTIDA -> finDePartida();
+                default -> System.out.println("MENSAJE DE PRUEBA");
             }
         }
     }

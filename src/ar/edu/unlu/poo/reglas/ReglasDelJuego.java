@@ -64,7 +64,7 @@ public class ReglasDelJuego {
         if (ficha == null){
             return false;
         } else {
-            return ficha.getJugador() == jugador;
+            return ficha.getJugador().equals(jugador);
         }
     }
 
