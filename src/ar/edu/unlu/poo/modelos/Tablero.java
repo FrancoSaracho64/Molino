@@ -1,16 +1,13 @@
 package ar.edu.unlu.poo.modelos;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.enumerados.EventosTablero;
-import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Tablero extends ObservableRemoto implements Serializable {
+public class Tablero implements Serializable {
     private static final int CANT_COLUMNAS = 7;
     private static final int CANT_FILAS = 7;
     private final Casilla[][] casillas;
@@ -97,27 +94,22 @@ public class Tablero extends ObservableRemoto implements Serializable {
      * @param coordenada Coordenada de la nueva ubicación.
      * @param ficha      Ficha a colocar en el tablero.
      */
-    public void colocarFicha(Coordenada coordenada, Ficha ficha) throws RemoteException {
+    public void colocarFicha(Coordenada coordenada, Ficha ficha) {
         casillas[coordenada.getFila()][coordenada.getColumna()].colocarFicha(ficha);
-        notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
     }
 
     /**
      * Se quita una ficha del tablero
      *
-     * @param notificar TRUE para notificar el cambio, FALSE para no notificar
      * @param coordenada de la ficha
      */
-    public void quitarFicha(boolean notificar, Coordenada coordenada) throws RemoteException {
+    public void quitarFicha(Coordenada coordenada) {
         casillas[coordenada.getFila()][coordenada.getColumna()].quitarFicha();
-        if (notificar) {
-            notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
-        }
     }
 
-    public void moverFicha(Coordenada antiguaCoord, Coordenada nuevaCoord) throws RemoteException {
+    public void moverFicha(Coordenada antiguaCoord, Coordenada nuevaCoord) {
         Ficha ficha = obtenerFicha(antiguaCoord);
-        quitarFicha(false, antiguaCoord);
+        quitarFicha(antiguaCoord);
         colocarFicha(nuevaCoord, ficha);
     }
 

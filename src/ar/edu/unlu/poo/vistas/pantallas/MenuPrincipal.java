@@ -40,7 +40,7 @@ public class MenuPrincipal {
 
         iniciarPartidaButton.addActionListener(e -> {
             try {
-                controlador.agregarJugador(jugadoresActivos.get(0));
+                controlador.agregarJugador(jugadoresActivos.getFirst());
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }

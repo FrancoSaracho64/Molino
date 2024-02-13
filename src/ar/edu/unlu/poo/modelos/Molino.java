@@ -12,7 +12,7 @@ import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-public class Molino extends ObservableRemoto implements IMolino {
+public class Molino extends ObservableRemoto implements IMolino/*, IObservable*/ {
     public static final int CANTIDAD_FICHAS = 9;
     private static final String CASILLA_DISPONIBLE = "#";
     private static final String CASILLA_INVALIDA = "";
@@ -25,16 +25,6 @@ public class Molino extends ObservableRemoto implements IMolino {
     private Tablero tablero;
     private ReglasDelJuego reglas;
 
-    /*
-    public static void main(String[] args) {
-        /**
-         * Ejecuto esta clase, la cual se encarga de levantar una vista en caso de que se quiera correr
-         * de forma local.
-         * Acá se le podría preguntar al usuario.
-
-        //new MenuPrincipal();
-    }*/
-
     public Molino() {
         this.jugadores = new ArrayList<>();
         this.tablero = new Tablero();
@@ -43,7 +33,11 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     @Override
     public void comenzarJuego() throws RemoteException {
-        partidaMolino();
+        jugador1 = obtenerJ1();
+        jugador2 = obtenerJ2();
+        prepararFichas();
+        notificarObservadores(EventosTablero.INICIO_PARTIDA);
+        //partidaMolino();
     }
 
     @Override
@@ -53,11 +47,6 @@ public class Molino extends ObservableRemoto implements IMolino {
         } else {
             return jugador1;
         }
-    }
-
-    @Override
-    public boolean estaListoParaComenzar() throws RemoteException {
-        return jugadores.size() == 2;
     }
 
     private void partidaMolino() throws RemoteException {
@@ -147,8 +136,7 @@ public class Molino extends ObservableRemoto implements IMolino {
             tablero.colocarFicha(coordenada, jugadorActual.getFichaParaColocar());
             jugadorActual.incFichasEnTablero();
             jugadorActual.incFichasColocadas();
-            alternarTurno();
-            notificarObservadores(); // Mostramos el cambio de la nueva ficha ingresada
+            notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO); // Mostramos el cambio de la nueva ficha ingresada
         } else {
             throw new RemoteException("No es tu turno.");
         }
@@ -156,7 +144,8 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     @Override
     public void quitarFicha(Coordenada coordenada) throws RemoteException {
-        tablero.quitarFicha(true, coordenada);
+        tablero.quitarFicha(coordenada);
+        notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
     }
 
     @Override
@@ -200,27 +189,19 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     @Override
     public void conectarJugador(Jugador jugador) throws RemoteException {
-        //TODO: El primer jugador comienza.
+        //TODO: El primer jugador que se conecta comienza.
         if (jugadores.isEmpty()) {
             jugadorActual = jugador;
         }
         jugadores.add(jugador);
         notificarObservadores(EventosTablero.JUGADOR_CONECTADO);
         if (jugadores.size() == 2) {
-            jugador1 = obtenerJ1();
-            jugador2 = obtenerJ2();
-            prepararFichas();
-            notificarObservadores(EventosTablero.INICIO_PARTIDA);
+            comenzarJuego();
         }
     }
 
     public Tablero getTablero() {
         return tablero;
-    }
-
-    @Override
-    public void enviarMovimiento(Jugador jugador, Coordenada coordenada) throws RemoteException {
-
     }
 
     @Override
@@ -300,7 +281,7 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     public Jugador obtenerJ1() throws RemoteException {
-        return jugadores.get(0);
+        return jugadores.getFirst();
     }
 
     public Jugador obtenerJ2() throws RemoteException {

@@ -17,7 +17,6 @@ public interface IMolino extends IObservableRemoto {
     void colocarFicha(Coordenada coordenada, Jugador jugadorActual) throws RemoteException;
     void quitarFicha(Coordenada coordenada) throws RemoteException;
     void moverFicha(Coordenada antCoord, Coordenada nueCoord) throws RemoteException;
-    void enviarMovimiento(Jugador jugador, Coordenada coordenada) throws RemoteException;
     void cerrar(IObservadorRemoto controlador, Jugador jugador) throws RemoteException;
     Jugador obtenerJugadorActual() throws RemoteException;
     Jugador obtenerJugadorOponente() throws RemoteException;
@@ -32,5 +31,4 @@ public interface IMolino extends IObservableRemoto {
     boolean sonCasillasAdyacentes(Coordenada cOrigen, Coordenada cDestino) throws RemoteException;
     void comenzarJuego() throws RemoteException;
     Jugador getOponente(Jugador jugadorLocal) throws RemoteException;
-    boolean estaListoParaComenzar() throws RemoteException;
 }

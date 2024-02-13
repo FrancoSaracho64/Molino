@@ -49,7 +49,6 @@ public class Controlador implements IControladorRemoto {
                                 }
                             }
                         }
-
                          */
                         finalizarTurno(); // Cambiar el turno si la acción fue exitosa
                     }
@@ -111,7 +110,7 @@ public class Controlador implements IControladorRemoto {
 
     private void finalizarTurno() {
         try {
-            modelo.alternarTurno();
+            this.modelo.alternarTurno();
             Jugador jugadorActual = modelo.obtenerJugadorActual();
             // Notificar a la vista que el turno ha cambiado
             vista.mostrarTurnoActual(jugadorActual);
@@ -324,7 +323,7 @@ public class Controlador implements IControladorRemoto {
                     break;
                 }
                 case CAMBIO_EN_EL_TABLERO -> {
-                    this.vista.mostrarTablero(obtenerTablero());
+                    this.vista.actualizar();
                 }
                 case TURNO_JUGADOR -> {
 

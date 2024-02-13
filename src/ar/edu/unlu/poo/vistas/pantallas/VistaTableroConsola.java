@@ -231,7 +231,7 @@ public class VistaTableroConsola implements IVista {
 
     @Override
     public void mostrarJugadorConectado() {
-
+        textArea.setText("Se ha conectado un jugador...");
     }
 
     @Override
