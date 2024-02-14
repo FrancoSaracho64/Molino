@@ -69,30 +69,27 @@ public class Molino extends ObservableRemoto implements IMolino {
     private void finPartida() throws RemoteException {
         // Informar que el juego ha terminado.
         notificarObservadores(EventosTablero.FIN_PARTIDA);
-
         Jugador ganador = reglas.obtenerGanador(jugador1, jugador2);
         if (ganador == null) {
-            //todo: vista.mostrarEmpate(j1.getNombre(), j2.getNombre());
             jugador1.empataPartida();
             jugador2.empataPartida();
         } else {
             ganador.ganaPartida();
-            if (jugador1 == ganador)
+            if (jugador1.equals(ganador)) {
                 jugador2.pierdePartida();
-            else
+            } else {
                 jugador1.pierdePartida();
-            // Mostramos el ganador.
-            //todo: vista.mostrarGanador(ganador.getNombre());
-            ArrayList<Jugador> jugadores_historicos = Persistencia.cargarJugadoresHistorico();
+                ArrayList<Jugador> jugadores_historicos = Persistencia.cargarJugadoresHistorico();
 
-            for (int i = 0; i < jugadores_historicos.size(); i++) {
-                if (jugadores_historicos.get(i).getId() == jugador1.getId()) {
-                    jugadores_historicos.set(i, jugador1);
-                } else if (jugadores_historicos.get(i).getId() == jugador2.getId()) {
-                    jugadores_historicos.set(i, jugador2);
+                for (int i = 0; i < jugadores_historicos.size(); i++) {
+                    if (jugadores_historicos.get(i).equals(jugador1)) {
+                        jugadores_historicos.set(i, jugador1);
+                    } else if (jugadores_historicos.get(i).equals(jugador2)) {
+                        jugadores_historicos.set(i, jugador2);
+                    }
                 }
+                Persistencia.guardarJugadores(jugadores_historicos);
             }
-            Persistencia.guardarJugadores(jugadores_historicos);
         }
     }
 
@@ -141,6 +138,38 @@ public class Molino extends ObservableRemoto implements IMolino {
     @Override
     public MotivoFinPartida obtenerMotivoFinPartida() throws RemoteException {
         return motivoFinPartida;
+    }
+
+    @Override
+    public Coordenada generarCoordenada(Object[] coordenada) {
+        int fila = (int) coordenada[0];
+        char columna = (char) coordenada[1];
+        switch (fila) {
+            case 1 -> fila = 0;
+            case 2 -> fila = 1;
+            case 3 -> fila = 2;
+            case 4 -> fila = 3;
+            case 5 -> fila = 4;
+            case 6 -> fila = 5;
+            case 7 -> fila = 6;
+        }
+        int columnaResultado;
+        switch (columna) {
+            case 'A' -> columnaResultado = 0;
+            case 'B' -> columnaResultado = 1;
+            case 'C' -> columnaResultado = 2;
+            case 'D' -> columnaResultado = 3;
+            case 'E' -> columnaResultado = 4;
+            case 'F' -> columnaResultado = 5;
+            case 'G' -> columnaResultado = 6;
+            default -> columnaResultado = -1;
+        }
+        return new Coordenada(fila, columnaResultado);
+    }
+
+    @Override
+    public Jugador obtenerGanador() throws RemoteException {
+        return reglas.obtenerGanador(jugador1, jugador2);
     }
 
     @Override

@@ -187,8 +187,8 @@ public class VistaConsola implements IVista {
     }
 
     @Override
-    public void mostrarEmpate(String nombreJ1, String nombreJ2) {
-        System.out.println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 + "!");
+    public void mostrarEmpate() {
+        System.out.println("¡Se ha producido un EMPATE entre!");
     }
 
     @Override

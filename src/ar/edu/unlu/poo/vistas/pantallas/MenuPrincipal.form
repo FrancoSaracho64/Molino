@@ -47,61 +47,12 @@
           </component>
         </children>
       </scrollpane>
-      <component id="5b96a" class="javax.swing.JRadioButton" binding="radioConsola" default-binding="true">
-        <constraints>
-          <grid row="0" column="2" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <label value="Consola"/>
-          <text value="Consola"/>
-          <visible value="false"/>
-        </properties>
-      </component>
-      <component id="35c2a" class="javax.swing.JRadioButton" binding="radioConsolaGrafica" default-binding="true">
-        <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <label value="Consola Gráfica"/>
-          <text value="Consola Gráfica"/>
-          <visible value="false"/>
-        </properties>
-      </component>
-      <component id="1cb52" class="javax.swing.JRadioButton" binding="radioInterGrafica" default-binding="true">
-        <constraints>
-          <grid row="3" column="2" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <label value="Interfaz Gráfica"/>
-          <text value="Interfaz Gráfica"/>
-          <visible value="false"/>
-        </properties>
-      </component>
-      <component id="652fa" class="javax.swing.JButton" binding="btnSiguiente" default-binding="true">
-        <constraints>
-          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <label value="Comenzar juego"/>
-          <text value="Comenzar juego"/>
-          <visible value="false"/>
-        </properties>
-      </component>
       <component id="9efdd" class="javax.swing.JButton" binding="seleccionarJ1Button" default-binding="true">
         <constraints>
           <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Crear Jugador 1"/>
-          <visible value="false"/>
-        </properties>
-      </component>
-      <component id="3f3ca" class="javax.swing.JButton" binding="seleccionarJ2Button" default-binding="true">
-        <constraints>
-          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Crear Jugador 2"/>
           <visible value="false"/>
         </properties>
       </component>

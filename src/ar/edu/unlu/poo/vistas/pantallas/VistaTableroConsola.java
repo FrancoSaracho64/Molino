@@ -27,7 +27,7 @@ public class VistaTableroConsola implements IVista {
         frame1.setTitle("Juego del Molino - Nueve hombres de Morris");
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame1.setSize(600, 800);
-        frame1.setVisible(true);
+        frame1.setVisible(false);
 
         //Eventos
         button.addActionListener(new ActionListener() {
@@ -196,8 +196,8 @@ public class VistaTableroConsola implements IVista {
     }
 
     @Override
-    public void mostrarEmpate(String nombreJ1, String nombreJ2) {
-        println("¡Se ha producido un EMPATE entre " + nombreJ1 + " y " + nombreJ2 + "!");
+    public void mostrarEmpate() {
+        println("¡Se ha producido un EMPATE!");
     }
 
     @Override
@@ -232,7 +232,8 @@ public class VistaTableroConsola implements IVista {
 
     @Override
     public void mostrarJugadorConectado() {
-        textArea.setText("Se ha conectado un jugador...");
+        frame1.setVisible(true);
+        textArea.setText("Te has conectado.\nEsperando a que se una tu oponente...");
     }
 
     @Override

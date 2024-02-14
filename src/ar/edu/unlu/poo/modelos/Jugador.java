@@ -1,12 +1,10 @@
 package ar.edu.unlu.poo.modelos;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Jugador implements Serializable {
     private ArrayList<Ficha> fichas;
-    private static Integer id_jugador = 0;
     private final Integer id;
     private final String nombre;
     private int puntaje;
@@ -17,8 +15,7 @@ public class Jugador implements Serializable {
     private int fichasEnTablero;
 
     public Jugador(String nombre) {
-        this.id = id_jugador;
-        id_jugador++;
+        this.id = generarHashID(nombre);
         this.nombre = nombre;
         this.puntaje = 0;
         this.victorias = 0;
@@ -26,10 +23,6 @@ public class Jugador implements Serializable {
         this.fichasColocadas = 0;
         this.fichasEnTablero = 0;
         this.fichas = new ArrayList<>();
-    }
-
-    public static void actualizarUltimoId(ArrayList<Jugador> jugadores) {
-        id_jugador = jugadores.size();
     }
 
     public ArrayList<Ficha> getFichas() {
@@ -127,8 +120,10 @@ public class Jugador implements Serializable {
         return id.equals(jugador.id) && nombre.equals(jugador.nombre);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, nombre);
+    private int generarHashID(String nombre){
+        long timestamp = System.currentTimeMillis();
+        String nombreLimpio = nombre.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9_]", "");
+        String input = nombreLimpio + "_" + timestamp;
+        return input.hashCode();
     }
 }

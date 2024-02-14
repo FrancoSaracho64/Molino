@@ -16,16 +16,11 @@ public class MenuPrincipal {
     private JButton btnMenu;
     private JTextField editText;
     private JTextArea textArea;
-    private JRadioButton radioConsola;
-    private JRadioButton radioConsolaGrafica;
-    private JRadioButton radioInterGrafica;
-    private JButton btnSiguiente;
     private JButton seleccionarJ1Button;
-    private JButton seleccionarJ2Button;
     private JButton seleccionarJugadorPorIDButton;
     private JButton iniciarPartidaButton;
     private JButton crearNuevoJugadorButton;
-    private ArrayList<Jugador> jugadoresActivos;
+    private Jugador jugadorActivo;
     private ArrayList<Jugador> jugadoresRegistrados;
 
     public MenuPrincipal(IVista vista, Controlador controlador) {
@@ -35,23 +30,18 @@ public class MenuPrincipal {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setVisible(true);
-        jugadoresActivos = new ArrayList<>();
         jugadoresRegistrados = Persistencia.cargarJugadoresHistorico();
 
         iniciarPartidaButton.addActionListener(e -> {
             try {
-                controlador.agregarJugador(jugadoresActivos.getFirst());
+                jugadoresRegistrados.add(jugadorActivo);
+                Persistencia.guardarJugadores(jugadoresRegistrados);
+                System.out.println("Se guardo a: " + jugadorActivo.getNombre());
+                controlador.agregarJugador(jugadorActivo);
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }
-
-            /*
-            limpiarPantalla();
-            println("\n\nSeleccione con los RadioButton como quiere ejecutar el juego.\nLuego presione en 'Comenzar juego'.");
-            btnSiguiente.setVisible(true);
-            radioConsola.setVisible(true);
-            radioConsolaGrafica.setVisible(true);
-            iniciarPartidaButton.setVisible(false); */
+            this.frame.dispose();
         });
 
         crearNuevoJugadorButton.addActionListener(e -> {
@@ -59,65 +49,25 @@ public class MenuPrincipal {
             println("¡Generando Jugador nuevo!");
             String nombre = JOptionPane.showInputDialog(null, "Ingrese nombre del nuevo jugador: ");
             println("Jugador creado con exito. ¡Bienvenido " + nombre + "!");
-            Jugador jugador = new Jugador(nombre);
-            jugadoresActivos.add(jugador);
-            jugadoresRegistrados.add(jugador);
-            if (jugadoresActivos.size() == 1) {
-                crearNuevoJugadorButton.setVisible(false);
-                seleccionarJugadorPorIDButton.setVisible(false);
-                iniciarPartidaButton.setVisible(true);
-            }
+            jugadorActivo = new Jugador(nombre);
+            crearNuevoJugadorButton.setVisible(false);
+            seleccionarJugadorPorIDButton.setVisible(false);
+            iniciarPartidaButton.setVisible(true);
         });
 
         seleccionarJugadorPorIDButton.addActionListener(e -> {
-            int id_jugador = solicitarID();
-            boolean valido = false;
-            while (!valido) {
-                if (!jugadoresActivos.isEmpty()) {
-                    if (jugadoresActivos.get(0).getId() != id_jugador) {
-                        valido = true;
-                        for (Jugador jugadoresRegistrado : jugadoresRegistrados) {
-                            if (jugadoresRegistrado.getId() == id_jugador) {
-                                jugadoresActivos.add(jugadoresRegistrado);
-                                println("Se ha seleccionado el jugador " + jugadoresRegistrado.getNombre());
-                                break;
-                            }
-                        }
-                    } else {
-                        println("Ha ingresado el mismo jugador. Vuelva a intentar.");
-                        println("");
-                        id_jugador = solicitarID();
-                    }
-                } else {
-                    valido = true;
-                    for (Jugador jugadoresRegistrado : jugadoresRegistrados) {
-                        if (jugadoresRegistrado.getId() == id_jugador) {
-                            jugadoresActivos.add(jugadoresRegistrado);
-                            println("Se ha seleccionado el jugador " + jugadoresRegistrado.getNombre());
-                            break;
-                        }
-                    }
-                }
-            }
-            if (jugadoresActivos.size() == 1) {
-                crearNuevoJugadorButton.setVisible(false);
-                seleccionarJugadorPorIDButton.setVisible(false);
-                iniciarPartidaButton.setVisible(true);
-            }
-        });
-
-        seleccionarJ2Button.addActionListener(e -> {
-            Jugador jugador = pedirJugador();
-            seleccionarJ2Button.setVisible(false);
+            int pos = solicitarPosicion();
+            jugadorActivo = jugadoresRegistrados.get(pos - 1);
+            println("Se ha seleccionado el jugador " + jugadorActivo.getNombre());
+            crearNuevoJugadorButton.setVisible(false);
+            seleccionarJugadorPorIDButton.setVisible(false);
             iniciarPartidaButton.setVisible(true);
-            jugadoresActivos.add(jugador);
         });
 
         seleccionarJ1Button.addActionListener(e -> {
-            Jugador jugador = pedirJugador();
-            jugadoresActivos.add(jugador);
+            jugadorActivo = pedirJugador();
             seleccionarJ1Button.setVisible(false);
-            seleccionarJ2Button.setVisible(true);
+            iniciarPartidaButton.setVisible(true);
         });
 
         btnMenu.addActionListener(e -> {
@@ -197,58 +147,30 @@ public class MenuPrincipal {
             else if (radioInterGrafica.isSelected())
                 opcion = 3;
             frame.dispose();
-            switch (opcion) {
-                case 1 -> {
-                    println("Ejecutando juego por consola...");
-                    IVistaTablero vista = new VistaConsola(controlador);
-                    controlador.agregarVista(vista);
-                    try {
-                        vista.iniciarJuego();
-                    } catch (RemoteException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-                case 2 -> {
-                    println("Ejecutando juego por Consola/Interfaz grafica");
-
-                    IVistaTablero vista = new VistaVistaTableroConsola(controlador);
-                    controlador.agregarVista(vista);
-                    try {
-                        vista.iniciarJuego();
-                    } catch (RemoteException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-                case 3 -> {
-                    println("Interfaz grafica");
-                    // TODO: IMPLEMENTAR
-                }
-            }
 
         });
-
          */
         println("\t\t¡Bienvenid@ al Juego del Molino!\n\n");
         mostrar_menu();
     }
 
-    private int solicitarID() {
+    private int solicitarPosicion() {
         boolean inputValido = false;
-        int id_jugador = 0;
+        int i = 0;
         while (!inputValido) {
-            String inputID = JOptionPane.showInputDialog(null, "Ingrese un ID: ");
+            String index = JOptionPane.showInputDialog(null, "Ingrese la posicion que identifique a su jugador: ");
             try {
-                id_jugador = Integer.parseInt(inputID);
-                if (id_jugador >= 0 && id_jugador < jugadoresRegistrados.size()) {
+                i = Integer.parseInt(index);
+                if (i > 0 && i <= jugadoresRegistrados.size()) {
                     inputValido = true;
                 } else {
-                    JOptionPane.showMessageDialog(null, "El ID ingresado no está dentro del rango válido (0 / " + (jugadoresRegistrados.size() - 1) + ").");
+                    JOptionPane.showMessageDialog(null, "El ID ingresado no está dentro del rango válido (1 / " + (jugadoresRegistrados.size()) + ").");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Ingrese un número válido para el ID.");
             }
         }
-        return id_jugador;
+        return i;
     }
 
     public static void ordenamientoPuntaje(List<Jugador> jugadores) {

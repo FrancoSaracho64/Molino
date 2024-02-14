@@ -19,7 +19,7 @@ public interface IVista {
     void casillaNoAdyacente();
     void mensajeCasillaFichaAMover();
     void mensajePedirNuevaCasillaLibreAdyacente();
-    void mostrarEmpate(String nombreJ1, String nombreJ2);
+    void mostrarEmpate();
     void mostrarMensajeCasillaOcupada();
     void mensajeFichaFormaMolino();
     void mensajePedirNuevaCasillaLibre();

@@ -1,13 +1,14 @@
 package ar.edu.unlu.poo.persistencia;
 
 import ar.edu.unlu.poo.modelos.Jugador;
+import ar.edu.unlu.poo.modelos.Molino;
 
 import java.io.*;
 import java.util.ArrayList;
 
 public class Persistencia {
     private static final String ARCHIVO_JUGADORES_HISTORICO = "historicoJugadores.dat";
-    //private static final String ARCHIVO_TABLERO = "tablero.dat";  TODO: Implementar
+    private static final String ARCHIVO_PARTIDA_GUARDADA = "partidasGuardadas.dat";
 
     public static void guardarJugadores(ArrayList<Jugador> jugadores) {
         try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(ARCHIVO_JUGADORES_HISTORICO))) {
@@ -18,16 +19,34 @@ public class Persistencia {
     }
 
     public static ArrayList<Jugador> cargarJugadoresHistorico() {
-        ArrayList<Jugador> jugadores = new ArrayList<>();
         File archivo = new File(ARCHIVO_JUGADORES_HISTORICO);
         if (archivo.exists()) {
             try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(ARCHIVO_JUGADORES_HISTORICO))) {
-                jugadores = (ArrayList<Jugador>) entrada.readObject();
-                Jugador.actualizarUltimoId(jugadores);
+                return (ArrayList<Jugador>) entrada.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
-        return jugadores;
+        return new ArrayList<>();
+    }
+
+    public static void guardarPartida(Molino molino) {
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(ARCHIVO_PARTIDA_GUARDADA))) {
+            salida.writeObject(molino);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Molino cargarPartidasGuardadas() {
+        File archivo = new File(ARCHIVO_JUGADORES_HISTORICO);
+        if (archivo.exists()) {
+            try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(ARCHIVO_PARTIDA_GUARDADA))) {
+                return (Molino) entrada.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

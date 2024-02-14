@@ -100,31 +100,9 @@ public class Controlador implements IControladorRemoto {
         modelo.conectarJugador(jugador);
     }
 
-    public Coordenada solicitarCasillaVista() {
+    private Coordenada solicitarCasillaVista() throws RemoteException {
         Object[] coordenada = vista.pedirCasilla();
-        int fila = (int) coordenada[0];
-        char columna = (char) coordenada[1];
-        switch (fila) {
-            case 1 -> fila = 0;
-            case 2 -> fila = 1;
-            case 3 -> fila = 2;
-            case 4 -> fila = 3;
-            case 5 -> fila = 4;
-            case 6 -> fila = 5;
-            case 7 -> fila = 6;
-        }
-        int columnaResultado;
-        switch (columna) {
-            case 'A' -> columnaResultado = 0;
-            case 'B' -> columnaResultado = 1;
-            case 'C' -> columnaResultado = 2;
-            case 'D' -> columnaResultado = 3;
-            case 'E' -> columnaResultado = 4;
-            case 'F' -> columnaResultado = 5;
-            case 'G' -> columnaResultado = 6;
-            default -> columnaResultado = -1;
-        }
-        return new Coordenada(fila, columnaResultado);
+        return modelo.generarCoordenada(coordenada);
     }
 
     private void eliminarFichaOponente(Jugador jugadorOponente) throws RemoteException {
@@ -263,6 +241,15 @@ public class Controlador implements IControladorRemoto {
 
     private void finDePartida() throws RemoteException {
         vista.juegoTerminado();
+        Jugador ganador = modelo.obtenerGanador();
+
+        if (ganador == null) {
+            vista.mostrarEmpate();
+        } else {
+            // Mostramos el ganador.
+            vista.mostrarGanador(ganador.getNombre());
+        }
+
         switch (modelo.obtenerMotivoFinPartida()) {
             case JUGADOR_SIN_MOVIMIENTOS -> {
                 vista.jugadorSinMovimientos();
@@ -275,7 +262,7 @@ public class Controlador implements IControladorRemoto {
 
     public void closeApp() throws RemoteException {
         try {
-            this.modelo.cerrar(this, this.jugadorLocal);
+            this.modelo.cerrar(this, jugadorLocal);
             System.exit(0);
         } catch (RemoteException e) {
             e.printStackTrace();

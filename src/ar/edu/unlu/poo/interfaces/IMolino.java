@@ -5,6 +5,7 @@ import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.modelos.Tablero;
+import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 import ar.edu.unlu.rmimvc.observer.IObservadorRemoto;
 
@@ -34,4 +35,6 @@ public interface IMolino extends IObservableRemoto {
     boolean verificarMolinoTrasMovimiento(Coordenada coordenada, Jugador jugador) throws RemoteException;
     void finalizarTurno() throws RemoteException;
     MotivoFinPartida obtenerMotivoFinPartida() throws RemoteException;
+    Coordenada generarCoordenada(Object[] coordenada) throws RemoteException;
+    Jugador obtenerGanador() throws RemoteException;
 }

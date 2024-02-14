@@ -81,7 +81,7 @@ public class VistaTableroInterfazGrafica implements IVista {
     }
 
     @Override
-    public void mostrarEmpate(String nombreJ1, String nombreJ2) {
+    public void mostrarEmpate() {
 
     }
 
