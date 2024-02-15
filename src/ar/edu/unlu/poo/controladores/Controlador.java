@@ -1,6 +1,7 @@
 package ar.edu.unlu.poo.controladores;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.enumerados.EventosTablero;
@@ -24,8 +25,7 @@ public class Controlador implements IControladorRemoto {
     public void iniciarPartida() throws RemoteException {
         // Comenzar el juego
         setOponente();
-        //modelo.comenzarJuego();
-        vista.mostrarTablero();
+        vista.actualizar();
     }
 
     public void realizarAccion() {
@@ -37,20 +37,26 @@ public class Controlador implements IControladorRemoto {
                         modelo.colocarFicha(coordenada, jugadorLocal);
                         if (modelo.verificarMolinoTrasMovimiento(coordenada, jugadorLocal)) {
                             // Si se da la condición, eliminamos una ficha.
-                            eliminarFichaOponente(oponente);
+                            if (modelo.hayFichasParaEliminar(oponente)) {
+                                eliminarFichaOponente(oponente);
+                            } else {
+                                //Le informamos al usuario que no hay fichas para eliminar.
+                                vista.avisoNoHayFichasParaEliminarDelOponente();
+                            }
                         }
                         finalizarTurno();
                     }
                     case MOVER_FICHA -> {
                         Coordenada origen = pedirCoordenadaFichaAMover(jugadorLocal);
-                        if (modelo.fichaTieneMovimientos(origen)) {
-                            Coordenada destino = pedirCoordenadaLibreAdyacente(origen);
-                            modelo.moverFicha(origen, destino);
-                            if (modelo.verificarMolinoTrasMovimiento(destino, jugadorLocal)) {
+                        Coordenada destino = pedirCoordenadaLibreAdyacente(origen);
+                        modelo.moverFicha(origen, destino);
+                        if (modelo.verificarMolinoTrasMovimiento(destino, jugadorLocal)) {
+                            if (modelo.hayFichasParaEliminar(oponente)) {
                                 eliminarFichaOponente(oponente);
+                            } else {
+                                //Le informamos al usuario que no hay fichas para eliminar.
+                                vista.avisoNoHayFichasParaEliminarDelOponente();
                             }
-                        } else {
-                            vista.fichaSinMovimiento();
                         }
                         finalizarTurno();
                     }
@@ -59,7 +65,12 @@ public class Controlador implements IControladorRemoto {
                         Coordenada destino = pedirCoordenadaLibre();
                         modelo.moverFicha(origen, destino);
                         if (modelo.verificarMolinoTrasMovimiento(destino, jugadorLocal)) {
-                            eliminarFichaOponente(oponente);
+                            if (modelo.hayFichasParaEliminar(oponente)) {
+                                eliminarFichaOponente(oponente);
+                            } else {
+                                //Le informamos al usuario que no hay fichas para eliminar.
+                                vista.avisoNoHayFichasParaEliminarDelOponente();
+                            }
                         }
                         finalizarTurno();
                     }
@@ -203,11 +214,11 @@ public class Controlador implements IControladorRemoto {
     private Coordenada pedirCoordenadaFichaAMover(Jugador jugador) {
         try {
             boolean valida;
-            boolean ocupada;
             boolean esDeJugador;
+            boolean movimientos;
             Coordenada coord;
-            do { // verifico que la ficha corresponda al jugador pasado por parámetro.
-                do { // verifico que la casilla esté ocupada.
+            do { // verifico que la ficha tenga movimientos.
+                do { // verifico que la casilla esté ocupada por el jugador.
                     do { // verifico que sea una casilla válida.
                         vista.mensajeCasillaFichaAMover();
                         coord = solicitarCasillaVista();
@@ -216,17 +227,16 @@ public class Controlador implements IControladorRemoto {
                             vista.mostrarMensajeErrorCasilla();
                         }
                     } while (!valida);
-                    ocupada = modelo.getTablero().obtenerEstadoCasilla(coord)
-                            == EstadoCasilla.OCUPADA;
-                    if (!ocupada) {
+                    esDeJugador = modelo.casillaOcupadaPorJugador(coord, jugador);
+                    if (!esDeJugador) {
                         vista.mostrarMensajeErrorCasilla();
                     }
-                } while (!ocupada);
-                esDeJugador = modelo.getTablero().obtenerFicha(coord).getJugador().equals(jugador);
-                if (!esDeJugador) {
-                    vista.mostrarMensajeErrorCasilla();
+                } while (!esDeJugador);
+                movimientos = modelo.fichaTieneMovimientos(coord);
+                if (!movimientos) {
+                    vista.fichaSinMovimiento();
                 }
-            } while (!esDeJugador);
+            } while (!movimientos);
             return coord;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -235,30 +245,35 @@ public class Controlador implements IControladorRemoto {
     }
 
     private void finDePartida() throws RemoteException {
-        vista.juegoTerminado();
         Jugador ganador = modelo.obtenerGanador();
-
+        vista.juegoTerminado();
         if (ganador == null) {
             vista.mostrarEmpate();
         } else {
-            // Mostramos el ganador.
             vista.mostrarGanador(ganador.getNombre());
-        }
-
-        switch (modelo.obtenerMotivoFinPartida()) {
-            case JUGADOR_SIN_MOVIMIENTOS -> {
-                vista.jugadorSinMovimientos();
-            }
-            case JUGADOR_SIN_FICHAS -> {
-                vista.jugadorSinFichas();
+            if (ganador.equals(jugadorLocal)) {
+                //Soy el ganador...
+                vista.mensajeAlGanador();
+            } else {
+                vista.mensajeAlPerdedor();
+                switch (modelo.obtenerMotivoFinPartida()) {
+                    case JUGADOR_SIN_MOVIMIENTOS -> {
+                        vista.jugadorSinMovimientos();
+                    }
+                    case JUGADOR_SIN_FICHAS -> {
+                        vista.jugadorSinFichas();
+                    }
+                }
             }
         }
     }
 
-    public void closeApp() throws RemoteException {
+    public void cerrarAplicacion() throws RemoteException {
         try {
-            this.modelo.cerrar(this, jugadorLocal);
-            System.exit(0);
+            if (modelo != null) {
+                modelo.removerObservador(this);
+                modelo.removerJugador(jugadorLocal);
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -289,5 +304,33 @@ public class Controlador implements IControladorRemoto {
                 default -> System.out.println("MENSAJE DE PRUEBA");
             }
         }
+    }
+
+    public boolean hayJugadoresRegistrados() throws RemoteException {
+        return modelo.hayJugadoresRegistrados();
+    }
+
+    public ArrayList<Jugador> obtenerJugadoresRegistrados() throws RemoteException {
+        return modelo.obtenerJugadoresRegistrados();
+    }
+
+    public boolean jugadorRegistradoEstaDisponible(int pos) throws RemoteException {
+        return modelo.jugadorEstaDisponible(pos);
+    }
+
+    public boolean existeElNombre(String nombre) throws RemoteException {
+        return modelo.existeNombreJugador(nombre);
+    }
+
+    public void jugadorAbandona() {
+        try {
+            modelo.jugadorHaAbandonado(jugadorLocal);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean hayPartidaActiva() throws RemoteException {
+        return modelo.hayPartidaActiva();
     }
 }

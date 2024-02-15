@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReglasDelJuego {
-    private Tablero tablero;
+    private static final int CANT_COLUMNAS = 7;
+    private static final int CANT_FILAS = 7;
+    private final Tablero tablero;
 
     public ReglasDelJuego(Tablero tablero) {
         this.tablero = tablero;
@@ -17,7 +19,7 @@ public class ReglasDelJuego {
         // Verifica si la casilla está dentro de los límites del tablero.
         int fila = coordenada.getFila();
         int columna = coordenada.getColumna();
-        if (fila < 0 || fila >= tablero.getCountFilas() || columna < 0 || columna >= tablero.getCountColumnas()) {
+        if (fila < 0 || fila >= CANT_FILAS || columna < 0 || columna >= CANT_COLUMNAS) {
             return false;
         }
         return !tablero.obtenerEstadoCasilla(new Coordenada(fila, columna)).equals(EstadoCasilla.INVALIDA);
@@ -41,6 +43,7 @@ public class ReglasDelJuego {
      * Con este metodo se debe obtener todas las sus casillas adyacentes.
      * Luego, determinar si son válidas o no.
      * Si son válidas, se debe analizar por si es posible o no moverse ahí.
+     *
      * @param casilla La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
      * @return Se retorna true si hay movimientos. False si no hay.
      */
@@ -50,7 +53,7 @@ public class ReglasDelJuego {
         for (Coordenada coordenada : coordAdyacentes) {
             if (esCasillaValida(coordenada)) {
                 if (tablero.obtenerEstadoCasilla(coordenada).
-                    equals(EstadoCasilla.LIBRE)) {
+                        equals(EstadoCasilla.LIBRE)) {
                     return true;  // Hay al menos un movimiento posible
                 }
             }
@@ -61,7 +64,7 @@ public class ReglasDelJuego {
 
     private boolean esFichaDelJugador(Coordenada coordenada, Jugador jugador) {
         Ficha ficha = tablero.getCasilla(coordenada).getFicha();
-        if (ficha == null){
+        if (ficha == null) {
             return false;
         } else {
             return ficha.getJugador().equals(jugador);
@@ -79,15 +82,15 @@ public class ReglasDelJuego {
         }  // Las columnas son iguales, entonces tomas el valor de la columna
 
         ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(adyacente).getCoordenadasCasillasAdyacentes();
-        if (filaComun != -1){
-            for (Coordenada co: casillasAdyacentes){
-                if (!co.equals(origen) && co.getFila() == filaComun ){
+        if (filaComun != -1) {
+            for (Coordenada co : casillasAdyacentes) {
+                if (!co.equals(origen) && co.getFila() == filaComun) {
                     return co;
                 }
             }
         } else {
-            for (Coordenada co: casillasAdyacentes){
-                if (!co.equals(origen) && co.getColumna() == columna){
+            for (Coordenada co : casillasAdyacentes) {
+                if (!co.equals(origen) && co.getColumna() == columna) {
                     return co;
                 }
             }
@@ -126,8 +129,8 @@ public class ReglasDelJuego {
         int columnaOpuesta = origen.getColumna() + deltaCol;
 
         // Verifica si la coordenada opuesta es válida dentro del tablero
-        if (filaOpuesta >= 0 && filaOpuesta < tablero.getCountFilas() &&
-                columnaOpuesta >= 0 && columnaOpuesta < tablero.getCountColumnas()) {
+        if (filaOpuesta >= 0 && filaOpuesta < CANT_FILAS &&
+                columnaOpuesta >= 0 && columnaOpuesta < CANT_COLUMNAS) {
             return new Coordenada(filaOpuesta, columnaOpuesta);
         }
         return null;
@@ -158,7 +161,7 @@ public class ReglasDelJuego {
 
     public boolean hayFichasParaEliminar(Jugador jugadorOponente) {
         List<Casilla> casillasOcupadas = tablero.obtenerCasillasOcupadasPorJugador(jugadorOponente);
-        for (Casilla casilla : casillasOcupadas){
+        for (Casilla casilla : casillasOcupadas) {
             if (!hayMolinoEnPosicion(casilla.getCoordenada(), jugadorOponente)) {
                 return true;
             }

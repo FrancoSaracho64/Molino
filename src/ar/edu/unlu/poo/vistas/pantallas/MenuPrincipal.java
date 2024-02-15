@@ -1,18 +1,19 @@
 package ar.edu.unlu.poo.vistas.pantallas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
-import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.poo.persistencia.Persistencia;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MenuPrincipal {
     private final JFrame frame;
-    private JPanel panel1;
+    private JPanel panel;
     private JButton btnMenu;
     private JTextField editText;
     private JTextArea textArea;
@@ -20,24 +21,42 @@ public class MenuPrincipal {
     private JButton seleccionarJugadorPorIDButton;
     private JButton iniciarPartidaButton;
     private JButton crearNuevoJugadorButton;
-    private Jugador jugadorActivo;
-    private ArrayList<Jugador> jugadoresRegistrados;
+    private Jugador jugadorLocal;
+    private final Controlador controlador;
 
-    public MenuPrincipal(IVista vista, Controlador controlador) {
+    public MenuPrincipal(Controlador controlador) {
+        this.controlador = controlador;
         frame = new JFrame();
-        frame.setContentPane(panel1);
+        frame.setContentPane(panel);
         frame.setTitle("Juego del Molino - Menú principal");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setVisible(true);
-        jugadoresRegistrados = Persistencia.cargarJugadoresHistorico();
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Aquí puedes agregar cualquier acción que desees realizar antes de cerrar.
+                // Por ejemplo, mostrar un diálogo de confirmación.
+                try {
+                    int confirm = JOptionPane.showConfirmDialog(frame,
+                            "¿Estás seguro de que quieres cerrar la aplicación? El juego todavía no ha comenzado.",
+                            "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        // Si el usuario confirma, cierra la aplicación.
+                        controlador.cerrarAplicacion();
+                        frame.dispose(); // Cierra la ventana
+                        System.exit(0); // Termina la aplicación
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         iniciarPartidaButton.addActionListener(e -> {
             try {
-                jugadoresRegistrados.add(jugadorActivo);
-                Persistencia.guardarJugadores(jugadoresRegistrados);
-                System.out.println("Se guardo a: " + jugadorActivo.getNombre());
-                controlador.agregarJugador(jugadorActivo);
+                controlador.agregarJugador(jugadorLocal);
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }
@@ -47,25 +66,51 @@ public class MenuPrincipal {
         crearNuevoJugadorButton.addActionListener(e -> {
             println("");
             println("¡Generando Jugador nuevo!");
+            // Verificamos que ese nombre no exista
+            boolean ocupado;
             String nombre = JOptionPane.showInputDialog(null, "Ingrese nombre del nuevo jugador: ");
+            try {
+                ocupado = controlador.existeElNombre(nombre);
+                if (ocupado) {
+                    println("El nombre ingresado ya se encuentra registrado. Intente con otro.");
+                    return;
+                }
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             println("Jugador creado con exito. ¡Bienvenido " + nombre + "!");
-            jugadorActivo = new Jugador(nombre);
+            jugadorLocal = new Jugador(nombre);
             crearNuevoJugadorButton.setVisible(false);
             seleccionarJugadorPorIDButton.setVisible(false);
             iniciarPartidaButton.setVisible(true);
         });
 
         seleccionarJugadorPorIDButton.addActionListener(e -> {
-            int pos = solicitarPosicion();
-            jugadorActivo = jugadoresRegistrados.get(pos - 1);
-            println("Se ha seleccionado el jugador " + jugadorActivo.getNombre());
+            try {
+                boolean disponible;
+                int pos;
+                pos = solicitarPosicion();
+                if (pos == -1) {
+                    return;
+                }
+                disponible = controlador.jugadorRegistradoEstaDisponible(pos);
+                if (!disponible) {
+                    println("El jugador seleccionado NO está disponible. Intente con otro.");
+                    return;
+                }
+                jugadorLocal = controlador.obtenerJugadoresRegistrados().get(pos);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            println("Se ha seleccionado el jugador " + jugadorLocal.getNombre());
             crearNuevoJugadorButton.setVisible(false);
             seleccionarJugadorPorIDButton.setVisible(false);
             iniciarPartidaButton.setVisible(true);
         });
 
         seleccionarJ1Button.addActionListener(e -> {
-            jugadorActivo = pedirJugador();
+            jugadorLocal = pedirJugador();
             seleccionarJ1Button.setVisible(false);
             iniciarPartidaButton.setVisible(true);
         });
@@ -81,25 +126,29 @@ public class MenuPrincipal {
                         limpiarPantalla();
                         println("NOTA IMPORTANTE: El jugador 1 mueve primero.\n");
                         println("* * * Analizando lista de jugadores... * * *\n");
-                        if (jugadoresRegistrados.isEmpty()) {
-                            println("No se ha encontrado registro de jugadores antiguos.");
-                            seleccionarJ1Button.setVisible(true);
-                        } else {
-                            crearNuevoJugadorButton.setVisible(true);
-                            seleccionarJugadorPorIDButton.setVisible(true);
-                            println("Se han detectado jugadores antiguos.\nLos jugadores detectados son los siguientes:\n");
-                            int i = 1;
-                            for (Jugador jugador : jugadoresRegistrados) {
-                                println("Jugador N°" + i + "  :");
-                                println(jugador.toString());
-                                println("");
-                                i++;
+                        try {
+                            if (!controlador.hayJugadoresRegistrados()) {
+                                println("No se ha encontrado registro de jugadores antiguos.");
+                                seleccionarJ1Button.setVisible(true);
+                            } else {
+                                crearNuevoJugadorButton.setVisible(true);
+                                seleccionarJugadorPorIDButton.setVisible(true);
+                                println("Se han detectado jugadores antiguos.\nLos jugadores detectados son los siguientes:\n");
+                                int i = 1;
+                                for (Jugador jugador : controlador.obtenerJugadoresRegistrados()) {
+                                    println("Jugador N°" + i + "  :");
+                                    println(jugador.toString());
+                                    println("");
+                                    i++;
+                                }
+                                println("\n\n");
+                                println("Seleccione/Cargue los jugadores a través del botón.");
+                                println("\n");
+                                println("En caso de que el jugador se encuentre en la lista, ingrese el ID correspondiente.");
+                                println("Caso contrario, toque el botón para crear un jugador.");
                             }
-                            println("\n\n");
-                            println("Seleccione/Cargue los jugadores a través del botón.");
-                            println("\n");
-                            println("En caso de que el jugador se encuentre en la lista, ingrese el ID correspondiente.");
-                            println("Caso contrario, toque el botón para crear un jugador.");
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
                         }
                     }
                     case "2" -> {
@@ -110,7 +159,7 @@ public class MenuPrincipal {
                             ordenamientoPuntaje(jugadoresRegistrados);
                             int pos = 1;
                             for (Jugador jugador : jugadoresRegistrados) {
-                                println("POSICION " + pos + "--->  Nombre: " + jugador.getNombre() + " - Puntaje: " + jugador.getPuntaje());
+                                println("POSICION " + pos + " --->  Nombre: " + jugador.getNombre() + " - Puntaje: " + jugador.getPuntaje());
                                 pos++;
                             }
                         }
@@ -120,36 +169,6 @@ public class MenuPrincipal {
             }
         });
 
-        /*
-        btnSiguiente.addActionListener(e -> {
-            editText.setText("");
-            Tablero tablero = new Tablero();
-
-            if (jugadoresRegistrados.isEmpty()) {
-                jugadoresRegistrados.addAll(jugadoresActivos);
-            } else {
-                for (int i = 0; i < jugadoresRegistrados.size(); i++) {
-                    if (jugadoresRegistrados.get(i).getId() == jugadoresActivos.get(0).getId()) {
-                        jugadoresRegistrados.set(i, jugadoresActivos.get(0));
-                    } else if (jugadoresRegistrados.get(i).getId() == jugadoresActivos.get(1).getId()) {
-                        jugadoresRegistrados.set(i, jugadoresActivos.get(1));
-                    }
-                }
-            }
-            // Guardo los jugadores.
-            Persistencia.guardarJugadores(jugadoresRegistrados);
-            TableroControlador controlador = new TableroControlador(jugadoresActivos, tablero);
-            int opcion = 0;
-            if (radioConsola.isSelected())
-                opcion = 1;
-            else if (radioConsolaGrafica.isSelected())
-                opcion = 2;
-            else if (radioInterGrafica.isSelected())
-                opcion = 3;
-            frame.dispose();
-
-        });
-         */
         println("\t\t¡Bienvenid@ al Juego del Molino!\n\n");
         mostrar_menu();
     }
@@ -158,22 +177,25 @@ public class MenuPrincipal {
         boolean inputValido = false;
         int i = 0;
         while (!inputValido) {
-            String index = JOptionPane.showInputDialog(null, "Ingrese la posicion que identifique a su jugador: ");
+            String index = JOptionPane.showInputDialog(null, "Ingrese la posicion que identifique a su jugador ('0' para volver al menú): ");
             try {
+                int size = controlador.obtenerJugadoresRegistrados().size();
                 i = Integer.parseInt(index);
-                if (i > 0 && i <= jugadoresRegistrados.size()) {
+                if (i >= 0 && i <= size) {
                     inputValido = true;
                 } else {
-                    JOptionPane.showMessageDialog(null, "El ID ingresado no está dentro del rango válido (1 / " + (jugadoresRegistrados.size()) + ").");
+                    JOptionPane.showMessageDialog(null, "El ID ingresado no está dentro del rango válido (1 / " + size + "). Introduzca '0' para volver al menú.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Ingrese un número válido para el ID.");
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
         }
-        return i;
+        return i - 1;
     }
 
-    public static void ordenamientoPuntaje(List<Jugador> jugadores) {
+    private static void ordenamientoPuntaje(List<Jugador> jugadores) {
         int n = jugadores.size();
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
@@ -197,23 +219,7 @@ public class MenuPrincipal {
     private void mostrar_menu() {
         println("\tMenu principal");
         println("1)   Iniciar nueva partida");
-        println("2)   Mostrar TOP 5 de mejores jugadores");
-    }
-
-    private ArrayList<Jugador> pedirJugadores() {
-        ArrayList<Jugador> jugadores = new ArrayList<>();
-        //
-        println("\n+++++++++++++++++++++++++++++\n¡Conozcamos a los jugadores!\n+++++++++++++++++++++++++++++");
-        String userInput = JOptionPane.showInputDialog(null, "Ingrese nombre del jugador 1: ");
-        println("Jugador   '" + userInput + "'   registrado correctamente.");
-        Jugador j1 = new Jugador(userInput);
-        jugadores.add(j1);
-        //
-        userInput = JOptionPane.showInputDialog(null, "Ingrese nombre del jugador 2: ");
-        println("Jugador   '" + userInput + "'   registrado correctamente.");
-        Jugador j2 = new Jugador(userInput);
-        jugadores.add(j2);
-        return jugadores;
+        println("2)   Mostrar TOP 5 de mejores jugadores\n");
     }
 
     private Jugador pedirJugador() {

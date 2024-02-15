@@ -10,7 +10,7 @@ import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 import java.rmi.RemoteException;
 
 public class VistaConsola implements IVista {
-    private Controlador controlador;
+    private final Controlador controlador;
 
     public VistaConsola(Controlador controlador) {
         this.controlador = controlador;
@@ -49,7 +49,7 @@ public class VistaConsola implements IVista {
 
     @Override
     public void iniciar() {
-        new MenuPrincipal(this, controlador);
+        new MenuPrincipal(controlador);
     }
 
     @Override
@@ -244,5 +244,15 @@ public class VistaConsola implements IVista {
     public void actualizar() throws RemoteException {
         limpiarConsola();
         mostrarTablero();
+    }
+
+    @Override
+    public void mensajeAlGanador() {
+
+    }
+
+    @Override
+    public void mensajeAlPerdedor() {
+
     }
 }

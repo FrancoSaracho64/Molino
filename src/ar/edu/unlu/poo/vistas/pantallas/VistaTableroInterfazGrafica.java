@@ -7,7 +7,7 @@ import ar.edu.unlu.poo.modelos.Jugador;
 import java.rmi.RemoteException;
 
 public class VistaTableroInterfazGrafica implements IVista {
-    private Controlador controlador;
+    private final Controlador controlador;
 
     public VistaTableroInterfazGrafica(Controlador controlador) {
         this.controlador = controlador;
@@ -131,6 +131,16 @@ public class VistaTableroInterfazGrafica implements IVista {
 
     @Override
     public void actualizar() throws RemoteException {
+
+    }
+
+    @Override
+    public void mensajeAlGanador() {
+
+    }
+
+    @Override
+    public void mensajeAlPerdedor() {
 
     }
 }

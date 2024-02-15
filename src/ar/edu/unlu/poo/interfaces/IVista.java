@@ -29,4 +29,6 @@ public interface IVista {
     void mostrarTurnoActual(Jugador jugadorActual);
     void mostrarMensajeError(String mensaje);
     void actualizar() throws RemoteException;
+    void mensajeAlGanador();
+    void mensajeAlPerdedor();
 }

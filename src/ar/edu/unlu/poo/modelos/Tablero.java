@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Tablero implements Serializable {
-    private static final int CANT_COLUMNAS = 7;
-    private static final int CANT_FILAS = 7;
     private final ArrayList<Casilla> casillas;
 
     public Tablero() {
@@ -139,7 +137,8 @@ public class Tablero implements Serializable {
 
     /**
      * Desplazamos la ficha que se ubica en la primer coordenada a la segunda coordenada.
-     * @param cOrigen Coordenada de origen.
+     *
+     * @param cOrigen  Coordenada de origen.
      * @param cDestino Coordenada de destino.
      */
     public void moverFicha(Coordenada cOrigen, Coordenada cDestino) {
@@ -162,13 +161,5 @@ public class Tablero implements Serializable {
             }
         }
         return casillasOcupadas;
-    }
-
-    public int getCountFilas() {
-        return CANT_FILAS;
-    }
-
-    public int getCountColumnas() {
-        return CANT_COLUMNAS;
     }
 }

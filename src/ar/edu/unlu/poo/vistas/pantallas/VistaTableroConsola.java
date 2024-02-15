@@ -2,18 +2,20 @@ package ar.edu.unlu.poo.vistas.pantallas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
+import ar.edu.unlu.poo.mensajes.MensajesGanador;
+import ar.edu.unlu.poo.mensajes.MensajesPerdedor;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 
 public class VistaTableroConsola implements IVista {
-    private final JFrame frame1;
+    private final Controlador controlador;
+    private final JFrame frame;
     private JPanel paneJ;
-    private Controlador controlador;
     private JTextArea textArea;
     private JButton button;
 
@@ -21,20 +23,51 @@ public class VistaTableroConsola implements IVista {
         this.controlador = controlador;
         this.controlador.setVista(this);
 
-        frame1 = new JFrame();
-        frame1.setContentPane(paneJ);
-        frame1.setTitle("Juego del Molino - Nueve hombres de Morris");
-        frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame1.setSize(600, 800);
-        frame1.setVisible(false);
+        frame = new JFrame();
+        frame.setContentPane(paneJ);
+        frame.setTitle("Juego del Molino - Nueve hombres de Morris");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 800);
+        frame.setVisible(false);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         //Eventos
-        button.addActionListener(new ActionListener() {
+        frame.addWindowListener(new WindowAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                controlador.realizarAccion();
+            public void windowClosing(WindowEvent e) {
+                // Aquí puedes agregar cualquier acción que desees realizar antes de cerrar.
+                // Por ejemplo, mostrar un diálogo de confirmación.
+                try {
+                    if (controlador.hayPartidaActiva()) {
+                        int confirm = JOptionPane.showConfirmDialog(frame,
+                                "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
+                                "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            //todo: implementar guardado de partida.
+                        }
+                        if (confirm == JOptionPane.NO_OPTION) {
+                            // Si el usuario confirma, cierra la aplicación.
+                            controlador.jugadorAbandona();
+                            frame.dispose(); // Cierra la ventana
+                            System.exit(0); // Termina la aplicación
+                        }
+                    } else {
+                        int confirm = JOptionPane.showConfirmDialog(frame,
+                                "¿Estás seguro de que quieres cerrar la aplicación? El juego todavía no ha comenzado.",
+                                "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            // Si el usuario confirma, cierra la aplicación.
+                            controlador.cerrarAplicacion();
+                            frame.dispose(); // Cierra la ventana
+                            System.exit(0); // Termina la aplicación
+                        }
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
+        button.addActionListener(e -> controlador.realizarAccion());
     }
 
     private String numeroFila(int fila) {
@@ -47,7 +80,7 @@ public class VistaTableroConsola implements IVista {
 
     @Override
     public void iniciar() {
-        new MenuPrincipal(this, controlador);
+        new MenuPrincipal(controlador);
     }
 
     @Override
@@ -64,9 +97,9 @@ public class VistaTableroConsola implements IVista {
                 tablero.append("   ");
             }
             for (int columna = 0; columna < 13; columna++) {
-                String contenidoCelda ="";
+                String contenidoCelda = "";
                 if (fila % 2 == 0 && columna % 2 == 0) {
-                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila/2, columna/2));
+                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila / 2, columna / 2));
                 }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -171,7 +204,7 @@ public class VistaTableroConsola implements IVista {
 
     @Override
     public void mostrarGanador(String nombreJugador) {
-        println("\n\nEl ganador es: " + nombreJugador);
+        println("El ganador es: " + nombreJugador);
     }
 
     @Override
@@ -231,7 +264,7 @@ public class VistaTableroConsola implements IVista {
 
     @Override
     public void mostrarJugadorConectado() {
-        frame1.setVisible(true);
+        frame.setVisible(true);
         textArea.setText("Te has conectado.\nEsperando a que se una tu oponente...");
     }
 
@@ -253,6 +286,16 @@ public class VistaTableroConsola implements IVista {
     public void actualizar() throws RemoteException {
         textArea.setText("");
         mostrarTablero();
+    }
+
+    @Override
+    public void mensajeAlGanador() {
+        println(MensajesGanador.getMensajeFelicitacion());
+    }
+
+    @Override
+    public void mensajeAlPerdedor() {
+        println(MensajesPerdedor.getMensajeDeAnimo());
     }
 
     private void println(String texto) {
