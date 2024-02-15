@@ -7,20 +7,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Casilla implements Serializable {
-    private final Coordenada coordenada;
+    private final ArrayList<Casilla> casillasAdyacentes = new ArrayList<>();
+    private Coordenada coordenada;
     private Ficha ficha;
     private EstadoCasilla estado;
-    private ArrayList<Casilla> casillasAdyacentes;
+
+    /**
+     * Se crea una casilla sin coordenada.
+     * <p></p>
+     * Se le asigna "EstadoCasilla.INVALIDA".
+     */
+    public Casilla(){
+        this.estado = EstadoCasilla.INVALIDA;
+    }
 
     public Casilla(Coordenada coordenada){
         this.coordenada = coordenada;
-        this.casillasAdyacentes = new ArrayList<>();
-        this.estado = EstadoCasilla.INVALIDA;
-        this.ficha = null;
-    }
-
-    public void setEstadoCasilla(EstadoCasilla estadoCasilla) {
-        this.estado = estadoCasilla;
+        this.estado = EstadoCasilla.LIBRE;
     }
 
     public EstadoCasilla getEstadoCasilla() {
@@ -41,8 +44,11 @@ public class Casilla implements Serializable {
         estado = EstadoCasilla.LIBRE;
     }
 
+    /**
+     * Dada una lista de Casillas, las agregamos como adyacentes a la casilla seleccionada.
+     * @param adyacentes Coordenadas adyacentes.
+     */
     public void agregarAdyacentes(List<Casilla> adyacentes) {
-        // Agregar una casilla adyacente a la lista
         casillasAdyacentes.addAll(adyacentes);
     }
 
@@ -50,7 +56,7 @@ public class Casilla implements Serializable {
         return casillasAdyacentes;
     }
 
-    public ArrayList<Coordenada> getCoordenadasAdyacentes(){
+    public ArrayList<Coordenada> getCoordenadasCasillasAdyacentes(){
         ArrayList<Coordenada> coordenadas = new ArrayList<>();
         for (Casilla casilla : casillasAdyacentes){
             coordenadas.add(casilla.getCoordenada());

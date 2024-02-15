@@ -1,13 +1,12 @@
 package ar.edu.unlu.poo.interfaces;
 
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 
 import java.rmi.RemoteException;
 
 public interface IVista {
     void iniciar();
-    void mostrarTablero(Tablero tablero) throws RemoteException;
+    void mostrarTablero() throws RemoteException;
     void mostrarTurno(String mensaje);
     void mostrarMensajeErrorCasilla();
     void avisoDeMolino(String nombreJugador);

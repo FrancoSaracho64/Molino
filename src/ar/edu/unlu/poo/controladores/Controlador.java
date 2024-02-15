@@ -9,7 +9,6 @@ import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Ficha;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.rmimvc.cliente.IControladorRemoto;
 import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 
@@ -26,7 +25,7 @@ public class Controlador implements IControladorRemoto {
         // Comenzar el juego
         setOponente();
         //modelo.comenzarJuego();
-        vista.mostrarTablero(modelo.getTablero());
+        vista.mostrarTablero();
     }
 
     public void realizarAccion() {
@@ -85,10 +84,6 @@ public class Controlador implements IControladorRemoto {
 
     public String contenidoCasilla(Coordenada coordenada) throws RemoteException {
         return modelo.contenidoCasilla(coordenada);
-    }
-
-    public Tablero obtenerTablero() throws RemoteException {
-        return modelo.getTablero();
     }
 
     public void setVista(IVista vista) {

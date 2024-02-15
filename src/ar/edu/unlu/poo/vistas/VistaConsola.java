@@ -4,7 +4,6 @@ import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.poo.vistas.pantallas.MenuPrincipal;
 import ar.edu.unlu.poo.vistas.utilidadesConsola.EntradaTeclado;
 
@@ -54,7 +53,7 @@ public class VistaConsola implements IVista {
     }
 
     @Override
-    public void mostrarTablero(Tablero tablero) throws RemoteException {
+    public void mostrarTablero() throws RemoteException {
         int col = 0;
         int fil = 0;
         int filfin = 0;
@@ -244,6 +243,6 @@ public class VistaConsola implements IVista {
     @Override
     public void actualizar() throws RemoteException {
         limpiarConsola();
-        mostrarTablero(controlador.obtenerTablero());
+        mostrarTablero();
     }
 }

@@ -3,7 +3,6 @@ package ar.edu.unlu.poo.vistas.pantallas;
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 
 import java.rmi.RemoteException;
 
@@ -21,7 +20,7 @@ public class VistaTableroInterfazGrafica implements IVista {
     }
 
     @Override
-    public void mostrarTablero(Tablero tablero) {
+    public void mostrarTablero() {
 
     }
 

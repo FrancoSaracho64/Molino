@@ -4,7 +4,6 @@ import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -52,7 +51,7 @@ public class VistaTableroConsola implements IVista {
     }
 
     @Override
-    public void mostrarTablero(Tablero taba) throws RemoteException {
+    public void mostrarTablero() throws RemoteException {
         StringBuilder tablero = new StringBuilder();
         String letras = "          A        B        C        D        E        F        G\n";
         tablero.append("\n\n");
@@ -253,7 +252,7 @@ public class VistaTableroConsola implements IVista {
 
     public void actualizar() throws RemoteException {
         textArea.setText("");
-        mostrarTablero(controlador.obtenerTablero());
+        mostrarTablero();
     }
 
     private void println(String texto) {

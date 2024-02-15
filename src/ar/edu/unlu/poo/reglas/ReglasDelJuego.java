@@ -46,7 +46,7 @@ public class ReglasDelJuego {
      */
     private boolean hayMovimientosPosibles(Casilla casilla) {
         // Verifica las posiciones adyacentes y verifica si se pueden mover a ellas
-        ArrayList<Coordenada> coordAdyacentes = casilla.getCoordenadasAdyacentes();
+        ArrayList<Coordenada> coordAdyacentes = casilla.getCoordenadasCasillasAdyacentes();
         for (Coordenada coordenada : coordAdyacentes) {
             if (esCasillaValida(coordenada)) {
                 if (tablero.obtenerEstadoCasilla(coordenada).
@@ -78,7 +78,7 @@ public class ReglasDelJuego {
             filaComun = filOri;
         }  // Las columnas son iguales, entonces tomas el valor de la columna
 
-        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(adyacente).getCoordenadasAdyacentes();
+        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(adyacente).getCoordenadasCasillasAdyacentes();
         if (filaComun != -1){
             for (Coordenada co: casillasAdyacentes){
                 if (!co.equals(origen) && co.getFila() == filaComun ){
@@ -97,7 +97,7 @@ public class ReglasDelJuego {
     }
 
     public boolean hayMolinoEnPosicion(Coordenada coordenada, Jugador jugador) {
-        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(coordenada).getCoordenadasAdyacentes();
+        ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(coordenada).getCoordenadasCasillasAdyacentes();
         // Verificar en cada dirección si se forma un molino
         for (Coordenada adyacente : casillasAdyacentes) {
             if (esFichaDelJugador(adyacente, jugador)) {
@@ -148,7 +148,7 @@ public class ReglasDelJuego {
 
     public boolean sonCasillasAdyacentes(Coordenada posFichaSelec, Coordenada nuevaPosFichaSelec) {
         Casilla casillaSelec = tablero.getCasilla(posFichaSelec);
-        ArrayList<Coordenada> coordenadas = casillaSelec.getCoordenadasAdyacentes();
+        ArrayList<Coordenada> coordenadas = casillaSelec.getCoordenadasCasillasAdyacentes();
         return coordenadas.contains(nuevaPosFichaSelec);
     }
 
