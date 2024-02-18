@@ -2,8 +2,8 @@ package ar.edu.unlu.poo.online;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
-import ar.edu.unlu.poo.vistas.pantallas.VistaTableroConsola;
-import ar.edu.unlu.poo.vistas.pantallas.VistaTableroInterfazGrafica;
+import ar.edu.unlu.poo.vistas.VistaTableroConsola;
+import ar.edu.unlu.poo.vistas.VistaTableroInterfazGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.cliente.Cliente;

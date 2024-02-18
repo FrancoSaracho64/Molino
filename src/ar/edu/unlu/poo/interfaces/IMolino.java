@@ -4,7 +4,6 @@ import ar.edu.unlu.poo.enumerados.Accion;
 import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Tablero;
 import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 
 import java.rmi.RemoteException;
@@ -12,15 +11,13 @@ import java.util.ArrayList;
 
 public interface IMolino extends IObservableRemoto {
     void conectarJugador(Jugador jugador) throws RemoteException;
-    Tablero getTablero() throws RemoteException;
-    String contenidoCasilla(Coordenada coordenada) throws RemoteException;
+    String getContenidoCasilla(Coordenada coordenada) throws RemoteException;
     void colocarFicha(Coordenada coordenada, Jugador jugadorActual) throws RemoteException;
     void quitarFicha(Coordenada coordenada, Jugador oponente) throws RemoteException;
     void moverFicha(Coordenada antCoord, Coordenada nueCoord) throws RemoteException;
     void jugadorHaAbandonado(Jugador jugador) throws RemoteException;
     Jugador obtenerJugadorActual() throws RemoteException;
     Jugador obtenerJugadorOponente() throws RemoteException;
-    void establecerTurnoInicial(Jugador jugador) throws RemoteException;
     boolean esTurnoDe(Jugador jugador) throws RemoteException;
     boolean esCasillaValida(Coordenada coordenada) throws RemoteException;
     boolean hayFichasParaEliminar(Jugador oponente) throws RemoteException;
@@ -34,7 +31,6 @@ public interface IMolino extends IObservableRemoto {
     boolean verificarMolinoTrasMovimiento(Coordenada coordenada, Jugador jugador) throws RemoteException;
     void finalizarTurno() throws RemoteException;
     MotivoFinPartida obtenerMotivoFinPartida() throws RemoteException;
-    Coordenada generarCoordenada(Object[] coordenada) throws RemoteException;
     Jugador obtenerGanador() throws RemoteException;
     boolean hayJugadoresRegistrados() throws RemoteException;
     ArrayList<Jugador> obtenerJugadoresRegistrados() throws RemoteException;
@@ -43,4 +39,5 @@ public interface IMolino extends IObservableRemoto {
     boolean casillaOcupadaPorJugador(Coordenada coordenada, Jugador jugador) throws RemoteException;
     boolean hayPartidaActiva() throws RemoteException;
     void removerJugador(Jugador jugadorLocal) throws RemoteException;
+    boolean esCasillaLibre(Coordenada coordenada) throws RemoteException;
 }

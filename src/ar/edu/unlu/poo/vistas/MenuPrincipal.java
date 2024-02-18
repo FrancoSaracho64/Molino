@@ -1,4 +1,4 @@
-package ar.edu.unlu.poo.vistas.pantallas;
+package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.modelos.Jugador;

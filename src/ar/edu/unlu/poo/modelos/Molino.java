@@ -13,11 +13,13 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class Molino extends ObservableRemoto implements IMolino {
-    public static final int CANTIDAD_FICHAS = 9;
-    private static final String CASILLA_DISPONIBLE = "#";
-    private static final String CASILLA_INVALIDA = "";
-    private static final String JUGADOR_1 = "X";
-    private static final String JUGADOR_2 = "O";
+    // todo: colocar en 9
+    private final int CANTIDAD_FICHAS = 4;
+    private final int MOVIMIENTOS_SIN_ELIMINAR_FICHAS = 20;
+    public static final String JUGADOR_1 = "X";
+    public static final String JUGADOR_2 = "O";
+    public static final String CASILLA_DISPONIBLE = "#";
+    public static final String CASILLA_INVALIDA = "";
     private int movimientosSinCaptura;
     private boolean juegoComenzado;
     private Jugador ultimoMolino;
@@ -98,7 +100,7 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
-    public String contenidoCasilla(Coordenada coordenada) {
+    public String getContenidoCasilla(Coordenada coordenada) {
         String contenido;
         Ficha ficha = tablero.obtenerFicha(coordenada);
         if (ficha == null) {
@@ -140,33 +142,6 @@ public class Molino extends ObservableRemoto implements IMolino {
     @Override
     public MotivoFinPartida obtenerMotivoFinPartida() throws RemoteException {
         return motivoFinPartida;
-    }
-
-    @Override
-    public Coordenada generarCoordenada(Object[] coordenada) {
-        int fila = (int) coordenada[0];
-        char columna = (char) coordenada[1];
-        switch (fila) {
-            case 1 -> fila = 0;
-            case 2 -> fila = 1;
-            case 3 -> fila = 2;
-            case 4 -> fila = 3;
-            case 5 -> fila = 4;
-            case 6 -> fila = 5;
-            case 7 -> fila = 6;
-        }
-        int columnaResultado;
-        switch (columna) {
-            case 'A' -> columnaResultado = 0;
-            case 'B' -> columnaResultado = 1;
-            case 'C' -> columnaResultado = 2;
-            case 'D' -> columnaResultado = 3;
-            case 'E' -> columnaResultado = 4;
-            case 'F' -> columnaResultado = 5;
-            case 'G' -> columnaResultado = 6;
-            default -> columnaResultado = -1;
-        }
-        return new Coordenada(fila, columnaResultado);
     }
 
     @Override
@@ -216,10 +191,14 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
+    public boolean esCasillaLibre(Coordenada coordenada) throws RemoteException {
+        return tablero.obtenerEstadoCasilla(coordenada) == EstadoCasilla.LIBRE;
+    }
+
+    @Override
     public void colocarFicha(Coordenada coordenada, Jugador jugador) throws RemoteException {
         if (jugador.equals(jugadorActual)) {
             tablero.colocarFicha(coordenada, jugadorActual.getFichaParaColocar());
-            // Mostramos el cambio de la nueva ficha ingresada
             notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
         } else {
             throw new RemoteException("No es tu turno.");
@@ -231,7 +210,6 @@ public class Molino extends ObservableRemoto implements IMolino {
         movimientosSinCaptura = 0;
         getJugador(jugador).decFichasEnTablero();
         tablero.quitarFicha(coordenada);
-        // Finalizamos el turno y luego actualizamos la vista.
         notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
     }
 
@@ -249,7 +227,6 @@ public class Molino extends ObservableRemoto implements IMolino {
             motivoFinPartida = MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA;
             finPartida();
         } else {
-            // Finalizamos el turno y luego actualizamos la vista.
             notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
         }
     }
@@ -261,7 +238,7 @@ public class Molino extends ObservableRemoto implements IMolino {
      * @throws RemoteException
      */
     private boolean verificarEmpatePorMovimientosSinCaptura() throws RemoteException {
-        return movimientosSinCaptura >= 4;
+        return movimientosSinCaptura >= MOVIMIENTOS_SIN_ELIMINAR_FICHAS;
     }
 
     private static ArrayList<Ficha> generarFichas(Jugador jugador) {
@@ -323,6 +300,7 @@ public class Molino extends ObservableRemoto implements IMolino {
     public void jugadorHaAbandonado(Jugador jugador) throws RemoteException {
         // El jugador que se recibe por parametro es el que abandonó la partida.
         finPartidaPorAbandono(jugador);
+        System.exit(0); // Termina la aplicación
     }
 
     private void finPartidaPorAbandono(Jugador jugador) throws RemoteException {
@@ -358,11 +336,6 @@ public class Molino extends ObservableRemoto implements IMolino {
         } else {
             return jugador1;
         }
-    }
-
-    @Override
-    public void establecerTurnoInicial(Jugador jugador) {
-        jugadorActual = getJugador(jugador);
     }
 
     @Override
@@ -419,17 +392,6 @@ public class Molino extends ObservableRemoto implements IMolino {
         return jugadores.get(1);
     }
 
-    /*private void finalizarTurnoJugadorActual() throws RemoteException {
-        cambiarTurnoJugador();
-        // Si ambos jugadores han colocado todas sus fichas, entonces verificamos el estado de juego activo.
-        if (todosHanColocadoTodasLasFichas()) {
-            if (!juegoActivo()) {
-                // Si el juego no está activo, finaliza la partida.
-                finPartida();
-            }
-        }
-    }*/
-
     private void finalizarTurnoJugadorActual() throws RemoteException {
         if (jugadorActual.getFichasColocadas() < CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
             // Si ambos jugadores no han colocado todas sus fichas, simplemente se invierte el turno.
@@ -446,8 +408,9 @@ public class Molino extends ObservableRemoto implements IMolino {
         }
     }
 
-    private void cambiarTurnoJugador() {
+    private void cambiarTurnoJugador() throws RemoteException {
         jugadorActual = jugadorActual.equals(jugador1) ? jugador2 : jugador1;
+        notificarObservadores(EventosTablero.CAMBIO_TURNO_JUGADOR);
     }
 
     /**
