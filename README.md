@@ -29,5 +29,5 @@ _**++ Vuelo**_
 
 _**  ---- IMPORTANTE ----  **_
 * Si se producen 30 movimientos sin realizar ninguna captura, la partida terminará en empate.
-* Si ambos jugadores tienen 3 fichas, el jugador que hace MOLINO, puede eliminar una ficha del oponente por más que
-* estén formando MOLINO. Es decir, el que hace MOLINO en esta situación, gana ;)
+* Si ambos jugadores tienen 3 fichas, el jugador que hace MOLINO, puede eliminar una ficha del oponente por más 
+  que estén formando MOLINO. Es decir, el que hace MOLINO en esta situación, gana ;)
