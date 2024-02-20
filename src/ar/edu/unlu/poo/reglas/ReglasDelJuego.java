@@ -3,10 +3,11 @@ package ar.edu.unlu.poo.reglas;
 import ar.edu.unlu.poo.enumerados.EstadoCasilla;
 import ar.edu.unlu.poo.modelos.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReglasDelJuego {
+public class ReglasDelJuego implements Serializable {
     private static final int CANT_COLUMNAS = 7;
     private static final int CANT_FILAS = 7;
     private final Tablero tablero;
@@ -80,7 +81,6 @@ public class ReglasDelJuego {
             // Las filas son iguales, entonces tomas el valor de la fila
             filaComun = filOri;
         }  // Las columnas son iguales, entonces tomas el valor de la columna
-
         ArrayList<Coordenada> casillasAdyacentes = tablero.getCasilla(adyacente).getCoordenadasCasillasAdyacentes();
         if (filaComun != -1) {
             for (Coordenada co : casillasAdyacentes) {
@@ -123,11 +123,9 @@ public class ReglasDelJuego {
         // Calcula la dirección opuesta basándose en la diferencia entre origen y adyacente
         int deltaFil = origen.getFila() - adyacente.getFila();
         int deltaCol = origen.getColumna() - adyacente.getColumna();
-
         // Calcula la coordenada opuesta usando la dirección opuesta
         int filaOpuesta = origen.getFila() + deltaFil;
         int columnaOpuesta = origen.getColumna() + deltaCol;
-
         // Verifica si la coordenada opuesta es válida dentro del tablero
         if (filaOpuesta >= 0 && filaOpuesta < CANT_FILAS &&
                 columnaOpuesta >= 0 && columnaOpuesta < CANT_COLUMNAS) {
@@ -160,6 +158,9 @@ public class ReglasDelJuego {
     }
 
     public boolean hayFichasParaEliminar(Jugador jugadorOponente) {
+        if (jugadorOponente.getFichasColocadas() == Molino.CANTIDAD_FICHAS && jugadorOponente.getFichasEnTablero() == 3) {
+            return true;
+        }
         List<Casilla> casillasOcupadas = tablero.obtenerCasillasOcupadasPorJugador(jugadorOponente);
         for (Casilla casilla : casillasOcupadas) {
             if (!hayMolinoEnPosicion(casilla.getCoordenada(), jugadorOponente)) {

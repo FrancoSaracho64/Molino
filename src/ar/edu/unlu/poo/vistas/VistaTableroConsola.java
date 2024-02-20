@@ -19,15 +19,18 @@ import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 
 public class VistaTableroConsola extends JFrame implements IVista {
-    private Controlador controlador;
+    private final Controlador controlador;
     private JTextArea textAreaTablero;
     private JTextArea textAreaMensajes;
+    private JPanel optionsPanel;
+    private JPanel rightPanel;
+    private Image icono;
 
     public VistaTableroConsola(Controlador controlador) {
         this.controlador = controlador;
         this.controlador.setVista(this);
-
-        setTitle("Juego del Molino - Nueve hombres de Morris");
+        initComponents();
+        setIconImage(icono);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(750, 350);
         setLocationRelativeTo(null);
@@ -38,17 +41,22 @@ public class VistaTableroConsola extends JFrame implements IVista {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (controlador.hayPartidaActiva()) {
-                        int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
-                                "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
-                                "Confirmar salida", JOptionPane.YES_NO_OPTION);
-                        if (confirm == JOptionPane.YES_OPTION) {
-                            //todo: implementar guardado de partida.
-                        }
-                        if (confirm == JOptionPane.NO_OPTION) {
-                            // Si el usuario confirma, cierra la aplicación.
-                            controlador.jugadorAbandona();
-                            dispose(); // Cierra la ventana
+                    if (controlador.laPartidaHaComenzado()) {
+                        if (controlador.laPartidaSigueActiva()) {
+                            int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
+                                    "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
+                                    "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                controlador.guardarPartidaEstadoActual();
+                                System.exit(0); // Termina la aplicación
+                            }
+                            if (confirm == JOptionPane.NO_OPTION) {
+                                // Si el usuario confirma, cierra la aplicación.
+                                controlador.jugadorAbandona();
+                                System.exit(0); // Termina la aplicación
+                            }
+                        } else {
+                            System.exit(0); // Termina la aplicación
                         }
                     } else {
                         int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
@@ -57,7 +65,6 @@ public class VistaTableroConsola extends JFrame implements IVista {
                         if (confirm == JOptionPane.YES_OPTION) {
                             // Si el usuario confirma, cierra la aplicación.
                             controlador.cerrarAplicacion();
-                            dispose(); // Cierra la ventana
                             System.exit(0); // Termina la aplicación
                         }
                     }
@@ -70,16 +77,14 @@ public class VistaTableroConsola extends JFrame implements IVista {
         textAreaTablero = new JTextArea(28, 28);
         textAreaTablero.setEditable(false);
         add(textAreaTablero, BorderLayout.WEST);
-        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel = new JPanel(new BorderLayout());
         textAreaMensajes = new JTextArea(10, 35);
         textAreaMensajes.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
         rightPanel.add(scrollPane, BorderLayout.NORTH);
         add(rightPanel, BorderLayout.EAST);
-
-        JPanel optionsPanel = new JPanel();
+        optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-
         JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel filaLabel = new JLabel("Fila:");
         JTextField fila = new JTextField(5);
@@ -95,7 +100,6 @@ public class VistaTableroConsola extends JFrame implements IVista {
                 }
             }
         });
-
         JLabel columnaLabel = new JLabel("Columna:");
         JTextField columna = new JTextField(5);
         PlainDocument doc = (PlainDocument) columna.getDocument();
@@ -131,9 +135,16 @@ public class VistaTableroConsola extends JFrame implements IVista {
         setVisible(false);
     }
 
+    private void initComponents() {
+        icono = new ImageIcon(getClass().getResource("/ar/edu/unlu/poo/images/LogoMolino.jpg")).getImage();
+        Image originalImage = icono;
+        Image scaledImage = originalImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        icono = new ImageIcon(scaledImage).getImage();
+    }
+
     @Override
     public void iniciar() {
-        new MenuPrincipal(controlador);
+        new MenuPrePartida(controlador);
     }
 
     @Override
@@ -218,7 +229,7 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void juegoTerminado() {
-        println(textAreaMensajes, "El juego ha terminado.");
+        println(textAreaMensajes, "\n--------------------------------------------------------\n-------------El juego ha terminado-------------\n--------------------------------------------------------\n");
     }
 
     @Override
@@ -233,7 +244,7 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void mostrarEmpate() {
-        println(textAreaMensajes, "¡Se ha producido un EMPATE!");
+        println(textAreaMensajes, "\n¡Se ha producido un EMPATE!\n");
     }
 
     @Override
@@ -262,7 +273,8 @@ public class VistaTableroConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void mostrarJugadorConectado() {
+    public void mostrarJugadorConectado() throws RemoteException {
+        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.nombreJugador() + ")");
         setVisible(true);
         textAreaMensajes.setText("Te has conectado.\nEsperando a que se una tu oponente...");
     }
@@ -314,6 +326,31 @@ public class VistaTableroConsola extends JFrame implements IVista {
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
                 mensajeFichaAEliminar();
             }
+            case PARTIDA_SUSPENDIDA -> {
+                limpiarMensajes();
+                println(textAreaMensajes, "******** ¡La partida se ha suspendido! ********\n\n");
+                println(textAreaMensajes, "Tu oponente ha salido de la partida, pero ha guardado el estado del\njuego en el servidor. En caso de querer retomar la partida,\nno olvides que jugador tenía asignado cada uno. Así no\npierden el progreso. Ya puedes cerrar el juego.");
+                optionsPanel.setVisible(false);
+                JButton botonSalir = new JButton();
+                botonSalir.setText("Cerrar aplicación...");
+                botonSalir.setVisible(true);
+                botonSalir.addActionListener(e -> {
+                    System.exit(0);
+                });
+                rightPanel.add(botonSalir, BorderLayout.SOUTH);
+            }
+            case PARTIDA_TERMINADA -> {
+                limpiarMensajes();
+                juegoTerminado();
+                optionsPanel.setVisible(false);
+                JButton botonSalir = new JButton();
+                botonSalir.setText("Cerrar aplicación...");
+                botonSalir.setVisible(true);
+                botonSalir.addActionListener(e -> {
+                    System.exit(0);
+                });
+                rightPanel.add(botonSalir, BorderLayout.SOUTH);
+            }
         }
     }
 
@@ -335,6 +372,16 @@ public class VistaTableroConsola extends JFrame implements IVista {
     @Override
     public void mostrarMensajeCasillaLibre() {
         println(textAreaMensajes, "No hay ficha en la coordenada que ingresaste.\nIngresa una casilla ocupada por tu oponente.");
+    }
+
+    @Override
+    public void empatePorMovimientosSinComerFichas() {
+        println(textAreaMensajes, "¡Han realizado más de 30 movimientos sin comer una ficha! Entonces se declara empate.");
+    }
+
+    @Override
+    public void informarOponenteHaAbandonado() {
+        println(textAreaMensajes, "¡Tu oponente ha abandonado! Se te otorga la victoria. ¡Felicitaciones!");
     }
 
     private void limpiarMensajes() {

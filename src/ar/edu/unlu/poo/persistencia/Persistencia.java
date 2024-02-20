@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Persistencia {
     private static final String ARCHIVO_JUGADORES_HISTORICO = "historicoJugadores.dat";
-    private static final String ARCHIVO_PARTIDA_GUARDADA = "partidasGuardadas.dat";
+    private static final String ARCHIVO_PARTIDAS_GUARDADAS = "partidasGuardadas.dat";
 
     public static void guardarJugadores(ArrayList<Jugador> jugadores) {
         try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(ARCHIVO_JUGADORES_HISTORICO))) {
@@ -30,23 +30,23 @@ public class Persistencia {
         return new ArrayList<>();
     }
 
-    public static void guardarPartida(Molino molino) {
-        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(ARCHIVO_PARTIDA_GUARDADA))) {
-            salida.writeObject(molino);
+    public static void guardarPartida(ArrayList<PartidaGuardada> partidas) {
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(ARCHIVO_PARTIDAS_GUARDADAS))) {
+            salida.writeObject(partidas);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static Molino cargarPartidasGuardadas() {
+    public static ArrayList<PartidaGuardada> cargarPartidasGuardadas() {
         File archivo = new File(ARCHIVO_JUGADORES_HISTORICO);
         if (archivo.exists()) {
-            try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(ARCHIVO_PARTIDA_GUARDADA))) {
-                return (Molino) entrada.readObject();
+            try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(ARCHIVO_PARTIDAS_GUARDADAS))) {
+                return (ArrayList<PartidaGuardada>) entrada.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 }

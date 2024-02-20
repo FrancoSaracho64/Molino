@@ -1,5 +1,7 @@
 package ar.edu.unlu.poo.modelos;
 
+import ar.edu.unlu.poo.enumerados.EstadoJuego;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -104,8 +106,8 @@ public class Jugador implements Serializable {
 
     @Override
     public String toString() {
-        return "Jugador ---> '" + nombre + "'  :  ID: " + id +"\n" +
-            "ESTADISTICAS:"+
+        return "  '" + nombre + "'     \n" +
+            "   ESTADISTICAS:"+
             "\n     Puntaje: " + puntaje +
             "\n     Victorias: " + victorias +
             "\n     Empates: " + empates +

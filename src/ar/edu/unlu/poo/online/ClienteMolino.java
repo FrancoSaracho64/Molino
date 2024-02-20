@@ -12,8 +12,8 @@ import javax.swing.*;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-public class IniciarMolino {
-    public static void main(String[] args) {
+public class ClienteMolino {
+    public ClienteMolino() {
         ArrayList<String> opciones = new ArrayList<>();
         opciones.add("Consola");
         opciones.add("Interfáz gráfica");
@@ -66,11 +66,15 @@ public class IniciarMolino {
             vista = new VistaTableroInterfazGrafica(controlador);
         }
         Cliente cliente = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
-        vista.iniciar();
         try {
             cliente.iniciar(controlador);
+            vista.iniciar();
         } catch (RemoteException | RMIMVCException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        new ClienteMolino();
     }
 }

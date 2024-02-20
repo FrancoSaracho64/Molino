@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import ar.edu.unlu.poo.enumerados.EstadoJuego;
 import ar.edu.unlu.poo.enumerados.EventosTablero;
+import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
 import ar.edu.unlu.poo.interfaces.IMolino;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
@@ -27,7 +28,20 @@ public class Controlador implements IControladorRemoto {
         // Comenzar el juego
         setOponente();
         if (modelo.esTurnoDe(jugadorLocal)) {
-            cambiarEstadoYActualizarVista(EstadoJuego.COLOCAR_FICHA);
+            // Validaciones necesarias por si se reanuda la partida
+            if (modelo.ultimoMovimientoFueMolino()) {
+                cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_FICHA_PARA_ELIMINAR);
+            } else {
+                if (modelo.jugadorTieneFichasPendientes(jugadorLocal)) {
+                    cambiarEstadoYActualizarVista(EstadoJuego.COLOCAR_FICHA);
+                } else {
+                    if (modelo.jugadorEstaEnVuelo(jugadorLocal)) {
+                        cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_ORIGEN_MOVER_SUPER);
+                    } else {
+                        cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_ORIGEN_MOVER);
+                    }
+                }
+            }
         } else {
             cambiarEstadoYActualizarVista(EstadoJuego.ESPERANDO_TURNO);
         }
@@ -74,7 +88,7 @@ public class Controlador implements IControladorRemoto {
                 }
             }
             case SELECCIONAR_ORIGEN_MOVER -> {
-                if (validarCasillaValida(coordenada) && validarCasillaJugadorLocal(coordenada)) {
+                if (validarCasillaValida(coordenada) && !validarCasillaLibre(coordenada) && validarCasillaJugadorLocal(coordenada)) {
                     if (modelo.fichaTieneMovimientos(coordenada)) {
                         coordTemporalMovimiento = coordenada;
                         cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_DESTINO_MOVER);
@@ -105,7 +119,7 @@ public class Controlador implements IControladorRemoto {
                 }
             }
             case SELECCIONAR_ORIGEN_MOVER_SUPER -> {
-                if (validarCasillaValida(coordenada) && validarCasillaJugadorLocal(coordenada)) {
+                if (validarCasillaValida(coordenada) && !validarCasillaLibre(coordenada) && validarCasillaJugadorLocal(coordenada)) {
                     coordTemporalMovimiento = coordenada;
                     cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_DESTINO_MOVER_SUPER);
                 }
@@ -131,7 +145,7 @@ public class Controlador implements IControladorRemoto {
                 if (validarCasillaValida(coordenada)) {
                     if (!modelo.esCasillaLibre(coordenada)) {
                         if (modelo.casillaOcupadaPorJugador(coordenada, oponente)) {
-                            if (!modelo.hayMolinoEnPosicion(coordenada, oponente)) {
+                            if (modelo.fichaSePuedeEliminar(coordenada, oponente)) {
                                 modelo.quitarFicha(coordenada, oponente);
                                 finalizarTurno();
                             } else {
@@ -156,7 +170,6 @@ public class Controlador implements IControladorRemoto {
     private void finalizarTurno() {
         try {
             modelo.finalizarTurno();
-            /*vista.mostrarTurnoActual();*/
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -201,24 +214,22 @@ public class Controlador implements IControladorRemoto {
 
     private void finDePartida() throws RemoteException {
         Jugador ganador = modelo.obtenerGanador();
-        vista.juegoTerminado();
+        cambiarEstadoYActualizarVista(EstadoJuego.PARTIDA_TERMINADA);
         if (ganador == null) {
             vista.mostrarEmpate();
+            if (modelo.obtenerMotivoFinPartida().equals(MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA)) {
+                vista.empatePorMovimientosSinComerFichas();
+            }
         } else {
             vista.mostrarGanador(ganador.getNombre());
             if (ganador.equals(jugadorLocal)) {
-                //Soy el ganador...
                 vista.mensajeAlGanador();
             } else {
-                vista.mensajeAlPerdedor();
                 switch (modelo.obtenerMotivoFinPartida()) {
-                    case JUGADOR_SIN_MOVIMIENTOS -> {
-                        vista.jugadorSinMovimientos();
-                    }
-                    case JUGADOR_SIN_FICHAS -> {
-                        vista.jugadorSinFichas();
-                    }
+                    case JUGADOR_SIN_MOVIMIENTOS -> vista.jugadorSinMovimientos();
+                    case JUGADOR_SIN_FICHAS -> vista.jugadorSinFichas();
                 }
+                vista.mensajeAlPerdedor();
             }
         }
     }
@@ -255,8 +266,16 @@ public class Controlador implements IControladorRemoto {
                 case JUGADOR_SIN_FICHAS -> vista.jugadorSinFichas();
                 case JUGADOR_SIN_MOVIMIENTOS -> vista.jugadorSinMovimientos();
                 case FIN_PARTIDA -> finDePartida();
+                case FIN_PARTIDA_ABANDONO -> finDePartidaPorAbandono();
+                case PARTIDA_SUSPENDIDA -> cambiarEstadoYActualizarVista(EstadoJuego.PARTIDA_SUSPENDIDA);
             }
         }
+    }
+
+    private void finDePartidaPorAbandono() {
+        cambiarEstadoYActualizarVista(EstadoJuego.PARTIDA_TERMINADA);
+        vista.mensajeAlGanador();
+        vista.informarOponenteHaAbandonado();
     }
 
     public boolean hayJugadoresRegistrados() throws RemoteException {
@@ -283,7 +302,31 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
-    public boolean hayPartidaActiva() throws RemoteException {
+    public boolean laPartidaHaComenzado() throws RemoteException {
         return modelo.hayPartidaActiva();
+    }
+
+    public void guardarPartidaEstadoActual() throws RemoteException {
+        modelo.guardarPartida();
+    }
+
+    public boolean esPartidaNueva() throws RemoteException {
+        return modelo.esPartidaNueva();
+    }
+
+    public ArrayList<Jugador> obtenerJugadoresParaReanudar() throws RemoteException {
+        return modelo.obtenerJugadoresParaReanudar();
+    }
+
+    public boolean jugadorParaReanudarDisponible(int pos) throws RemoteException {
+        return modelo.jugadorParaReanudarDisponible(pos);
+    }
+
+    public String nombreJugador() throws RemoteException {
+        return jugadorLocal.getNombre();
+    }
+
+    public boolean laPartidaSigueActiva() throws RemoteException {
+        return modelo.juegoSigueActivo();
     }
 }

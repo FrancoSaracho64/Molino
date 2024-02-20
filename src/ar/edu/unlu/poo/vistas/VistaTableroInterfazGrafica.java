@@ -20,19 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VistaTableroInterfazGrafica extends JFrame implements IVista {
-    private Controlador controlador;
+    private final Controlador controlador;
     private ImageIcon fichaBlanca;
     private ImageIcon fichaNegra;
+    private ImageIcon fondoCasilla;
+    private Image icono;
     private JPanel rightPanel;
     private JTextArea textArea;
-    private JButton buttonVolverAlMenu;
-    private Map<ButtonCoordinates, JButton> botonesPorCoordenada = new HashMap<>();
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new VistaTableroInterfazGrafica(null);
-        });
-    }
+    private JButton bSalir;
+    private final Map<ButtonCoordinates, JButton> botonesPorCoordenada = new HashMap<>();
 
     public VistaTableroInterfazGrafica(Controlador controlador) {
         this.controlador = controlador;
@@ -41,26 +37,29 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
         initElements();
         setLocationRelativeTo(null);
         setSize(900, 540);
-        setTitle("Juego del Molino - Nueve hombres de Morris");
+        setIconImage(icono);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setResizable(false);
+        //Eventos
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // Aquí puedes agregar cualquier acción que desees realizar antes de cerrar.
-                // Por ejemplo, mostrar un diálogo de confirmación.
                 try {
-                    if (controlador.hayPartidaActiva()) {
-                        int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
-                                "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
-                                "Confirmar salida", JOptionPane.YES_NO_OPTION);
-                        if (confirm == JOptionPane.YES_OPTION) {
-                            //todo: implementar guardado de partida.
-                        }
-                        if (confirm == JOptionPane.NO_OPTION) {
-                            // Si el usuario confirma, cierra la aplicación.
-                            controlador.jugadorAbandona();
-                            dispose(); // Cierra la ventana
+                    if (controlador.laPartidaHaComenzado()) {
+                        if (controlador.laPartidaSigueActiva()) {
+                            int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
+                                    "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
+                                    "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                controlador.guardarPartidaEstadoActual();
+                                System.exit(0); // Termina la aplicación
+                            }
+                            if (confirm == JOptionPane.NO_OPTION) {
+                                // Si el usuario confirma, cierra la aplicación.
+                                controlador.jugadorAbandona();
+                                System.exit(0); // Termina la aplicación
+                            }
+                        } else {
                             System.exit(0); // Termina la aplicación
                         }
                     } else {
@@ -117,20 +116,35 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
         JScrollPane scrollPane = new JScrollPane(textArea); // Añade el textArea a un JScrollPane
         rightPanel.add(scrollPane, BorderLayout.CENTER);
 
+        bSalir = new JButton("Cerrar aplicación...");
+        bSalir.setEnabled(true);
+        bSalir.setVisible(false);
+        rightPanel.add(bSalir, BorderLayout.SOUTH);
+        bSalir.addActionListener(e -> {
+            System.exit(0);
+        });
         add(rightPanel, BorderLayout.EAST);
         setVisible(false);
     }
 
     private void initElements() {
         // Ajustar el tamaño de la imagen de la ficha
+        icono = new ImageIcon(getClass().getResource("/ar/edu/unlu/poo/images/LogoMolino.jpg")).getImage();
+        Image originalImage = icono;
+        Image scaledImage = originalImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        icono = new ImageIcon(scaledImage).getImage();
         fichaNegra = new ImageIcon(getClass().getResource("/ar/edu/unlu/poo/images/FichaNegra.png"));
-        Image originalImage = fichaNegra.getImage();
-        Image scaledImage = originalImage.getScaledInstance(66, 66, Image.SCALE_SMOOTH);
+        originalImage = fichaNegra.getImage();
+        scaledImage = originalImage.getScaledInstance(53, 53, Image.SCALE_SMOOTH);
         fichaNegra = new ImageIcon(scaledImage);
         fichaBlanca = new ImageIcon(getClass().getResource("/ar/edu/unlu/poo/images/FichaBlanca.png"));
         originalImage = fichaBlanca.getImage();
-        scaledImage = originalImage.getScaledInstance(66, 66, Image.SCALE_SMOOTH);
+        scaledImage = originalImage.getScaledInstance(53, 53, Image.SCALE_SMOOTH);
         fichaBlanca = new ImageIcon(scaledImage);
+        fondoCasilla = new ImageIcon(getClass().getResource("/ar/edu/unlu/poo/images/FondoCasillaClaro.png"));
+        originalImage = fondoCasilla.getImage();
+        scaledImage = originalImage.getScaledInstance(46, 46, Image.SCALE_SMOOTH);
+        fondoCasilla = new ImageIcon(scaledImage);
     }
 
     /**
@@ -159,7 +173,7 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
 
     @Override
     public void iniciar() {
-        new MenuPrincipal(controlador);
+        new MenuPrePartida(controlador);
     }
 
     @Override
@@ -170,10 +184,12 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
             String contenidoCasilla = controlador.contenidoCasilla(new Coordenada(coords.x, coords.y));
             if (contenidoCasilla.equals(Molino.JUGADOR_1)) {
                 button.setIcon(fichaBlanca);
+                button.setBorderPainted(false);
             } else if (contenidoCasilla.equals(Molino.JUGADOR_2)) {
                 button.setIcon(fichaNegra);
+                button.setBorderPainted(false);
             } else {
-                button.setIcon(null);
+                button.setIcon(fondoCasilla);
             }
         }
     }
@@ -195,19 +211,14 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
 
     @Override
     public void juegoTerminado() {
-        println("El juego ha terminado.");
+        println("\n--------------------------------------------------------\n-------------El juego ha terminado-------------\n--------------------------------------------------------\n");
+    }
+
+    private void cambiarEstadoBotones(boolean estado) {
         for (Map.Entry<ButtonCoordinates, JButton> entrada : botonesPorCoordenada.entrySet()) {
-            ButtonCoordinates coords = entrada.getKey();
             JButton button = entrada.getValue();
-            button.setEnabled(false);
+            button.setEnabled(estado);
         }
-        buttonVolverAlMenu = new JButton("Volver al menú principal...");
-        buttonVolverAlMenu.setEnabled(true);
-        rightPanel.add(buttonVolverAlMenu, BorderLayout.SOUTH);
-        buttonVolverAlMenu.addActionListener(e -> {
-            new MenuPrincipal(controlador);
-            dispose();
-        });
     }
 
     @Override
@@ -251,7 +262,8 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void mostrarJugadorConectado() {
+    public void mostrarJugadorConectado() throws RemoteException {
+        setTitle("Juego del Molino - Nueve hombres de Morris   ("+ controlador.nombreJugador() +")");
         setVisible(true);
         textArea.setText("Te has conectado.\nEsperando a que se conecte tu oponente...");
     }
@@ -302,6 +314,19 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
                 mensajeFichaAEliminar();
             }
+            case PARTIDA_SUSPENDIDA -> {
+                limpiarMensajes();
+                println("******** ¡La partida se ha suspendido! ********\n\n");
+                println("Tu oponente ha salido de la partida, pero ha guardado el estado del\njuego en el servidor. En caso de querer reanudar la partida,\nno olvides que jugador tenía asignado cada uno. Así no\npierden el progreso. Ya puedes cerrar el juego.");
+                cambiarEstadoBotones(false);
+                bSalir.setVisible(true);
+            }
+            case PARTIDA_TERMINADA -> {
+                limpiarMensajes();
+                juegoTerminado();
+                cambiarEstadoBotones(false);
+                bSalir.setVisible(true);
+            }
         }
     }
 
@@ -325,7 +350,17 @@ public class VistaTableroInterfazGrafica extends JFrame implements IVista {
         println("No hay ninguna ficha en la casilla que seleccionaste.\nSelecciona una casilla ocupada por tu oponente.");
     }
 
-    private void limpiarMensajes(){
+    @Override
+    public void empatePorMovimientosSinComerFichas() {
+        println("¡Han realizado más de 30 movimientos sin comer una ficha! Entonces se declara empate.");
+    }
+
+    @Override
+    public void informarOponenteHaAbandonado() {
+        println("¡Tu oponente ha abandonado! Se te otorga la victoria. ¡Felicitaciones!");
+    }
+
+    private void limpiarMensajes() {
         textArea.setText("");
     }
 

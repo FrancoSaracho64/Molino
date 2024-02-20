@@ -1,21 +1,20 @@
 package ar.edu.unlu.poo.modelos;
 
-import ar.edu.unlu.poo.enumerados.Accion;
-import ar.edu.unlu.poo.enumerados.EstadoCasilla;
-import ar.edu.unlu.poo.enumerados.EventosTablero;
-import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
+import ar.edu.unlu.poo.enumerados.*;
 import ar.edu.unlu.poo.interfaces.IMolino;
+import ar.edu.unlu.poo.persistencia.PartidaGuardada;
 import ar.edu.unlu.poo.persistencia.Persistencia;
 import ar.edu.unlu.poo.reglas.ReglasDelJuego;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Molino extends ObservableRemoto implements IMolino {
-    // todo: colocar en 9
-    private final int CANTIDAD_FICHAS = 4;
-    private final int MOVIMIENTOS_SIN_ELIMINAR_FICHAS = 20;
+public class Molino extends ObservableRemoto implements Serializable, IMolino {
+    private final int MOVIMIENTOS_SIN_ELIMINAR_FICHAS = 30;
+    public static final int CANTIDAD_FICHAS = 9;
     public static final String JUGADOR_1 = "X";
     public static final String JUGADOR_2 = "O";
     public static final String CASILLA_DISPONIBLE = "#";
@@ -30,6 +29,7 @@ public class Molino extends ObservableRemoto implements IMolino {
     private final ArrayList<Jugador> jugadoresRegistrados;
     private final Tablero tablero;
     private final ReglasDelJuego reglas;
+    private boolean ultimoMovimientoFueMolino;
     private MotivoFinPartida motivoFinPartida;
 
     public Molino() {
@@ -37,11 +37,16 @@ public class Molino extends ObservableRemoto implements IMolino {
         this.tablero = new Tablero();
         this.reglas = new ReglasDelJuego(tablero);
         this.juegoComenzado = false;
+        this.ultimoMovimientoFueMolino = false;
         this.jugadoresRegistrados = Persistencia.cargarJugadoresHistorico();
     }
 
     @Override
     public void comenzarJuego() throws RemoteException {
+        if (jugador1 != null && jugador2 != null) {
+            notificarObservadores(EventosTablero.INICIO_PARTIDA);
+            return;
+        }
         jugador1 = obtenerJ1();
         jugador2 = obtenerJ2();
         movimientosSinCaptura = 0;
@@ -75,7 +80,6 @@ public class Molino extends ObservableRemoto implements IMolino {
 
     private void finPartida() throws RemoteException {
         // Informar que el juego ha terminado.
-        notificarObservadores(EventosTablero.FIN_PARTIDA);
         Jugador ganador = reglas.obtenerGanador(jugador1, jugador2);
         if (ganador == null) {
             jugador1.empataPartida();
@@ -88,15 +92,16 @@ public class Molino extends ObservableRemoto implements IMolino {
                 jugador1.pierdePartida();
             }
         }
-        ArrayList<Jugador> jugadores_historicos = Persistencia.cargarJugadoresHistorico();
-        for (int i = 0; i < jugadores_historicos.size(); i++) {
-            if (jugadores_historicos.get(i).equals(jugador1)) {
-                jugadores_historicos.set(i, jugador1);
-            } else if (jugadores_historicos.get(i).equals(jugador2)) {
-                jugadores_historicos.set(i, jugador2);
+        ArrayList<Jugador> jugadoresHistoricos = Persistencia.cargarJugadoresHistorico();
+        for (int i = 0; i < jugadoresHistoricos.size(); i++) {
+            if (jugadoresHistoricos.get(i).equals(jugador1)) {
+                jugadoresHistoricos.set(i, jugador1);
+            } else if (jugadoresHistoricos.get(i).equals(jugador2)) {
+                jugadoresHistoricos.set(i, jugador2);
             }
         }
-        Persistencia.guardarJugadores(jugadores_historicos);
+        Persistencia.guardarJugadores(jugadoresHistoricos);
+        notificarObservadores(EventosTablero.FIN_PARTIDA);
     }
 
     @Override
@@ -126,8 +131,11 @@ public class Molino extends ObservableRemoto implements IMolino {
             if (jugadorActual.getFichasColocadas() >= 3) {
                 if (reglas.hayMolinoEnPosicion(coordenada, jugadorActual)) {
                     ultimoMolino = jugadorActual;
+                    ultimoMovimientoFueMolino = true;
                     notificarObservadores(EventosTablero.MOLINO);
                     return reglas.hayFichasParaEliminar(obtenerJugadorOponente());
+                } else {
+                    ultimoMovimientoFueMolino = false;
                 }
             }
         }
@@ -196,6 +204,50 @@ public class Molino extends ObservableRemoto implements IMolino {
     }
 
     @Override
+    public void guardarPartida() throws RemoteException {
+        jugadores.clear();
+        ArrayList<PartidaGuardada> partidaGuardadas = Persistencia.cargarPartidasGuardadas();
+        partidaGuardadas.add(new PartidaGuardada(this, jugador1.getNombre(), jugador2.getNombre(), LocalDateTime.now()));
+        Persistencia.guardarPartida(partidaGuardadas);
+        notificarObservadores(EventosTablero.PARTIDA_SUSPENDIDA);
+    }
+
+    @Override
+    public boolean esPartidaNueva() throws RemoteException {
+        return jugador1 == null && jugador2 == null && !juegoComenzado;
+    }
+
+    @Override
+    public ArrayList<Jugador> obtenerJugadoresParaReanudar() throws RemoteException {
+        ArrayList<Jugador> jugadoresReanudados = new ArrayList<>();
+        jugadoresReanudados.add(jugador1);
+        jugadoresReanudados.add(jugador2);
+        return jugadoresReanudados;
+    }
+
+    @Override
+    public boolean jugadorParaReanudarDisponible(int pos) throws RemoteException {
+        if (jugadores.isEmpty()) {
+            return true;
+        }
+        if (pos == 0) {
+            return !jugadores.contains(jugador1);
+        } else {
+            return !jugadores.contains(jugador2);
+        }
+    }
+
+    @Override
+    public boolean jugadorTieneFichasPendientes(Jugador jugadorLocal) throws RemoteException {
+        return getJugador(jugadorActual).getFichasColocadas() < CANTIDAD_FICHAS;
+    }
+
+    @Override
+    public boolean jugadorEstaEnVuelo(Jugador jugadorLocal) {
+        return getJugador(jugadorActual).getFichasColocadas() == CANTIDAD_FICHAS && getJugador(jugadorActual).getFichasEnTablero() == 3;
+    }
+
+    @Override
     public void colocarFicha(Coordenada coordenada, Jugador jugador) throws RemoteException {
         if (jugador.equals(jugadorActual)) {
             tablero.colocarFicha(coordenada, jugadorActual.getFichaParaColocar());
@@ -223,8 +275,7 @@ public class Molino extends ObservableRemoto implements IMolino {
         }
         movimientosSinCaptura++;
         System.out.println("Son " + movimientosSinCaptura + " despues de hacer el movimiento. ");
-        if (verificarEmpatePorMovimientosSinCaptura()) {
-            motivoFinPartida = MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA;
+        if (!juegoSigueActivo()) {
             finPartida();
         } else {
             notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
@@ -235,9 +286,8 @@ public class Molino extends ObservableRemoto implements IMolino {
      * Se verifica si se produjo o no un empate.
      *
      * @return True si hay empate. Caso contrario, False
-     * @throws RemoteException
      */
-    private boolean verificarEmpatePorMovimientosSinCaptura() throws RemoteException {
+    private boolean hayEmpatePorMovimientosSinCaptura() throws RemoteException {
         return movimientosSinCaptura >= MOVIMIENTOS_SIN_ELIMINAR_FICHAS;
     }
 
@@ -292,20 +342,13 @@ public class Molino extends ObservableRemoto implements IMolino {
         }
     }
 
-    public Tablero getTablero() {
-        return tablero;
-    }
-
     @Override
     public void jugadorHaAbandonado(Jugador jugador) throws RemoteException {
         // El jugador que se recibe por parametro es el que abandonó la partida.
-        finPartidaPorAbandono(jugador);
-        System.exit(0); // Termina la aplicación
+        finPartidaPorAbandono(getJugador(jugador));
     }
 
     private void finPartidaPorAbandono(Jugador jugador) throws RemoteException {
-        // Informar que el juego ha terminado.
-        notificarObservadores(EventosTablero.FIN_PARTIDA);
         Jugador ganador = getOponente(jugador);
         ganador.ganaPartida();
         if (jugador1.equals(ganador)) {
@@ -322,11 +365,8 @@ public class Molino extends ObservableRemoto implements IMolino {
             }
         }
         Persistencia.guardarJugadores(jugadores_historicos);
-    }
-
-    @Override
-    public Jugador obtenerJugadorActual() throws RemoteException {
-        return jugadorActual;
+        // Informar que el juego ha terminado.
+        notificarObservadores(EventosTablero.FIN_PARTIDA_ABANDONO);
     }
 
     @Override
@@ -358,6 +398,7 @@ public class Molino extends ObservableRemoto implements IMolino {
         return reglas.hayMolinoEnPosicion(coord, jugadorOponente);
     }
 
+    @Override
     public Accion determinarAccionJugador(Jugador jugador) {
         if (jugador.equals(jugadorActual)) {
             // Aquí puedes añadir más lógica, por ejemplo, si el jugador puede mover una ficha o si debe quitar una ficha del oponente
@@ -399,7 +440,7 @@ public class Molino extends ObservableRemoto implements IMolino {
         } else if (jugadorActual.getFichasColocadas() == CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
             // Si el jugador actual ha colocado todas sus fichas pero su oponente no, se invierte el turno.
             cambiarTurnoJugador();
-        } else if (juegoActivo()) {
+        } else if (juegoSigueActivo()) {
             // Si ambos jugadores han colocado todas sus fichas y el juego sigue activo, se invierte el turno.
             cambiarTurnoJugador();
         } else {
@@ -433,9 +474,13 @@ public class Molino extends ObservableRemoto implements IMolino {
      * Si la partida finaliza, se inicializa "mmotivoFinPartida", para obtener el valor desde el controlador.
      *
      * @return Si la partida sigue en juego, se retorna True. Caso contrario, False.
-     * @throws RemoteException
      */
-    private boolean juegoActivo() throws RemoteException {
+    @Override
+    public boolean juegoSigueActivo() throws RemoteException {
+        if (hayEmpatePorMovimientosSinCaptura()) {
+            motivoFinPartida = MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA;
+            return false;
+        }
         if (obtenerJugadorOponente().getFichasEnTablero() <= 2) {
             motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_FICHAS;
             return false;
@@ -445,5 +490,20 @@ public class Molino extends ObservableRemoto implements IMolino {
         }
         // Si no pasó por ninguno anterior, el juego sigue.
         return true;
+    }
+
+    @Override
+    public boolean fichaSePuedeEliminar(Coordenada coordenada, Jugador oponente) throws RemoteException {
+        Jugador op = getJugador(oponente);
+        if (op.getFichasColocadas() == CANTIDAD_FICHAS && op.getFichasEnTablero() == 3) {
+            return true;
+        } else {
+            return !reglas.hayMolinoEnPosicion(coordenada, op);
+        }
+    }
+
+    @Override
+    public boolean ultimoMovimientoFueMolino() {
+        return ultimoMovimientoFueMolino;
     }
 }

@@ -1,6 +1,7 @@
 package ar.edu.unlu.poo.interfaces;
 
 import ar.edu.unlu.poo.enumerados.Accion;
+import ar.edu.unlu.poo.enumerados.EstadoJuego;
 import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
 import ar.edu.unlu.poo.modelos.Coordenada;
 import ar.edu.unlu.poo.modelos.Jugador;
@@ -16,7 +17,6 @@ public interface IMolino extends IObservableRemoto {
     void quitarFicha(Coordenada coordenada, Jugador oponente) throws RemoteException;
     void moverFicha(Coordenada antCoord, Coordenada nueCoord) throws RemoteException;
     void jugadorHaAbandonado(Jugador jugador) throws RemoteException;
-    Jugador obtenerJugadorActual() throws RemoteException;
     Jugador obtenerJugadorOponente() throws RemoteException;
     boolean esTurnoDe(Jugador jugador) throws RemoteException;
     boolean esCasillaValida(Coordenada coordenada) throws RemoteException;
@@ -40,4 +40,13 @@ public interface IMolino extends IObservableRemoto {
     boolean hayPartidaActiva() throws RemoteException;
     void removerJugador(Jugador jugadorLocal) throws RemoteException;
     boolean esCasillaLibre(Coordenada coordenada) throws RemoteException;
+    void guardarPartida() throws RemoteException;
+    boolean esPartidaNueva() throws RemoteException;
+    ArrayList<Jugador> obtenerJugadoresParaReanudar() throws RemoteException;
+    boolean jugadorParaReanudarDisponible(int pos) throws RemoteException;
+    boolean jugadorTieneFichasPendientes(Jugador jugadorLocal) throws RemoteException;
+    boolean jugadorEstaEnVuelo(Jugador jugadorLocal) throws RemoteException;
+    boolean juegoSigueActivo() throws RemoteException;
+    boolean fichaSePuedeEliminar(Coordenada coordenada, Jugador oponente) throws RemoteException;
+    boolean ultimoMovimientoFueMolino() throws RemoteException;
 }
