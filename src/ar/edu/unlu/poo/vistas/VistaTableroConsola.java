@@ -1,7 +1,7 @@
 package ar.edu.unlu.poo.vistas;
 
-import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.enumerados.EstadoJuego;
+import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.mensajes.MensajesGanador;
 import ar.edu.unlu.poo.mensajes.MensajesMolino;
@@ -19,14 +19,14 @@ import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 
 public class VistaTableroConsola extends JFrame implements IVista {
-    private final Controlador controlador;
+    private final IControlador controlador;
     private JTextArea textAreaTablero;
     private JTextArea textAreaMensajes;
     private JPanel optionsPanel;
     private JPanel rightPanel;
     private Image icono;
 
-    public VistaTableroConsola(Controlador controlador) {
+    public VistaTableroConsola(IControlador controlador) {
         this.controlador = controlador;
         this.controlador.setVista(this);
         initComponents();

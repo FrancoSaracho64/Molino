@@ -1,6 +1,6 @@
 package ar.edu.unlu.poo.vistas;
 
-import ar.edu.unlu.poo.controladores.Controlador;
+import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.modelos.Jugador;
 
 import javax.swing.*;
@@ -17,10 +17,10 @@ public class MenuPrePartida extends JFrame{
     private JButton bCrearNuevoJugador;
     private JButton bSeleccionarExistente;
     private Jugador jugadorLocal;
-    private final Controlador controlador;
+    private final IControlador controlador;
     private Image icono;
 
-    public MenuPrePartida(Controlador controlador) {
+    public MenuPrePartida(IControlador controlador) {
         this.controlador = controlador;
         initComponents();
         setIconImage(icono);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import ar.edu.unlu.poo.enumerados.EstadoJuego;
 import ar.edu.unlu.poo.enumerados.EventosTablero;
 import ar.edu.unlu.poo.enumerados.MotivoFinPartida;
+import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.interfaces.IMolino;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.modelos.Coordenada;
@@ -13,7 +14,7 @@ import ar.edu.unlu.poo.modelos.Jugador;
 import ar.edu.unlu.rmimvc.cliente.IControladorRemoto;
 import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 
-public class Controlador implements IControladorRemoto {
+public class Controlador implements IControladorRemoto, IControlador {
     private IMolino modelo;
     private IVista vista;
     private Jugador jugadorLocal;
@@ -64,6 +65,7 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
+    @Override
     public void casillaSeleccionadaDesdeLaVista(Coordenada coordenada) throws RemoteException {
         if (!modelo.esTurnoDe(jugadorLocal)) {
             vista.mostrarTurnoActual();
@@ -175,14 +177,17 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
+    @Override
     public String contenidoCasilla(Coordenada coordenada) throws RemoteException {
         return modelo.getContenidoCasilla(coordenada);
     }
 
+    @Override
     public void setVista(IVista vista) {
         this.vista = vista;
     }
 
+    @Override
     public void agregarJugador(Jugador jugador) throws RemoteException {
         jugadorLocal = jugador;
         modelo.conectarJugador(jugador);
@@ -234,6 +239,7 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
+    @Override
     public void cerrarAplicacion() throws RemoteException {
         try {
             if (modelo != null) {
@@ -278,22 +284,27 @@ public class Controlador implements IControladorRemoto {
         vista.informarOponenteHaAbandonado();
     }
 
+    @Override
     public boolean hayJugadoresRegistrados() throws RemoteException {
         return modelo.hayJugadoresRegistrados();
     }
 
+    @Override
     public ArrayList<Jugador> obtenerJugadoresRegistrados() throws RemoteException {
         return modelo.obtenerJugadoresRegistrados();
     }
 
+    @Override
     public boolean jugadorRegistradoEstaDisponible(int pos) throws RemoteException {
         return modelo.jugadorEstaDisponible(pos);
     }
 
+    @Override
     public boolean existeElNombre(String nombre) throws RemoteException {
         return modelo.existeNombreJugador(nombre);
     }
 
+    @Override
     public void jugadorAbandona() {
         try {
             modelo.jugadorHaAbandonado(jugadorLocal);
@@ -302,30 +313,37 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
+    @Override
     public boolean laPartidaHaComenzado() throws RemoteException {
         return modelo.hayPartidaActiva();
     }
 
+    @Override
     public void guardarPartidaEstadoActual() throws RemoteException {
         modelo.guardarPartida();
     }
 
+    @Override
     public boolean esPartidaNueva() throws RemoteException {
         return modelo.esPartidaNueva();
     }
 
+    @Override
     public ArrayList<Jugador> obtenerJugadoresParaReanudar() throws RemoteException {
         return modelo.obtenerJugadoresParaReanudar();
     }
 
+    @Override
     public boolean jugadorParaReanudarDisponible(int pos) throws RemoteException {
         return modelo.jugadorParaReanudarDisponible(pos);
     }
 
+    @Override
     public String nombreJugador() throws RemoteException {
         return jugadorLocal.getNombre();
     }
 
+    @Override
     public boolean laPartidaSigueActiva() throws RemoteException {
         return modelo.juegoSigueActivo();
     }

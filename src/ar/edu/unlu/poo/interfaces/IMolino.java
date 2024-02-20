@@ -21,7 +21,6 @@ public interface IMolino extends IObservableRemoto {
     boolean esTurnoDe(Jugador jugador) throws RemoteException;
     boolean esCasillaValida(Coordenada coordenada) throws RemoteException;
     boolean hayFichasParaEliminar(Jugador oponente) throws RemoteException;
-    boolean hayMolinoEnPosicion(Coordenada coord, Jugador jugadorOponente) throws RemoteException;
     Accion determinarAccionJugador(Jugador jugador) throws RemoteException;
     boolean fichaTieneMovimientos(Coordenada coordenada) throws RemoteException;
     boolean sonCasillasAdyacentes(Coordenada cOrigen, Coordenada cDestino) throws RemoteException;

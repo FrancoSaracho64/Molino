@@ -394,11 +394,6 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
     }
 
     @Override
-    public boolean hayMolinoEnPosicion(Coordenada coord, Jugador jugadorOponente) {
-        return reglas.hayMolinoEnPosicion(coord, jugadorOponente);
-    }
-
-    @Override
     public Accion determinarAccionJugador(Jugador jugador) {
         if (jugador.equals(jugadorActual)) {
             // Aquí puedes añadir más lógica, por ejemplo, si el jugador puede mover una ficha o si debe quitar una ficha del oponente
@@ -481,7 +476,7 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
             motivoFinPartida = MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA;
             return false;
         }
-        if (obtenerJugadorOponente().getFichasEnTablero() <= 2) {
+        if (obtenerJugadorOponente().getFichasColocadas() == CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasEnTablero() <= 2) {
             motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_FICHAS;
             return false;
         } else if (!reglas.jugadorTieneMovimientos(obtenerJugadorOponente())) {
