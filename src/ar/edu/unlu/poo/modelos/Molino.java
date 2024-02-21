@@ -426,7 +426,7 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
     }
 
     private Jugador obtenerJ1() throws RemoteException {
-        return jugadores.getFirst();
+        return jugadores.get(0);
     }
 
     private Jugador obtenerJ2() throws RemoteException {
