@@ -16,9 +16,10 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.rmi.RemoteException;
 
-public class VistaTableroConsola extends JFrame implements IVista {
+public class VistaConsolaMejorada extends JFrame implements IVista {
     private final IControlador controlador;
     private JTextArea textAreaTablero;
     private JTextArea textAreaMensajes;
@@ -26,11 +27,12 @@ public class VistaTableroConsola extends JFrame implements IVista {
     private JPanel rightPanel;
     private Image icono;
 
-    public VistaTableroConsola(IControlador controlador) {
+    public VistaConsolaMejorada(IControlador controlador) {
         this.controlador = controlador;
         this.controlador.setVista(this);
         initComponents();
         setIconImage(icono);
+        setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(750, 350);
         setLocationRelativeTo(null);
@@ -69,69 +71,11 @@ public class VistaTableroConsola extends JFrame implements IVista {
                         }
                     }
                 } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
+                    ex.printStackTrace();
+                    System.exit(0); // Termina la aplicación
                 }
             }
         });
-        setLayout(new BorderLayout());
-        textAreaTablero = new JTextArea(28, 28);
-        textAreaTablero.setEditable(false);
-        add(textAreaTablero, BorderLayout.WEST);
-        rightPanel = new JPanel(new BorderLayout());
-        textAreaMensajes = new JTextArea(10, 35);
-        textAreaMensajes.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
-        rightPanel.add(scrollPane, BorderLayout.NORTH);
-        add(rightPanel, BorderLayout.EAST);
-        optionsPanel = new JPanel();
-        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel filaLabel = new JLabel("Fila:");
-        JTextField fila = new JTextField(5);
-        fila.setDocument(new PlainDocument() {
-            @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-                if (str == null) {
-                    return;
-                }
-                // Verifica si el texto ingresado es numérico y limita la longitud a 1.
-                if (str.matches("\\d") && (getLength() + str.length()) <= 1) {
-                    super.insertString(offs, str, a);
-                }
-            }
-        });
-        JLabel columnaLabel = new JLabel("Columna:");
-        JTextField columna = new JTextField(5);
-        PlainDocument doc = (PlainDocument) columna.getDocument();
-        doc.setDocumentFilter(new DocumentFilter() {
-            @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                // Verifica si la inserción excedería el límite de un carácter
-                if ((fb.getDocument().getLength() + text.length() - length) <= 1) {
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs); // Permitir inserción
-                } else {
-                    Toolkit.getDefaultToolkit().beep(); // Emite un sonido de error si se intenta exceder el límite
-                }
-            }
-        });
-        textFieldsPanel.add(columnaLabel);
-        textFieldsPanel.add(columna);
-        textFieldsPanel.add(filaLabel);
-        textFieldsPanel.add(fila);
-        JButton botonEnviarMovimiento = new JButton("Enviar movimiento...");
-        botonEnviarMovimiento.addActionListener(e -> {
-            try {
-                controlador.casillaSeleccionadaDesdeLaVista(generarCoordenada(fila.getText(), columna.getText()));
-                // Reiniciamos el contenido.
-                fila.setText("");
-                columna.setText("");
-            } catch (RemoteException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        optionsPanel.add(textFieldsPanel);
-        optionsPanel.add(botonEnviarMovimiento);
-        rightPanel.add(optionsPanel, BorderLayout.SOUTH);
         setVisible(false);
     }
 
@@ -214,12 +158,12 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void mostrarMensajeErrorCasilla() {
-        println(textAreaMensajes, "Ha introducido una coordenada incorrecta. Vuelva a intentar.");
+        println(textAreaMensajes, "Ha introducido una coordenada incorrecta.\nVuelva a intentar.");
     }
 
     @Override
     public void avisoDeMolino(String nombreJugador) {
-        println(textAreaMensajes, "¡El jugador " + nombreJugador + " hizo molino!");
+        println(textAreaMensajes, "****** ¡El jugador " + nombreJugador + " hizo molino! ******");
     }
 
     @Override
@@ -234,12 +178,12 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void mostrarMensajeFichaSinMovimiento() {
-        println(textAreaMensajes, "La ficha seleccionada NO tiene movimientos. Intente con otra.");
+        println(textAreaMensajes, "La ficha seleccionada NO tiene movimientos.\nIntente con otra.");
     }
 
     @Override
     public void casillaNoAdyacente() {
-        println(textAreaMensajes, "La casilla seleccionada no corresponde a una casilla adyacente. Intente con otra.");
+        println(textAreaMensajes, "La casilla seleccionada no corresponde a una casilla adyacente.\nIntente con otra.");
     }
 
     @Override
@@ -249,17 +193,17 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void mostrarMensajeCasillaOcupada() {
-        println(textAreaMensajes, "La casilla que ha seleccionado está ocupada. Intente con otra.");
+        println(textAreaMensajes, "La casilla que ha seleccionado está ocupada.\nIntente con otra.");
     }
 
     @Override
     public void mensajeFichaFormaMolino() {
-        println(textAreaMensajes, "La ficha seleccionada forma parte de un molino. Intente con otra.");
+        println(textAreaMensajes, "La ficha seleccionada forma parte de un molino.\nIntente con otra.");
     }
 
     @Override
     public void avisoNoHayFichasParaEliminarDelOponente() {
-        println(textAreaMensajes, "No hay fichas disponibles para eliminar en este turno. Mala suerte :/");
+        println(textAreaMensajes, "No hay fichas disponibles para eliminar\nen este turno. Mala suerte :/");
     }
 
     @Override
@@ -275,13 +219,71 @@ public class VistaTableroConsola extends JFrame implements IVista {
     @Override
     public void mostrarJugadorConectado() throws RemoteException {
         setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.nombreJugador() + ")");
+        textAreaTablero = new JTextArea(28, 28);
+        textAreaTablero.setEditable(false);
+        add(textAreaTablero, BorderLayout.WEST);
+        rightPanel = new JPanel(new BorderLayout());
+        textAreaMensajes = new JTextArea(10, 35);
+        textAreaMensajes.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
+        rightPanel.add(scrollPane, BorderLayout.NORTH);
+        add(rightPanel, BorderLayout.EAST);
+        optionsPanel = new JPanel();
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel filaLabel = new JLabel("Fila:");
+        JTextField fila = new JTextField(5);
+        fila.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null) {
+                    return;
+                }
+                // Verifica si el texto ingresado es numérico y limita la longitud a 1.
+                if (str.matches("\\d") && (getLength() + str.length()) <= 1) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+        JLabel columnaLabel = new JLabel("Columna:");
+        JTextField columna = new JTextField(5);
+        PlainDocument doc = (PlainDocument) columna.getDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                // Verifica si la inserción excedería el límite de un carácter
+                if ((fb.getDocument().getLength() + text.length() - length) <= 1) {
+                    super.replace(fb, offset, length, text.toUpperCase(), attrs); // Permitir inserción
+                } else {
+                    Toolkit.getDefaultToolkit().beep(); // Emite un sonido de error si se intenta exceder el límite
+                }
+            }
+        });
+        textFieldsPanel.add(columnaLabel);
+        textFieldsPanel.add(columna);
+        textFieldsPanel.add(filaLabel);
+        textFieldsPanel.add(fila);
+        JButton botonEnviarMovimiento = new JButton("Enviar movimiento...");
+        botonEnviarMovimiento.addActionListener(e -> {
+            try {
+                controlador.casillaSeleccionadaDesdeLaVista(generarCoordenada(fila.getText(), columna.getText()));
+                // Reiniciamos el contenido.
+                fila.setText("");
+                columna.setText("");
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        optionsPanel.add(textFieldsPanel);
+        optionsPanel.add(botonEnviarMovimiento);
+        rightPanel.add(optionsPanel, BorderLayout.SOUTH);
         setVisible(true);
         textAreaMensajes.setText("Te has conectado.\nEsperando a que se una tu oponente...");
     }
 
     @Override
-    public void mostrarTurnoActual() {
-        println(textAreaMensajes, "¡Es turno de tu oponente! Espera a que realice su movimiento.");
+    public void mostrarTurnoDelOponente() {
+        println(textAreaMensajes, "¡Es turno de tu oponente!\nEspera a que realice su movimiento.");
     }
 
     @Override
@@ -309,59 +311,107 @@ public class VistaTableroConsola extends JFrame implements IVista {
         switch (estadoActual) {
             case ESPERANDO_TURNO -> {
                 limpiarMensajes();
-                println(textAreaMensajes, "Ahora es el turno de tu oponente. Espera hasta que realice su movimiento ;)");
+                println(textAreaMensajes, "Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
             }
             case COLOCAR_FICHA, SELECCIONAR_DESTINO_MOVER_SUPER -> {
                 limpiarMensajes();
+                mensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibre();
             }
             case SELECCIONAR_ORIGEN_MOVER, SELECCIONAR_ORIGEN_MOVER_SUPER -> {
                 limpiarMensajes();
+                mensajeEsTuTurno();
                 mensajeCasillaFichaAMover();
             }
             case SELECCIONAR_DESTINO_MOVER -> {
                 limpiarMensajes();
+                mensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibreAdyacente();
             }
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
+                limpiarMensajes();
+                mensajeEsTuTurno();
                 mensajeFichaAEliminar();
             }
             case PARTIDA_SUSPENDIDA -> {
+                WindowListener[] listeners = getWindowListeners();
+                for (WindowListener listener : listeners) {
+                    removeWindowListener(listener);
+                }
+                addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+
                 limpiarMensajes();
                 println(textAreaMensajes, "******** ¡La partida se ha suspendido! ********\n\n");
                 println(textAreaMensajes, "Tu oponente ha salido de la partida, pero ha guardado el estado del\njuego en el servidor. En caso de querer retomar la partida,\nno olvides que jugador tenía asignado cada uno. Así no\npierden el progreso. Ya puedes cerrar el juego.");
                 optionsPanel.setVisible(false);
+
+                JPanel panelBotonesFin = new JPanel(new BorderLayout());
+
                 JButton botonSalir = new JButton();
                 botonSalir.setText("Cerrar aplicación...");
                 botonSalir.setVisible(true);
                 botonSalir.addActionListener(e -> {
                     System.exit(0);
                 });
-                rightPanel.add(botonSalir, BorderLayout.SOUTH);
+                JButton botonReanudar = new JButton();
+                botonReanudar.setText("Volver al menú principal...");
+                botonReanudar.setVisible(true);
+                botonReanudar.addActionListener(e -> {
+                    dispose();
+                    new MenuMolino();
+                });
+                panelBotonesFin.add(botonSalir, BorderLayout.WEST);
+                panelBotonesFin.add(botonReanudar, BorderLayout.EAST);
+                rightPanel.add(panelBotonesFin, BorderLayout.SOUTH);
             }
             case PARTIDA_TERMINADA -> {
+                WindowListener[] listeners = getWindowListeners();
+                for (WindowListener listener : listeners) {
+                    removeWindowListener(listener);
+                }
+                addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+
                 limpiarMensajes();
                 juegoTerminado();
                 optionsPanel.setVisible(false);
-                JButton botonSalir = new JButton();
-                botonSalir.setText("Cerrar aplicación...");
-                botonSalir.setVisible(true);
-                botonSalir.addActionListener(e -> {
+                JPanel panelBotonesFin = new JPanel(new BorderLayout());
+
+                JButton bSalir = new JButton("Cerrar aplicación...");
+                bSalir.setVisible(true);
+                bSalir.addActionListener(e -> {
                     System.exit(0);
                 });
-                rightPanel.add(botonSalir, BorderLayout.SOUTH);
+                JButton bVolver = new JButton("Volver al menú principal...");
+                bVolver.setVisible(true);
+                bVolver.addActionListener(e -> {
+                    dispose();
+                    new MenuMolino();
+                });
+                panelBotonesFin.add(bSalir, BorderLayout.WEST);
+                panelBotonesFin.add(bVolver, BorderLayout.EAST);
+                rightPanel.add(panelBotonesFin, BorderLayout.SOUTH);
             }
         }
     }
 
     @Override
     public void mostrarMensajeNoCorrespondeAlJugador() {
-        println(textAreaMensajes, "La ficha seleccionada pertenece a tu oponente. Intenta con otra.");
+        println(textAreaMensajes, "La ficha seleccionada pertenece a tu oponente.\nIntenta con otra.");
     }
 
     @Override
     public void mostrarMensajeNoCorrespondeAlOponente() {
-        println(textAreaMensajes, "¡No podés eliminar tus propias fichas! Seleccioná una ficha de tu oponente.");
+        println(textAreaMensajes, "¡No podés eliminar tus propias fichas!\nSeleccioná una ficha de tu oponente.");
     }
 
     @Override
@@ -376,12 +426,17 @@ public class VistaTableroConsola extends JFrame implements IVista {
 
     @Override
     public void empatePorMovimientosSinComerFichas() {
-        println(textAreaMensajes, "¡Han realizado más de 30 movimientos sin comer una ficha! Entonces se declara empate.");
+        println(textAreaMensajes, "¡Han realizado más de 30 movimientos sin comer una ficha!\nEntonces se declara empate.");
     }
 
     @Override
     public void informarOponenteHaAbandonado() {
-        println(textAreaMensajes, "¡Tu oponente ha abandonado! Se te otorga la victoria. ¡Felicitaciones!");
+        println(textAreaMensajes, "¡Tu oponente ha abandonado!\nSe te otorga la victoria. ¡Felicitaciones!");
+    }
+
+    @Override
+    public void mensajeEsTuTurno() {
+        println(textAreaMensajes, "¡Es tu turno! Piensa tu próximo movimiento.");
     }
 
     private void limpiarMensajes() {
@@ -449,7 +504,7 @@ public class VistaTableroConsola extends JFrame implements IVista {
     }
 
     private void println(JTextArea textArea, String texto) {
-        textArea.append(texto + "\n");
+        textArea.append("\n" + texto + "\n");
     }
 
     private void print(JTextArea textArea, String texto) {

@@ -20,7 +20,7 @@ public interface IVista {
     void jugadorSinMovimientos();
     void jugadorSinFichas();
     void mostrarJugadorConectado() throws RemoteException;
-    void mostrarTurnoActual();
+    void mostrarTurnoDelOponente();
     void mostrarMensajeError(String mensaje);
     void actualizarTablero() throws RemoteException;
     void mensajeAlGanador();
@@ -32,4 +32,5 @@ public interface IVista {
     void mostrarMensajeCasillaLibre();
     void empatePorMovimientosSinComerFichas();
     void informarOponenteHaAbandonado();
+    void mensajeEsTuTurno();
 }

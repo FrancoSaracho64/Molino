@@ -12,7 +12,10 @@ import java.util.ArrayList;
 
 public class ListaPartidasGuardadas extends JFrame {
     public ListaPartidasGuardadas(ArrayList<PartidaGuardada> partidasGuardadas){
+        setTitle("Partidas guardadas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setSize(750, 200);
         // Crear un modelo de lista y agregar los elementos
         DefaultListModel<PartidaGuardada> model = new DefaultListModel<>();
         for (PartidaGuardada partida : partidasGuardadas) {
@@ -31,6 +34,7 @@ public class ListaPartidasGuardadas extends JFrame {
                 Persistencia.guardarPartida(partidas);
                 //
                 JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "Has seleccionado: " + seleccion);
+                dispose();
                 // Aquí puedes continuar con la aplicación según la selección del usuario
                 new ServidorMolino(seleccion.getModelo());
                 JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "Espera, para comenzar correctamente la partida, primero debe unirse otro jugador desde otra computadora.\nLuego de que se haya unido, selecciona en OK y se ejecutará tu cliente.", "¡ESPERA!", JOptionPane.INFORMATION_MESSAGE);
@@ -40,7 +44,6 @@ public class ListaPartidasGuardadas extends JFrame {
             }
         });
         add(continuarButton, BorderLayout.SOUTH);
-        setSize(300, 200);
         setVisible(true);
     }
 }

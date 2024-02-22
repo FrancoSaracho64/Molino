@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class Molino extends ObservableRemoto implements Serializable, IMolino {
     private final int MOVIMIENTOS_SIN_ELIMINAR_FICHAS = 30;
-    public static final int CANTIDAD_FICHAS = 9;
+    public static final int CANTIDAD_FICHAS = 4;
     public static final String JUGADOR_1 = "X";
     public static final String JUGADOR_2 = "O";
     public static final String CASILLA_DISPONIBLE = "#";
@@ -44,24 +44,33 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
     @Override
     public void comenzarJuego() throws RemoteException {
         if (jugador1 != null && jugador2 != null) {
+            testJugadores();
             notificarObservadores(EventosTablero.INICIO_PARTIDA);
-            return;
+        } else {
+            jugador1 = obtenerJ1();
+            jugador2 = obtenerJ2();
+            testJugadores();
+            movimientosSinCaptura = 0;
+            prepararFichas();
+            juegoComenzado = true;
+            notificarObservadores(EventosTablero.INICIO_PARTIDA);
         }
-        jugador1 = obtenerJ1();
-        jugador2 = obtenerJ2();
-        movimientosSinCaptura = 0;
-        prepararFichas();
-        juegoComenzado = true;
-        notificarObservadores(EventosTablero.INICIO_PARTIDA);
     }
 
-    @Override
-    public Jugador getOponente(Jugador jugadorLocal) {
-        if (jugadorLocal.equals(jugador1)) {
-            return jugador2;
-        } else {
-            return jugador1;
-        }
+    private void testJugadores() {
+        System.out.println("Le toca a:  " + jugadorActual.getId() + " --- " + jugadorActual.getNombre());
+        System.out.println();
+        System.out.println(jugador1);
+        System.out.println("colocadas: " + jugador1.getFichasColocadas());
+        System.out.println("en tablero: " + jugador1.getFichasEnTablero());
+        System.out.println("id: " + jugador1.getId());
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println(jugador2);
+        System.out.println("colocadas: " + jugador2.getFichasColocadas());
+        System.out.println("en tablero: " + jugador2.getFichasEnTablero());
+        System.out.println("id: " + jugador2.getId());
     }
 
     @Override
@@ -144,7 +153,19 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
 
     @Override
     public void finalizarTurno() throws RemoteException {
-        finalizarTurnoJugadorActual();
+        if (jugadorActual.getFichasColocadas() < CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
+            // Si ambos jugadores no han colocado todas sus fichas, simplemente se invierte el turno.
+            cambiarTurnoJugador();
+        } else if (jugadorActual.getFichasColocadas() == CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
+            // Si el jugador actual ha colocado todas sus fichas pero su oponente no, se invierte el turno.
+            cambiarTurnoJugador();
+        } else if (juegoSigueActivo()) {
+            // Si ambos jugadores han colocado todas sus fichas y el juego sigue activo, se invierte el turno.
+            cambiarTurnoJugador();
+        } else {
+            // Si ninguna de las condiciones anteriores se cumple, significa que el juego ha terminado.
+            finPartida();
+        }
     }
 
     @Override
@@ -238,13 +259,13 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
     }
 
     @Override
-    public boolean jugadorTieneFichasPendientes(Jugador jugadorLocal) throws RemoteException {
-        return getJugador(jugadorActual).getFichasColocadas() < CANTIDAD_FICHAS;
+    public boolean jugadorTieneFichasPendientes(Jugador jugador) throws RemoteException {
+        return getJugador(jugador).getFichasColocadas() < CANTIDAD_FICHAS;
     }
 
     @Override
-    public boolean jugadorEstaEnVuelo(Jugador jugadorLocal) {
-        return getJugador(jugadorActual).getFichasColocadas() == CANTIDAD_FICHAS && getJugador(jugadorActual).getFichasEnTablero() == 3;
+    public boolean jugadorEstaEnVuelo(Jugador jugador) {
+        return getJugador(jugador).getFichasColocadas() == CANTIDAD_FICHAS && getJugador(jugador).getFichasEnTablero() == 3;
     }
 
     @Override
@@ -252,8 +273,6 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         if (jugador.equals(jugadorActual)) {
             tablero.colocarFicha(coordenada, jugadorActual.getFichaParaColocar());
             notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
-        } else {
-            throw new RemoteException("No es tu turno.");
         }
     }
 
@@ -271,7 +290,10 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         if (reglas.hayMolinoEnPosicion(nueCoord, jugadorActual)) {
             if (reglas.hayFichasParaEliminar(getOponente(jugadorActual))) {
                 movimientosSinCaptura = 0;
+                ultimoMovimientoFueMolino = true;
             }
+        } else {
+            ultimoMovimientoFueMolino = false;
         }
         movimientosSinCaptura++;
         System.out.println("Son " + movimientosSinCaptura + " despues de hacer el movimiento. ");
@@ -330,9 +352,8 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         }
         // Guardo los jugadores.
         Persistencia.guardarJugadores(jugadoresRegistrados);
-
-        // El primer jugador que se conecta comienza la partida.
-        if (jugadores.isEmpty()) {
+        // El primer jugador que se conecta comienza la partida. Si la partida se reanuda, no se modifica el J-actual.
+        if (jugadores.isEmpty() && jugadorActual == null) {
             jugadorActual = jugador;
         }
         jugadores.add(jugador);
@@ -369,13 +390,8 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         notificarObservadores(EventosTablero.FIN_PARTIDA_ABANDONO);
     }
 
-    @Override
-    public Jugador obtenerJugadorOponente() throws RemoteException {
-        if (jugadorActual.equals(jugador1)) {
-            return jugador2;
-        } else {
-            return jugador1;
-        }
+    private Jugador obtenerJugadorOponente() throws RemoteException {
+        return (jugadorActual.equals(jugador1)) ? jugador2 : jugador1;
     }
 
     @Override
@@ -428,22 +444,6 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         return jugadores.get(1);
     }
 
-    private void finalizarTurnoJugadorActual() throws RemoteException {
-        if (jugadorActual.getFichasColocadas() < CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
-            // Si ambos jugadores no han colocado todas sus fichas, simplemente se invierte el turno.
-            cambiarTurnoJugador();
-        } else if (jugadorActual.getFichasColocadas() == CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasColocadas() < CANTIDAD_FICHAS) {
-            // Si el jugador actual ha colocado todas sus fichas pero su oponente no, se invierte el turno.
-            cambiarTurnoJugador();
-        } else if (juegoSigueActivo()) {
-            // Si ambos jugadores han colocado todas sus fichas y el juego sigue activo, se invierte el turno.
-            cambiarTurnoJugador();
-        } else {
-            // Si ninguna de las condiciones anteriores se cumple, significa que el juego ha terminado.
-            finPartida();
-        }
-    }
-
     private void cambiarTurnoJugador() throws RemoteException {
         jugadorActual = jugadorActual.equals(jugador1) ? jugador2 : jugador1;
         notificarObservadores(EventosTablero.CAMBIO_TURNO_JUGADOR);
@@ -457,9 +457,12 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
      * @return Se retorna el jugador almacenado en el modelo. Puede ser el J1 o J2.
      */
     private Jugador getJugador(Jugador jugador) {
-        if (jugador.equals(jugador1))
-            return jugador1;
-        else return jugador2;
+        return (jugador.equals(jugador1)) ? jugador1 : jugador2;
+    }
+
+    @Override
+    public Jugador getOponente(Jugador jugador) {
+        return (jugador.equals(jugador1)) ? jugador2 : jugador1;
     }
 
     /**
@@ -479,9 +482,11 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         if (obtenerJugadorOponente().getFichasColocadas() == CANTIDAD_FICHAS && obtenerJugadorOponente().getFichasEnTablero() <= 2) {
             motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_FICHAS;
             return false;
-        } else if (!reglas.jugadorTieneMovimientos(obtenerJugadorOponente())) {
-            motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_MOVIMIENTOS;
-            return false;
+        } else if (obtenerJugadorOponente().getFichasColocadas() >= 1 && jugadorActual.getFichasColocadas() >= 1) {
+            if (!reglas.jugadorTieneMovimientos(obtenerJugadorOponente())) {
+                motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_MOVIMIENTOS;
+                return false;
+            }
         }
         // Si no pasó por ninguno anterior, el juego sigue.
         return true;

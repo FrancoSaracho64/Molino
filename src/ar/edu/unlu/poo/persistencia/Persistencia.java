@@ -39,7 +39,7 @@ public class Persistencia {
     }
 
     public static ArrayList<PartidaGuardada> cargarPartidasGuardadas() {
-        File archivo = new File(ARCHIVO_JUGADORES_HISTORICO);
+        File archivo = new File(ARCHIVO_PARTIDAS_GUARDADAS);
         if (archivo.exists()) {
             try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(ARCHIVO_PARTIDAS_GUARDADAS))) {
                 return (ArrayList<PartidaGuardada>) entrada.readObject();

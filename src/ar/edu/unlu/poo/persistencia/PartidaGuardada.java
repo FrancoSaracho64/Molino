@@ -25,7 +25,7 @@ public class PartidaGuardada implements Serializable {
 
     @Override
     public String toString() {
-        return " PartidaGuardada ---> (J1) " + jugador1 + " vs. " + jugador2 + " (J2)  ---->>  GUARDADA EL :   " + formatearFecha();
+        return " PartidaGuardada --- (J1) " + jugador1 + " vs. " + jugador2 + " (J2)  -----  GUARDADA EL :   " + formatearFecha();
     }
 
     private String formatearFecha() {

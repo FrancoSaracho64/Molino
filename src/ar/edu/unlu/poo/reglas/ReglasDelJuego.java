@@ -45,7 +45,7 @@ public class ReglasDelJuego implements Serializable {
      * Luego, determinar si son válidas o no.
      * Si son válidas, se debe analizar por si es posible o no moverse ahí.
      *
-     * @param casilla La posicion que viene por parametro corresponde a una casilla ocupara por el usuario.
+     * @param casilla La posicion que viene por parametro corresponde a una casilla ocupada por el usuario.
      * @return Se retorna true si hay movimientos. False si no hay.
      */
     private boolean hayMovimientosPosibles(Casilla casilla) {

@@ -32,6 +32,7 @@ public class MenuMolino extends JFrame {
         setIconImage(icono);
         setVisible(true);
         setResizable(false);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("Menú principal - Molino");
 
@@ -45,10 +46,10 @@ public class MenuMolino extends JFrame {
         // Eventos
 
         bIniciarRed.addActionListener(e -> {
-            new ServidorMolino(false);
-            JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "Se ha iniciado correctamente el servidor.\nPara unirte a la partida, volvé al menú principal y seleccioná la opción 'Unirse a un servidor',\ncompletando con los datos de tu computadora/red.'", "Servidor iniciado.", JOptionPane.INFORMATION_MESSAGE);
+            new ServidorMolino();
         });
         bUnirseRed.addActionListener(e -> {
+            dispose();
             new ClienteMolino();
         });
         bReanudar.addActionListener(e -> {
@@ -56,6 +57,7 @@ public class MenuMolino extends JFrame {
             if (partidasGuardadas.isEmpty()) {
                 JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "No se han encontrado partidas guardadas en el ordenador", "¡AVISO!", JOptionPane.INFORMATION_MESSAGE);
             } else {
+                dispose();
                 new ListaPartidasGuardadas(partidasGuardadas);
             }
         });
@@ -64,8 +66,8 @@ public class MenuMolino extends JFrame {
             if (mejoresJugadores.isEmpty()) {
                 JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "No se han encontrado Jugadores en este ordenador.", "ERROR", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                MejoresJugadoresDialog dialog = new MejoresJugadoresDialog(null, mejoresJugadores);
-                dialog.setVisible(true);
+                dispose();
+                new MejoresJugadoresDialog(null, mejoresJugadores);
             }
         });
         bReglas.addActionListener(e -> {
@@ -124,6 +126,7 @@ public class MenuMolino extends JFrame {
     private static class MejoresJugadoresDialog extends JDialog {
         public MejoresJugadoresDialog(Frame parent, ArrayList<Jugador> mejoresJugadores) {
             super(parent, "Ranking mejores Jugadores", true);
+            setLocationRelativeTo(null);
             // Crear un modelo de lista con los datos de los mejores jugadores
             DefaultListModel<Jugador> listModel = new DefaultListModel<>();
             ordenamientoPuntaje(mejoresJugadores);

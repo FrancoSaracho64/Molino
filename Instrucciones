@@ -1,0 +1,12 @@
+Notas:
+--  El juego se puede correr levantando el main de la clase "Iniciar Molino". Esto levantará un menú que nos dará todas
+    las opciones disponibles dentro del juego.
+
+
+--  También se puede correr levantando sus partes por separado, pero siguiendo esta parte solo se va a poder iniciar una
+    partida desde cero. Es decir, no se va a poder reanudar una partida.
+    Para hacer esto, tenemos las clases:
+        "src/ar/edu/unlu/poo/online/ClienteMolino"
+        Y
+        "src/ar/edu/unlu/poo/online/ServidorMolino"
+    Primero ejecutamos el Servidor. Luego, los 2 clientes por separado que se van a unir al servidor creado.

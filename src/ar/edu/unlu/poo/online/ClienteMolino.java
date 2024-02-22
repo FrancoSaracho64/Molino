@@ -2,8 +2,9 @@ package ar.edu.unlu.poo.online;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
-import ar.edu.unlu.poo.vistas.VistaTableroConsola;
-import ar.edu.unlu.poo.vistas.VistaTableroInterfazGrafica;
+import ar.edu.unlu.poo.vistas.VistaConsola;
+import ar.edu.unlu.poo.vistas.VistaConsolaMejorada;
+import ar.edu.unlu.poo.vistas.VistaInterfazGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
@@ -15,8 +16,9 @@ import java.util.ArrayList;
 public class ClienteMolino {
     public ClienteMolino() {
         ArrayList<String> opciones = new ArrayList<>();
-        opciones.add("Consola");
         opciones.add("Interfáz gráfica");
+        opciones.add("Consola");
+        opciones.add("Consola (con UI mejorada)");
         ArrayList<String> ips = Util.getIpDisponibles();
         String ip = (String) JOptionPane.showInputDialog(
                 null,
@@ -60,10 +62,13 @@ public class ClienteMolino {
         );
         Controlador controlador = new Controlador();
         IVista vista;
+
         if (interfaz.equals("Consola")) {
-            vista = new VistaTableroConsola(controlador);
+            vista = new VistaConsola(controlador);
+        } else if (interfaz.equals("Consola (con UI mejorada)")) {
+            vista = new VistaConsolaMejorada(controlador);
         } else {
-            vista = new VistaTableroInterfazGrafica(controlador);
+            vista = new VistaInterfazGrafica(controlador);
         }
         Cliente cliente = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
         try {

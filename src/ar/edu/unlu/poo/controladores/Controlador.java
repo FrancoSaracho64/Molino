@@ -68,7 +68,7 @@ public class Controlador implements IControladorRemoto, IControlador {
     @Override
     public void casillaSeleccionadaDesdeLaVista(Coordenada coordenada) throws RemoteException {
         if (!modelo.esTurnoDe(jugadorLocal)) {
-            vista.mostrarTurnoActual();
+            vista.mostrarTurnoDelOponente();
             return;
         }
         switch (estadoActual) {
