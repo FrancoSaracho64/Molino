@@ -476,6 +476,9 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
             return false;
         } else if (obtenerJugadorOponente().getFichasColocadas() >= 1 && jugadorActual.getFichasColocadas() >= 1) {
             if (!reglas.jugadorTieneMovimientos(obtenerJugadorOponente())) {
+                if (obtenerJugadorOponente().getFichasEnTablero() == 3) { // Ignoramos porque el jugador está en vuelo.
+                    return true;
+                }
                 motivoFinPartida = MotivoFinPartida.JUGADOR_SIN_MOVIMIENTOS;
                 return false;
             }
