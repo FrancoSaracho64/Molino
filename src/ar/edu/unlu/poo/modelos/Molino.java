@@ -289,10 +289,9 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         }
         movimientosSinCaptura++;
         System.out.println("Son " + movimientosSinCaptura + " despues de hacer el movimiento. ");
+        notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
         if (!juegoSigueActivo()) {
             finPartida();
-        } else {
-            notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
         }
     }
 
