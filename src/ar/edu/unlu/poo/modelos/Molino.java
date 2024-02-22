@@ -273,6 +273,7 @@ public class Molino extends ObservableRemoto implements Serializable, IMolino {
         movimientosSinCaptura = 0;
         obtenerOponente(jugador).decFichasEnTablero();
         tablero.quitarFicha(coordenada);
+        ultimoMovimientoFueMolino = false;
         notificarObservadores(EventosTablero.CAMBIO_EN_EL_TABLERO);
     }
 
