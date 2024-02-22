@@ -7,6 +7,7 @@ import ar.edu.unlu.poo.mensajes.MensajesGanador;
 import ar.edu.unlu.poo.mensajes.MensajesMolino;
 import ar.edu.unlu.poo.mensajes.MensajesPerdedor;
 import ar.edu.unlu.poo.modelos.Coordenada;
+import ar.edu.unlu.poo.modelos.Molino;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -29,7 +30,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
 
     public VistaConsolaMejorada(IControlador controlador) {
         this.controlador = controlador;
-        this.controlador.setVista(this);
+        this.controlador.colocarVista(this);
         initComponents();
         setIconImage(icono);
         setLayout(new BorderLayout());
@@ -43,13 +44,13 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (controlador.laPartidaHaComenzado()) {
-                        if (controlador.laPartidaSigueActiva()) {
+                    if (controlador.partidaHaComenzado()) {
+                        if (controlador.partidaSigueActiva()) {
                             int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
                                     "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
                                     "Confirmar salida", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                controlador.guardarPartidaEstadoActual();
+                                controlador.guardarPartida();
                                 System.exit(0); // Termina la aplicación
                             }
                             if (confirm == JOptionPane.NO_OPTION) {
@@ -66,7 +67,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
                                 "Confirmar salida", JOptionPane.YES_NO_OPTION);
                         if (confirm == JOptionPane.YES_OPTION) {
                             // Si el usuario confirma, cierra la aplicación.
-                            controlador.cerrarAplicacion();
+                            controlador.aplicacionCerrada();
                             System.exit(0); // Termina la aplicación
                         }
                     }
@@ -77,6 +78,64 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
             }
         });
         setVisible(false);
+        textAreaTablero = new JTextArea(28, 28);
+        textAreaTablero.setEditable(false);
+        add(textAreaTablero, BorderLayout.WEST);
+        rightPanel = new JPanel(new BorderLayout());
+        textAreaMensajes = new JTextArea(10, 35);
+        textAreaMensajes.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
+        rightPanel.add(scrollPane, BorderLayout.NORTH);
+        add(rightPanel, BorderLayout.EAST);
+        optionsPanel = new JPanel();
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel filaLabel = new JLabel("Fila:");
+        JTextField fila = new JTextField(5);
+        fila.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null) {
+                    return;
+                }
+                // Verifica si el texto ingresado es numérico y limita la longitud a 1.
+                if (str.matches("\\d") && (getLength() + str.length()) <= 1) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+        JLabel columnaLabel = new JLabel("Columna:");
+        JTextField columna = new JTextField(5);
+        PlainDocument doc = (PlainDocument) columna.getDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                // Verifica si la inserción excedería el límite de un carácter
+                if ((fb.getDocument().getLength() + text.length() - length) <= 1) {
+                    super.replace(fb, offset, length, text.toUpperCase(), attrs); // Permitir inserción
+                } else {
+                    Toolkit.getDefaultToolkit().beep(); // Emite un sonido de error si se intenta exceder el límite
+                }
+            }
+        });
+        textFieldsPanel.add(columnaLabel);
+        textFieldsPanel.add(columna);
+        textFieldsPanel.add(filaLabel);
+        textFieldsPanel.add(fila);
+        JButton botonEnviarMovimiento = new JButton("Enviar movimiento...");
+        botonEnviarMovimiento.addActionListener(e -> {
+            try {
+                controlador.casillaSeleccionadaDesdeLaVista(generarCoordenada(fila.getText(), columna.getText()));
+                // Reiniciamos el contenido.
+                fila.setText("");
+                columna.setText("");
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        optionsPanel.add(textFieldsPanel);
+        optionsPanel.add(botonEnviarMovimiento);
+        rightPanel.add(optionsPanel, BorderLayout.SOUTH);
     }
 
     private void initComponents() {
@@ -87,7 +146,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void iniciar() {
+    public void iniciarVista() {
         new MenuPrePartida(controlador);
     }
 
@@ -107,7 +166,13 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
             for (int columna = 0; columna < 13; columna++) {
                 String contenidoCelda = "";
                 if (fila % 2 == 0 && columna % 2 == 0) {
-                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila / 2, columna / 2));
+                    String contenido = controlador.obtenerContenidoCasilla(new Coordenada(fila / 2, columna / 2));
+                    contenidoCelda = switch (contenido) {
+                        case Molino.JUGADOR_1 -> "X";
+                        case Molino.JUGADOR_2 -> "O";
+                        case Molino.CASILLA_DISPONIBLE -> "#";
+                        default -> contenidoCelda;
+                    };
                 }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -182,7 +247,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void casillaNoAdyacente() {
+    public void avisoCasillaNoAdyacente() {
         println(textAreaMensajes, "La casilla seleccionada no corresponde a una casilla adyacente.\nIntente con otra.");
     }
 
@@ -197,7 +262,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeFichaFormaMolino() {
+    public void mostrarMensajeFichaFormaMolino() {
         println(textAreaMensajes, "La ficha seleccionada forma parte de un molino.\nIntente con otra.");
     }
 
@@ -207,76 +272,18 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void jugadorSinMovimientos() {
+    public void avisoJugadorSinMovimientos() {
         println(textAreaMensajes, "¡Te quedaste sin movimientos posibles! :/\n");
     }
 
     @Override
-    public void jugadorSinFichas() {
+    public void avisoJugadorSinFichas() {
         println(textAreaMensajes, "¡Te quedaste sin fichas suficientes! :/\n");
     }
 
     @Override
     public void mostrarJugadorConectado() throws RemoteException {
-        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.nombreJugador() + ")");
-        textAreaTablero = new JTextArea(28, 28);
-        textAreaTablero.setEditable(false);
-        add(textAreaTablero, BorderLayout.WEST);
-        rightPanel = new JPanel(new BorderLayout());
-        textAreaMensajes = new JTextArea(10, 35);
-        textAreaMensajes.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
-        rightPanel.add(scrollPane, BorderLayout.NORTH);
-        add(rightPanel, BorderLayout.EAST);
-        optionsPanel = new JPanel();
-        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel filaLabel = new JLabel("Fila:");
-        JTextField fila = new JTextField(5);
-        fila.setDocument(new PlainDocument() {
-            @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-                if (str == null) {
-                    return;
-                }
-                // Verifica si el texto ingresado es numérico y limita la longitud a 1.
-                if (str.matches("\\d") && (getLength() + str.length()) <= 1) {
-                    super.insertString(offs, str, a);
-                }
-            }
-        });
-        JLabel columnaLabel = new JLabel("Columna:");
-        JTextField columna = new JTextField(5);
-        PlainDocument doc = (PlainDocument) columna.getDocument();
-        doc.setDocumentFilter(new DocumentFilter() {
-            @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                // Verifica si la inserción excedería el límite de un carácter
-                if ((fb.getDocument().getLength() + text.length() - length) <= 1) {
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs); // Permitir inserción
-                } else {
-                    Toolkit.getDefaultToolkit().beep(); // Emite un sonido de error si se intenta exceder el límite
-                }
-            }
-        });
-        textFieldsPanel.add(columnaLabel);
-        textFieldsPanel.add(columna);
-        textFieldsPanel.add(filaLabel);
-        textFieldsPanel.add(fila);
-        JButton botonEnviarMovimiento = new JButton("Enviar movimiento...");
-        botonEnviarMovimiento.addActionListener(e -> {
-            try {
-                controlador.casillaSeleccionadaDesdeLaVista(generarCoordenada(fila.getText(), columna.getText()));
-                // Reiniciamos el contenido.
-                fila.setText("");
-                columna.setText("");
-            } catch (RemoteException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        optionsPanel.add(textFieldsPanel);
-        optionsPanel.add(botonEnviarMovimiento);
-        rightPanel.add(optionsPanel, BorderLayout.SOUTH);
+        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.obtenerNombreJugador() + ")");
         setVisible(true);
         textAreaMensajes.setText("Te has conectado.\nEsperando a que se una tu oponente...");
     }
@@ -286,51 +293,42 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
         println(textAreaMensajes, "¡Es turno de tu oponente!\nEspera a que realice su movimiento.");
     }
 
-    @Override
-    public void mostrarMensajeError(String mensaje) {
-        println(textAreaMensajes, "Error: " + mensaje);
-    }
-
     public void actualizarTablero() throws RemoteException {
         textAreaTablero.setText("");
         mostrarTablero();
     }
 
     @Override
-    public void mensajeAlGanador() {
+    public void mostrarMensajeAlGanador() {
         println(textAreaMensajes, MensajesGanador.getMensajeFelicitacion());
     }
 
     @Override
-    public void mensajeAlPerdedor() {
+    public void mostrarMensajeAlPerdedor() {
         println(textAreaMensajes, MensajesPerdedor.getMensajeDeAnimo());
     }
 
     @Override
-    public void actualizarParaAccion(EstadoJuego estadoActual) {
+    public void actualizarVistaParaAccion(EstadoJuego estadoActual) {
         switch (estadoActual) {
-            case ESPERANDO_TURNO -> {
-                limpiarMensajes();
-                println(textAreaMensajes, "Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
-            }
+            case ESPERANDO_TURNO -> println(textAreaMensajes, "Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
             case COLOCAR_FICHA, SELECCIONAR_DESTINO_MOVER_SUPER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibre();
             }
             case SELECCIONAR_ORIGEN_MOVER, SELECCIONAR_ORIGEN_MOVER_SUPER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeCasillaFichaAMover();
             }
             case SELECCIONAR_DESTINO_MOVER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibreAdyacente();
             }
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
-                limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeFichaAEliminar();
             }
             case PARTIDA_SUSPENDIDA -> {
@@ -425,7 +423,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void empatePorMovimientosSinComerFichas() {
+    public void avisoEmpatePorMovimientosSinComerFichas() {
         println(textAreaMensajes, "¡Han realizado más de 30 movimientos sin comer una ficha!\nEntonces se declara empate.");
     }
 
@@ -435,7 +433,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeEsTuTurno() {
+    public void mostrarMensajeEsTuTurno() {
         println(textAreaMensajes, "¡Es tu turno! Piensa tu próximo movimiento.");
     }
 

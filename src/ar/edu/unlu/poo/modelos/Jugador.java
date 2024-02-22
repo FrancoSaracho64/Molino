@@ -27,10 +27,6 @@ public class Jugador implements Serializable {
         this.fichas = new ArrayList<>();
     }
 
-    public ArrayList<Ficha> getFichas() {
-        return fichas;
-    }
-
     public Ficha getFichaParaColocar() {
         Ficha ficha = fichas.get(fichasColocadas);
         incFichasEnTablero();
@@ -76,6 +72,10 @@ public class Jugador implements Serializable {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public int getEmpates() {
+        return empates;
     }
 
     public int getPuntaje() {

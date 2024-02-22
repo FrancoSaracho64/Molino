@@ -52,10 +52,6 @@ public class Casilla implements Serializable {
         casillasAdyacentes.addAll(adyacentes);
     }
 
-    public ArrayList<Casilla> getCasillasAdyacentes() {
-        return casillasAdyacentes;
-    }
-
     public ArrayList<Coordenada> getCoordenadasCasillasAdyacentes(){
         ArrayList<Coordenada> coordenadas = new ArrayList<>();
         for (Casilla casilla : casillasAdyacentes){

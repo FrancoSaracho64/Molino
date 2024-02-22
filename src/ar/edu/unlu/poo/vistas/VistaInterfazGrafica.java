@@ -2,6 +2,7 @@ package ar.edu.unlu.poo.vistas;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.enumerados.EstadoJuego;
+import ar.edu.unlu.poo.interfaces.IControlador;
 import ar.edu.unlu.poo.interfaces.IVista;
 import ar.edu.unlu.poo.mensajes.MensajesGanador;
 import ar.edu.unlu.poo.mensajes.MensajesMolino;
@@ -21,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VistaInterfazGrafica extends JFrame implements IVista {
-    private final Controlador controlador;
+    private final IControlador controlador;
     private ImageIcon fichaBlanca;
     private ImageIcon fichaNegra;
     private ImageIcon fondoCasilla;
@@ -31,9 +32,9 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     private JPanel panelBotonesFin;
     private final Map<ButtonCoordinates, JButton> botonesPorCoordenada = new HashMap<>();
 
-    public VistaInterfazGrafica(Controlador controlador) {
+    public VistaInterfazGrafica(IControlador controlador) {
         this.controlador = controlador;
-        this.controlador.setVista(this);
+        this.controlador.colocarVista(this);
 
         initElements();
         setLocationRelativeTo(null);
@@ -48,13 +49,13 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (controlador.laPartidaHaComenzado()) {
-                        if (controlador.laPartidaSigueActiva()) {
+                    if (controlador.partidaHaComenzado()) {
+                        if (controlador.partidaSigueActiva()) {
                             int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
                                     "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
                                     "Confirmar salida", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                controlador.guardarPartidaEstadoActual();
+                                controlador.guardarPartida();
                                 System.exit(0); // Termina la aplicación
                             }
                             if (confirm == JOptionPane.NO_OPTION) {
@@ -71,7 +72,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
                                 "Confirmar salida", JOptionPane.YES_NO_OPTION);
                         if (confirm == JOptionPane.YES_OPTION) {
                             // Si el usuario confirma, cierra la aplicación.
-                            controlador.cerrarAplicacion();
+                            controlador.aplicacionCerrada();
                             System.exit(0); // Termina la aplicación
                         }
                     }
@@ -81,7 +82,62 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
                 }
             }
         });
+
+        setLayout(new BorderLayout());
         setVisible(false);
+        // Tablero
+        BoardPanel boardPanel = new BoardPanel();
+        crearBoton(boardPanel, 0, 0, 29, 29);
+        crearBoton(boardPanel, 0, 3, 226, 29);
+        crearBoton(boardPanel, 0, 6, 425, 29);
+        crearBoton(boardPanel, 1, 1, 95, 95);
+        crearBoton(boardPanel, 1, 3, 226, 95);
+        crearBoton(boardPanel, 1, 5, 358, 95);
+        crearBoton(boardPanel, 2, 2, 157, 157);
+        crearBoton(boardPanel, 2, 3, 226, 157);
+        crearBoton(boardPanel, 2, 4, 296, 157);
+        crearBoton(boardPanel, 3, 0, 29, 226);
+        crearBoton(boardPanel, 3, 1, 95, 226);
+        crearBoton(boardPanel, 3, 2, 157, 226);
+        crearBoton(boardPanel, 3, 4, 296, 226);
+        crearBoton(boardPanel, 3, 5, 358, 226);
+        crearBoton(boardPanel, 3, 6, 425, 226);
+        crearBoton(boardPanel, 4, 2, 157, 298);
+        crearBoton(boardPanel, 4, 3, 226, 298);
+        crearBoton(boardPanel, 4, 4, 296, 298);
+        crearBoton(boardPanel, 5, 1, 95, 360);
+        crearBoton(boardPanel, 5, 3, 226, 360);
+        crearBoton(boardPanel, 5, 5, 358, 360);
+        crearBoton(boardPanel, 6, 0, 29, 425);
+        crearBoton(boardPanel, 6, 3, 226, 425);
+        crearBoton(boardPanel, 6, 6, 425, 425);
+        add(boardPanel, BorderLayout.WEST);
+
+        rightPanel = new JPanel(new BorderLayout());
+        // Texto
+        textArea = new JTextArea(10, 30); // Ajusta los valores para que se ajuste a tus necesidades
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea); // Añade el textArea a un JScrollPane
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton bSalir = new JButton("Cerrar aplicación...");
+        bSalir.addActionListener(e -> {
+            System.exit(0);
+        });
+        panelBotonesFin = new JPanel(new BorderLayout());
+
+        JButton bVolver = new JButton("Volver al menú principal...");
+        bVolver.setVisible(true);
+        bVolver.addActionListener(e -> {
+            dispose();
+            new MenuMolino();
+        });
+
+        panelBotonesFin.add(bSalir, BorderLayout.EAST);
+        panelBotonesFin.add(bVolver, BorderLayout.WEST);
+        rightPanel.add(panelBotonesFin, BorderLayout.SOUTH);
+        panelBotonesFin.setVisible(false);
+        add(rightPanel, BorderLayout.EAST);
     }
 
     private void initElements() {
@@ -129,7 +185,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void iniciar() {
+    public void iniciarVista() {
         new MenuPrePartida(controlador);
     }
 
@@ -138,7 +194,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
         for (Map.Entry<ButtonCoordinates, JButton> entrada : botonesPorCoordenada.entrySet()) {
             ButtonCoordinates coords = entrada.getKey();
             JButton button = entrada.getValue();
-            String contenidoCasilla = controlador.contenidoCasilla(new Coordenada(coords.x, coords.y));
+            String contenidoCasilla = controlador.obtenerContenidoCasilla(new Coordenada(coords.x, coords.y));
             if (contenidoCasilla.equals(Molino.JUGADOR_1)) {
                 button.setIcon(fichaBlanca);
                 button.setBorderPainted(false);
@@ -184,7 +240,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void casillaNoAdyacente() {
+    public void avisoCasillaNoAdyacente() {
         println("La casilla seleccionada no corresponde a una\ncasilla adyacente. Intente con otra.");
     }
 
@@ -199,7 +255,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeFichaFormaMolino() {
+    public void mostrarMensajeFichaFormaMolino() {
         println("La ficha seleccionada forma un molino.\nIntente con otra.");
     }
 
@@ -209,72 +265,18 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void jugadorSinMovimientos() {
+    public void avisoJugadorSinMovimientos() {
         println("¡Te quedaste sin movimientos posibles! :/\n");
     }
 
     @Override
-    public void jugadorSinFichas() {
+    public void avisoJugadorSinFichas() {
         println("¡Te quedaste sin fichas suficientes! :/\n");
     }
 
     @Override
     public void mostrarJugadorConectado() throws RemoteException {
-        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.nombreJugador() + ")");
-        // Tablero
-        BoardPanel boardPanel = new BoardPanel();
-        crearBoton(boardPanel, 0, 0, 29, 29);
-        crearBoton(boardPanel, 0, 3, 226, 29);
-        crearBoton(boardPanel, 0, 6, 425, 29);
-        crearBoton(boardPanel, 1, 1, 95, 95);
-        crearBoton(boardPanel, 1, 3, 226, 95);
-        crearBoton(boardPanel, 1, 5, 358, 95);
-        crearBoton(boardPanel, 2, 2, 157, 157);
-        crearBoton(boardPanel, 2, 3, 226, 157);
-        crearBoton(boardPanel, 2, 4, 296, 157);
-        crearBoton(boardPanel, 3, 0, 29, 226);
-        crearBoton(boardPanel, 3, 1, 95, 226);
-        crearBoton(boardPanel, 3, 2, 157, 226);
-        crearBoton(boardPanel, 3, 4, 296, 226);
-        crearBoton(boardPanel, 3, 5, 358, 226);
-        crearBoton(boardPanel, 3, 6, 425, 226);
-        crearBoton(boardPanel, 4, 2, 157, 298);
-        crearBoton(boardPanel, 4, 3, 226, 298);
-        crearBoton(boardPanel, 4, 4, 296, 298);
-        crearBoton(boardPanel, 5, 1, 95, 360);
-        crearBoton(boardPanel, 5, 3, 226, 360);
-        crearBoton(boardPanel, 5, 5, 358, 360);
-        crearBoton(boardPanel, 6, 0, 29, 425);
-        crearBoton(boardPanel, 6, 3, 226, 425);
-        crearBoton(boardPanel, 6, 6, 425, 425);
-        add(boardPanel, BorderLayout.WEST);
-
-        rightPanel = new JPanel(new BorderLayout());
-        // Texto
-        textArea = new JTextArea(10, 30); // Ajusta los valores para que se ajuste a tus necesidades
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea); // Añade el textArea a un JScrollPane
-        rightPanel.add(scrollPane, BorderLayout.CENTER);
-
-        panelBotonesFin = new JPanel(new BorderLayout());
-
-        JButton bSalir = new JButton("Cerrar aplicación...");
-        setVisible(true);
-        bSalir.addActionListener(e -> {
-            System.exit(0);
-        });
-        JButton bVolver = new JButton("Volver al menú principal...");
-        bVolver.setVisible(true);
-        bVolver.addActionListener(e -> {
-            dispose();
-            new MenuMolino();
-        });
-
-        panelBotonesFin.add(bSalir, BorderLayout.EAST);
-        panelBotonesFin.add(bVolver, BorderLayout.WEST);
-        rightPanel.add(panelBotonesFin, BorderLayout.SOUTH);
-        panelBotonesFin.setVisible(false);
-        add(rightPanel, BorderLayout.EAST);
+        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.obtenerNombreJugador() + ")");
         setVisible(true);
         textArea.setText("Te has conectado.\nEsperando a que se conecte tu oponente...");
     }
@@ -284,50 +286,41 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
         println("¡Es turno de tu oponente!\nEspera a que realice su movimiento ;)");
     }
 
-    @Override
-    public void mostrarMensajeError(String mensaje) {
-        println("Error: " + mensaje);
-    }
-
     public void actualizarTablero() throws RemoteException {
         mostrarTablero();
     }
 
     @Override
-    public void mensajeAlGanador() {
+    public void mostrarMensajeAlGanador() {
         println(MensajesGanador.getMensajeFelicitacion());
     }
 
     @Override
-    public void mensajeAlPerdedor() {
+    public void mostrarMensajeAlPerdedor() {
         println(MensajesPerdedor.getMensajeDeAnimo());
     }
 
     @Override
-    public void actualizarParaAccion(EstadoJuego estadoActual) {
+    public void actualizarVistaParaAccion(EstadoJuego estadoActual) {
         switch (estadoActual) {
-            case ESPERANDO_TURNO -> {
-                limpiarMensajes();
-                println("Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
-            }
+            case ESPERANDO_TURNO -> println("\nAhora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
             case COLOCAR_FICHA, SELECCIONAR_DESTINO_MOVER_SUPER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibre();
             }
             case SELECCIONAR_ORIGEN_MOVER, SELECCIONAR_ORIGEN_MOVER_SUPER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeCasillaFichaAMover();
             }
             case SELECCIONAR_DESTINO_MOVER -> {
                 limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibreAdyacente();
             }
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
-                limpiarMensajes();
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeFichaAEliminar();
             }
             case PARTIDA_SUSPENDIDA -> {
@@ -389,7 +382,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void empatePorMovimientosSinComerFichas() {
+    public void avisoEmpatePorMovimientosSinComerFichas() {
         println("¡Han realizado más de 30 movimientos sin comer\nuna ficha! Entonces se declara empate.");
     }
 
@@ -399,7 +392,7 @@ public class VistaInterfazGrafica extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeEsTuTurno() {
+    public void mostrarMensajeEsTuTurno() {
         println("¡Es tu turno! Piensa tu próximo movimiento.");
     }
 

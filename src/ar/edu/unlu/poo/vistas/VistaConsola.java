@@ -7,6 +7,7 @@ import ar.edu.unlu.poo.mensajes.MensajesGanador;
 import ar.edu.unlu.poo.mensajes.MensajesMolino;
 import ar.edu.unlu.poo.mensajes.MensajesPerdedor;
 import ar.edu.unlu.poo.modelos.Coordenada;
+import ar.edu.unlu.poo.modelos.Molino;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -28,7 +29,7 @@ public class VistaConsola extends JFrame implements IVista {
 
     public VistaConsola(IControlador controlador) {
         this.controlador = controlador;
-        this.controlador.setVista(this);
+        this.controlador.colocarVista(this);
         initComponents();
         setIconImage(icono);
         setResizable(false);
@@ -102,13 +103,13 @@ public class VistaConsola extends JFrame implements IVista {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (controlador.laPartidaHaComenzado()) {
-                        if (controlador.laPartidaSigueActiva()) {
+                    if (controlador.partidaHaComenzado()) {
+                        if (controlador.partidaSigueActiva()) {
                             int confirm = JOptionPane.showConfirmDialog(JOptionPane.getRootFrame(),
                                     "¿Quiere guardar la partida para reanudarla en otra ocación?\nNOTA: Si presiona 'NO' se le contará como abandono y perderás la partida :/",
                                     "Confirmar salida", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                controlador.guardarPartidaEstadoActual();
+                                controlador.guardarPartida();
                                 System.exit(0); // Termina la aplicación
                             }
                             if (confirm == JOptionPane.NO_OPTION) {
@@ -125,7 +126,7 @@ public class VistaConsola extends JFrame implements IVista {
                                 "Confirmar salida", JOptionPane.YES_NO_OPTION);
                         if (confirm == JOptionPane.YES_OPTION) {
                             // Si el usuario confirma, cierra la aplicación.
-                            controlador.cerrarAplicacion();
+                            controlador.aplicacionCerrada();
                             System.exit(0); // Termina la aplicación
                         }
                     }
@@ -146,7 +147,7 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void iniciar() {
+    public void iniciarVista() {
         new MenuPrePartida(controlador);
     }
 
@@ -166,7 +167,13 @@ public class VistaConsola extends JFrame implements IVista {
             for (int columna = 0; columna < 13; columna++) {
                 String contenidoCelda = "";
                 if (fila % 2 == 0 && columna % 2 == 0) {
-                    contenidoCelda = controlador.contenidoCasilla(new Coordenada(fila / 2, columna / 2));
+                    String contenido = controlador.obtenerContenidoCasilla(new Coordenada(fila / 2, columna / 2));
+                    contenidoCelda = switch (contenido) {
+                        case Molino.JUGADOR_1 -> "X";
+                        case Molino.JUGADOR_2 -> "O";
+                        case Molino.CASILLA_DISPONIBLE -> "#";
+                        default -> contenidoCelda;
+                    };
                 }
                 if (contenidoCelda.isEmpty()) {
                     if ((fila == 0 || fila == 12))
@@ -241,7 +248,7 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void casillaNoAdyacente() {
+    public void avisoCasillaNoAdyacente() {
         println("La casilla seleccionada no corresponde a una casilla adyacente.\nIntente con otra.");
     }
 
@@ -256,7 +263,7 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeFichaFormaMolino() {
+    public void mostrarMensajeFichaFormaMolino() {
         println("La ficha seleccionada forma parte de un molino.\nIntente con otra.");
     }
 
@@ -266,18 +273,18 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void jugadorSinMovimientos() {
+    public void avisoJugadorSinMovimientos() {
         println("¡Te quedaste sin movimientos posibles! :/\n");
     }
 
     @Override
-    public void jugadorSinFichas() {
+    public void avisoJugadorSinFichas() {
         println("¡Te quedaste sin fichas suficientes! :/\n");
     }
 
     @Override
     public void mostrarJugadorConectado() throws RemoteException {
-        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.nombreJugador() + ")");
+        setTitle("Juego del Molino - Nueve hombres de Morris   (" + controlador.obtenerNombreJugador() + ")");
         setVisible(true);
         println("Te has conectado.\nEsperando a que se una tu oponente...");
     }
@@ -287,45 +294,38 @@ public class VistaConsola extends JFrame implements IVista {
         println("¡Es turno de tu oponente!\nEspera a que realice su movimiento.");
     }
 
-    @Override
-    public void mostrarMensajeError(String mensaje) {
-        println("Error: " + mensaje);
-    }
-
     public void actualizarTablero() throws RemoteException {
         mostrarTablero();
     }
 
     @Override
-    public void mensajeAlGanador() {
+    public void mostrarMensajeAlGanador() {
         println(MensajesGanador.getMensajeFelicitacion());
     }
 
     @Override
-    public void mensajeAlPerdedor() {
+    public void mostrarMensajeAlPerdedor() {
         println(MensajesPerdedor.getMensajeDeAnimo());
     }
 
     @Override
-    public void actualizarParaAccion(EstadoJuego estadoActual) {
+    public void actualizarVistaParaAccion(EstadoJuego estadoActual) {
         switch (estadoActual) {
-            case ESPERANDO_TURNO -> {
-                println("Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
-            }
+            case ESPERANDO_TURNO -> println("Ahora es el turno de tu oponente.\nEspera hasta que realice su movimiento ;)");
             case COLOCAR_FICHA, SELECCIONAR_DESTINO_MOVER_SUPER -> {
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibre();
             }
             case SELECCIONAR_ORIGEN_MOVER, SELECCIONAR_ORIGEN_MOVER_SUPER -> {
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeCasillaFichaAMover();
             }
             case SELECCIONAR_DESTINO_MOVER -> {
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajePedirNuevaCasillaLibreAdyacente();
             }
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
-                mensajeEsTuTurno();
+                mostrarMensajeEsTuTurno();
                 mensajeFichaAEliminar();
             }
             case PARTIDA_SUSPENDIDA -> {
@@ -418,7 +418,7 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void empatePorMovimientosSinComerFichas() {
+    public void avisoEmpatePorMovimientosSinComerFichas() {
         println("¡Han realizado más de 30 movimientos sin comer una ficha!\nEntonces se declara empate.");
     }
 
@@ -428,7 +428,7 @@ public class VistaConsola extends JFrame implements IVista {
     }
 
     @Override
-    public void mensajeEsTuTurno() {
+    public void mostrarMensajeEsTuTurno() {
         println("¡Es tu turno! Piensa tu próximo movimiento.");
     }
 

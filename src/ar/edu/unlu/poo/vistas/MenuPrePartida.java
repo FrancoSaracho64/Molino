@@ -9,7 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 
-public class MenuPrePartida extends JFrame{
+public class MenuPrePartida extends JFrame {
     private JPanel panel;
     private JTextArea textArea;
     private JButton bSeleccionarJugadorPorPos;
@@ -28,7 +28,7 @@ public class MenuPrePartida extends JFrame{
         setTitle("Juego del Molino - Menú principal");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(800, 500);
-        textArea.setSize(10,50);
+        textArea.setSize(10, 50);
         setVisible(true);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -39,7 +39,7 @@ public class MenuPrePartida extends JFrame{
                             "Confirmar salida", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (controlador != null) {
-                            controlador.cerrarAplicacion();
+                            controlador.aplicacionCerrada();
                         }
                         System.exit(0); // Termina la aplicación
                     }
@@ -64,20 +64,26 @@ public class MenuPrePartida extends JFrame{
             // Verificamos que ese nombre no exista
             boolean ocupado;
             String nombre = JOptionPane.showInputDialog(null, "Ingrese nombre del nuevo jugador: ");
-            try {
-                ocupado = controlador.existeElNombre(nombre);
-                if (ocupado) {
-                    println("El nombre ingresado ya se encuentra registrado. Intente con otro.");
-                    return;
+            if (nombre.isBlank() || nombre.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No se puede introducir un nombre vacío. Vuelva a intentar.", "Error con el nombre", JOptionPane.ERROR_MESSAGE);
+                println("*** Error creando jugador ***   >>>   Se introdujo un nombre vacío/en blanco-");
+            } else {
+                try {
+                    ocupado = controlador.esNombreYaRegistrado(nombre);
+                    if (ocupado) {
+                        JOptionPane.showMessageDialog(null, "Ya existe un jugador con este mismo nombre. Intente con seleccionarlo desde la lista o cree un jugador nuevo con otro nombre.", "Error con el nombre", JOptionPane.ERROR_MESSAGE);
+                        println("*** Error creando jugador ***   >>>   El nombre ingresado ya se encuentra registrado. Intente con otro.");
+                        return;
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
                 }
-            } catch (RemoteException ex) {
-                throw new RuntimeException(ex);
+                println(">>> ¡Hecho! Jugador creado con exito. ¡Bienvenido " + nombre + "!");
+                jugadorLocal = new Jugador(nombre);
+                bCrearNuevoJugador.setVisible(false);
+                bSeleccionarJugadorPorPos.setVisible(false);
+                iniciarPartidaButton.setVisible(true);
             }
-            println("Jugador creado con exito. ¡Bienvenido " + nombre + "!");
-            jugadorLocal = new Jugador(nombre);
-            bCrearNuevoJugador.setVisible(false);
-            bSeleccionarJugadorPorPos.setVisible(false);
-            iniciarPartidaButton.setVisible(true);
         });
 
         bSeleccionarJugadorPorPos.addActionListener(e -> {
@@ -90,7 +96,7 @@ public class MenuPrePartida extends JFrame{
                 }
                 disponible = controlador.jugadorRegistradoEstaDisponible(pos);
                 if (!disponible) {
-                    println("El jugador seleccionado NO está disponible. Intente con otro.");
+                    println(">>> El jugador seleccionado NO está disponible. Intente con otro.");
                     return;
                 }
                 jugadorLocal = controlador.obtenerJugadoresRegistrados().get(pos);
@@ -98,7 +104,7 @@ public class MenuPrePartida extends JFrame{
                 throw new RuntimeException(ex);
             }
 
-            println("Se ha seleccionado el jugador " + jugadorLocal.getNombre());
+            println(">>> Se ha seleccionado el jugador " + jugadorLocal.getNombre());
             bCrearNuevoJugador.setVisible(false);
             bSeleccionarJugadorPorPos.setVisible(false);
             iniciarPartidaButton.setVisible(true);
@@ -114,7 +120,7 @@ public class MenuPrePartida extends JFrame{
                 }
                 disponible = controlador.jugadorParaReanudarDisponible(pos);
                 if (!disponible) {
-                    println("El jugador seleccionado ya fue elegido. Intente con el otro :/");
+                    println(">>> El jugador seleccionado ya fue elegido. Intente con el otro :/");
                     return;
                 }
                 jugadorLocal = controlador.obtenerJugadoresParaReanudar().get(pos);
@@ -122,25 +128,25 @@ public class MenuPrePartida extends JFrame{
                 throw new RuntimeException(ex);
             }
 
-            println("Se ha seleccionado el jugador " + jugadorLocal.getNombre());
+            println(">>> Se ha seleccionado el jugador " + jugadorLocal.getNombre());
             bSeleccionarExistente.setVisible(false);
             iniciarPartidaButton.setVisible(true);
         });
 
-        println("¡Bienvenido nuevamente al Juego del Molino!\n");
+        println("   ¡Bienvenido nuevamente al Juego del Molino!\n");
         println("Primero que nada vamos a analizar el estado del Juego encontrado en el Servidor seleccionado...\n");
         try {
             if (controlador.esPartidaNueva()) {
                 println("¡Se va a iniciar una nueva partida dentro de muy poco! Comencemos por conocerte, así te registramos.");
                 println("NOTA IMPORTANTE: El primer jugador que se una a la sesión mueve primero.\n");
-                println("* * * * ... analizando lista de jugadores registrados en el servidor... * * * *\n");
+                println("* * * * ... Analizando lista de jugadores registrados en el servidor... * * * *\n");
                 if (!controlador.hayJugadoresRegistrados()) {
                     println("No se ha encontrado registro de jugadores antiguos.");
                     bCrearNuevoJugador.setVisible(true);
                 } else {
                     bCrearNuevoJugador.setVisible(true);
                     bSeleccionarJugadorPorPos.setVisible(true);
-                    println("Se han detectado jugadores antiguos.\nLos jugadores detectados son los siguientes:\n");
+                    println("¡Se han detectado jugadores dentro del servidor!\n>>> Jugadores detectados:\n");
                     int i = 1;
                     for (Jugador jugador : controlador.obtenerJugadoresRegistrados()) {
                         println("Jugador N°" + i + "  :");
@@ -148,15 +154,13 @@ public class MenuPrePartida extends JFrame{
                         println("");
                         i++;
                     }
-                    println("\n\n");
-                    println("Seleccione/Cargue los jugadores a través del botón.");
                     println("\n");
-                    println("En caso de que el jugador se encuentre en la lista, ingrese el ID correspondiente.");
-                    println("Caso contrario, toque el botón para crear un jugador.");
+                    println("En caso de que el jugador se encuentre en la lista, podés seleccionarlo con el número de su posición.");
+                    println("Caso contrario, ¡cree un nuevo jugador!");
                 }
             } else {
                 println("Se ha encontrado una partida que está a punto de reanudarse.");
-                println("Indicame, ¿qué jugador sos?");
+                println("Seleccioná el jugador que te corresponda, no hagas trampa ;)");
                 bSeleccionarExistente.setVisible(true);
                 int i = 1;
                 for (Jugador jugador : controlador.obtenerJugadoresParaReanudar()) {

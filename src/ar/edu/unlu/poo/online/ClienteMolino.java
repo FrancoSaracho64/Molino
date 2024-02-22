@@ -73,7 +73,7 @@ public class ClienteMolino {
         Cliente cliente = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
         try {
             cliente.iniciar(controlador);
-            vista.iniciar();
+            vista.iniciarVista();
         } catch (RemoteException | RMIMVCException e) {
             e.printStackTrace();
         }

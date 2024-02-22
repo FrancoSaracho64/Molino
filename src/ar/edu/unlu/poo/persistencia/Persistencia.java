@@ -1,7 +1,6 @@
 package ar.edu.unlu.poo.persistencia;
 
 import ar.edu.unlu.poo.modelos.Jugador;
-import ar.edu.unlu.poo.modelos.Molino;
 
 import java.io.*;
 import java.util.ArrayList;

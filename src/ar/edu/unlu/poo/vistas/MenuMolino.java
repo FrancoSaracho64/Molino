@@ -8,6 +8,8 @@ import ar.edu.unlu.poo.persistencia.Persistencia;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,6 @@ public class MenuMolino extends JFrame {
         bReglas.setText("¿Cómo jugar? | Reglas");
 
         // Eventos
-
         bIniciarRed.addActionListener(e -> {
             new ServidorMolino();
         });
@@ -66,7 +67,6 @@ public class MenuMolino extends JFrame {
             if (mejoresJugadores.isEmpty()) {
                 JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "No se han encontrado Jugadores en este ordenador.", "ERROR", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                dispose();
                 new MejoresJugadoresDialog(null, mejoresJugadores);
             }
         });
@@ -126,26 +126,31 @@ public class MenuMolino extends JFrame {
     private static class MejoresJugadoresDialog extends JDialog {
         public MejoresJugadoresDialog(Frame parent, ArrayList<Jugador> mejoresJugadores) {
             super(parent, "Ranking mejores Jugadores", true);
-            setLocationRelativeTo(null);
-            // Crear un modelo de lista con los datos de los mejores jugadores
-            DefaultListModel<Jugador> listModel = new DefaultListModel<>();
-            ordenamientoPuntaje(mejoresJugadores);
-            for (Jugador jugador : mejoresJugadores) {
-                listModel.addElement(jugador);
-            }
-            // Crear una lista para mostrar los mejores jugadores
-            JList<Jugador> listaMejoresJugadores = new JList<>(listModel);
-            // Agregar la lista a un JScrollPane para que sea desplazable
-            JScrollPane scrollPane = new JScrollPane(listaMejoresJugadores);
-            // Agregar el JScrollPane al contenido del diálogo
-            getContentPane().add(scrollPane, BorderLayout.CENTER);
-            // Configurar el tamaño y la ubicación del diálogo
+            ordenarListaDeJugadores(mejoresJugadores);
             setSize(800, 300);
             setLocationRelativeTo(parent);
+            JTextArea textArea = new JTextArea(10, 50);
+            textArea.setEditable(false);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Lista de mejores jugadores registrados a la fecha  >>> (").append(formatearFecha()).append(")\n");
+            int posicion = 1;
+            for (Jugador jugador : mejoresJugadores) {
+                sb.append("\nPOSICIÓN N°").append(posicion++).append("  >>>  ").append(jugador.getNombre()).append("\n");
+                sb.append("     ").append("--- PUNTAJE  >>>  * ").append(jugador.getPuntaje()).append(" *\n");
+                sb.append("     ").append("--- VICTORIAS: ").append(jugador.getVictorias());
+                sb.append("     ").append("--- EMPATES: ").append(jugador.getEmpates());
+                sb.append("     ").append("--- DERROTAS: ").append(jugador.getDerrotas());
+                sb.append("\n");
+            }
+            textArea.setText(sb.toString());
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            getContentPane().add(scrollPane, BorderLayout.CENTER);
+            // Hacer visible el diálogo
+            setVisible(true);
         }
     }
 
-    private static void ordenamientoPuntaje(List<Jugador> jugadores) {
+    private static void ordenarListaDeJugadores(List<Jugador> jugadores) {
         int n = jugadores.size();
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
@@ -156,5 +161,10 @@ public class MenuMolino extends JFrame {
                 }
             }
         }
+    }
+
+    private static String formatearFecha() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return LocalDateTime.now().format(formatter);
     }
 }

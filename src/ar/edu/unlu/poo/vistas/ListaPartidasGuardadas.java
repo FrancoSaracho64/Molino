@@ -7,7 +7,6 @@ import ar.edu.unlu.poo.persistencia.Persistencia;
 
 import javax.swing.*;
 import java.awt.*;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class ListaPartidasGuardadas extends JFrame {

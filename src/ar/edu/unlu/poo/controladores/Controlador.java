@@ -18,7 +18,6 @@ public class Controlador implements IControladorRemoto, IControlador {
     private IMolino modelo;
     private IVista vista;
     private Jugador jugadorLocal;
-    private Jugador oponente;
     private EstadoJuego estadoActual;
     private Coordenada coordTemporalMovimiento;
 
@@ -27,7 +26,6 @@ public class Controlador implements IControladorRemoto, IControlador {
 
     public void iniciarPartida() throws RemoteException {
         // Comenzar el juego
-        setOponente();
         if (modelo.esTurnoDe(jugadorLocal)) {
             // Validaciones necesarias por si se reanuda la partida
             if (modelo.ultimoMovimientoFueMolino()) {
@@ -77,7 +75,7 @@ public class Controlador implements IControladorRemoto, IControlador {
                     modelo.colocarFicha(coordenada, jugadorLocal);
                     if (modelo.verificarMolinoTrasMovimiento(coordenada, jugadorLocal)) {
                         vista.avisoJugadorHizoMolino();
-                        if (modelo.hayFichasParaEliminar(oponente)) {
+                        if (modelo.hayFichasParaEliminarDelOponente(jugadorLocal)) {
                             cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_FICHA_PARA_ELIMINAR);
                         } else {
                             //Le informamos al usuario que no hay fichas para eliminar.
@@ -106,7 +104,7 @@ public class Controlador implements IControladorRemoto, IControlador {
                         coordTemporalMovimiento = null;
                         if (modelo.verificarMolinoTrasMovimiento(coordenada, jugadorLocal)) {
                             vista.avisoJugadorHizoMolino();
-                            if (modelo.hayFichasParaEliminar(oponente)) {
+                            if (modelo.hayFichasParaEliminarDelOponente(jugadorLocal)) {
                                 cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_FICHA_PARA_ELIMINAR);
                             } else {
                                 vista.avisoNoHayFichasParaEliminarDelOponente();
@@ -116,7 +114,7 @@ public class Controlador implements IControladorRemoto, IControlador {
                             finalizarTurno();
                         }
                     } else {
-                        vista.casillaNoAdyacente();
+                        vista.avisoCasillaNoAdyacente();
                     }
                 }
             }
@@ -132,7 +130,7 @@ public class Controlador implements IControladorRemoto, IControlador {
                     coordTemporalMovimiento = null;
                     if (modelo.verificarMolinoTrasMovimiento(coordenada, jugadorLocal)) {
                         vista.avisoJugadorHizoMolino();
-                        if (modelo.hayFichasParaEliminar(oponente)) {
+                        if (modelo.hayFichasParaEliminarDelOponente(jugadorLocal)) {
                             cambiarEstadoYActualizarVista(EstadoJuego.SELECCIONAR_FICHA_PARA_ELIMINAR);
                         } else {
                             vista.avisoNoHayFichasParaEliminarDelOponente();
@@ -146,12 +144,12 @@ public class Controlador implements IControladorRemoto, IControlador {
             case SELECCIONAR_FICHA_PARA_ELIMINAR -> {
                 if (validarCasillaValida(coordenada)) {
                     if (!modelo.esCasillaLibre(coordenada)) {
-                        if (modelo.casillaOcupadaPorJugador(coordenada, oponente)) {
-                            if (modelo.fichaSePuedeEliminar(coordenada, oponente)) {
-                                modelo.quitarFicha(coordenada, oponente);
+                        if (modelo.casillaOcupadaPorOponente(coordenada, jugadorLocal)) {
+                            if (modelo.fichaSePuedeEliminar(coordenada, jugadorLocal)) {
+                                modelo.quitarFicha(coordenada, jugadorLocal);
                                 finalizarTurno();
                             } else {
-                                vista.mensajeFichaFormaMolino();
+                                vista.mostrarMensajeFichaFormaMolino();
                             }
                         } else {
                             vista.mostrarMensajeNoCorrespondeAlOponente();
@@ -164,9 +162,9 @@ public class Controlador implements IControladorRemoto, IControlador {
         }
     }
 
-    private void cambiarEstadoYActualizarVista(EstadoJuego nuevoEstado) {
+    private void cambiarEstadoYActualizarVista(EstadoJuego nuevoEstado) throws RemoteException {
         estadoActual = nuevoEstado;
-        vista.actualizarParaAccion(nuevoEstado);
+        vista.actualizarVistaParaAccion(nuevoEstado);
     }
 
     private void finalizarTurno() {
@@ -178,12 +176,12 @@ public class Controlador implements IControladorRemoto, IControlador {
     }
 
     @Override
-    public String contenidoCasilla(Coordenada coordenada) throws RemoteException {
-        return modelo.getContenidoCasilla(coordenada);
+    public String obtenerContenidoCasilla(Coordenada coordenada) throws RemoteException {
+        return modelo.obtenerContenidoCasilla(coordenada);
     }
 
     @Override
-    public void setVista(IVista vista) {
+    public void colocarVista(IVista vista) {
         this.vista = vista;
     }
 
@@ -210,7 +208,7 @@ public class Controlador implements IControladorRemoto, IControlador {
     }
 
     private boolean validarCasillaJugadorLocal(Coordenada coordenada) throws RemoteException {
-        if (!modelo.casillaOcupadaPorJugador(coordenada, jugadorLocal)) {
+        if (!modelo.casillaOcupadaPorJugadorLocal(coordenada, jugadorLocal)) {
             vista.mostrarMensajeNoCorrespondeAlJugador();
             return false;
         }
@@ -223,24 +221,24 @@ public class Controlador implements IControladorRemoto, IControlador {
         if (ganador == null) {
             vista.mostrarEmpate();
             if (modelo.obtenerMotivoFinPartida().equals(MotivoFinPartida.EMPATE_POR_MOVIMIENTOS_SIN_CAPTURA)) {
-                vista.empatePorMovimientosSinComerFichas();
+                vista.avisoEmpatePorMovimientosSinComerFichas();
             }
         } else {
             vista.mostrarGanador(ganador.getNombre());
             if (ganador.equals(jugadorLocal)) {
-                vista.mensajeAlGanador();
+                vista.mostrarMensajeAlGanador();
             } else {
                 switch (modelo.obtenerMotivoFinPartida()) {
-                    case JUGADOR_SIN_MOVIMIENTOS -> vista.jugadorSinMovimientos();
-                    case JUGADOR_SIN_FICHAS -> vista.jugadorSinFichas();
+                    case JUGADOR_SIN_MOVIMIENTOS -> vista.avisoJugadorSinMovimientos();
+                    case JUGADOR_SIN_FICHAS -> vista.avisoJugadorSinFichas();
                 }
-                vista.mensajeAlPerdedor();
+                vista.mostrarMensajeAlPerdedor();
             }
         }
     }
 
     @Override
-    public void cerrarAplicacion() throws RemoteException {
+    public void aplicacionCerrada() throws RemoteException {
         try {
             if (modelo != null) {
                 modelo.removerObservador(this);
@@ -249,10 +247,6 @@ public class Controlador implements IControladorRemoto, IControlador {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setOponente() throws RemoteException {
-        this.oponente = modelo.getOponente(jugadorLocal);
     }
 
     @Override
@@ -266,11 +260,11 @@ public class Controlador implements IControladorRemoto, IControlador {
             switch ((EventosTablero) o) {
                 case JUGADOR_CONECTADO -> vista.mostrarJugadorConectado();
                 case INICIO_PARTIDA -> iniciarPartida();
-                case MOLINO -> vista.avisoDeMolino(modelo.getNombreMolino());
+                case MOLINO -> vista.avisoDeMolino(modelo.nombreJugadorDelMolino());
                 case CAMBIO_EN_EL_TABLERO -> vista.actualizarTablero();
                 case CAMBIO_TURNO_JUGADOR -> actualizarVistaNuevoTurno();
-                case JUGADOR_SIN_FICHAS -> vista.jugadorSinFichas();
-                case JUGADOR_SIN_MOVIMIENTOS -> vista.jugadorSinMovimientos();
+                case JUGADOR_SIN_FICHAS -> vista.avisoJugadorSinFichas();
+                case JUGADOR_SIN_MOVIMIENTOS -> vista.avisoJugadorSinMovimientos();
                 case FIN_PARTIDA -> finDePartida();
                 case FIN_PARTIDA_ABANDONO -> finDePartidaPorAbandono();
                 case PARTIDA_SUSPENDIDA -> cambiarEstadoYActualizarVista(EstadoJuego.PARTIDA_SUSPENDIDA);
@@ -278,9 +272,9 @@ public class Controlador implements IControladorRemoto, IControlador {
         }
     }
 
-    private void finDePartidaPorAbandono() {
+    private void finDePartidaPorAbandono() throws RemoteException {
         cambiarEstadoYActualizarVista(EstadoJuego.PARTIDA_TERMINADA);
-        vista.mensajeAlGanador();
+        vista.mostrarMensajeAlGanador();
         vista.informarOponenteHaAbandonado();
     }
 
@@ -300,7 +294,7 @@ public class Controlador implements IControladorRemoto, IControlador {
     }
 
     @Override
-    public boolean existeElNombre(String nombre) throws RemoteException {
+    public boolean esNombreYaRegistrado(String nombre) throws RemoteException {
         return modelo.existeNombreJugador(nombre);
     }
 
@@ -314,12 +308,12 @@ public class Controlador implements IControladorRemoto, IControlador {
     }
 
     @Override
-    public boolean laPartidaHaComenzado() throws RemoteException {
+    public boolean partidaHaComenzado() throws RemoteException {
         return modelo.hayPartidaActiva();
     }
 
     @Override
-    public void guardarPartidaEstadoActual() throws RemoteException {
+    public void guardarPartida() throws RemoteException {
         modelo.guardarPartida();
     }
 
@@ -339,12 +333,12 @@ public class Controlador implements IControladorRemoto, IControlador {
     }
 
     @Override
-    public String nombreJugador() throws RemoteException {
+    public String obtenerNombreJugador() throws RemoteException {
         return jugadorLocal.getNombre();
     }
 
     @Override
-    public boolean laPartidaSigueActiva() throws RemoteException {
+    public boolean partidaSigueActiva() throws RemoteException {
         return modelo.juegoSigueActivo();
     }
 }
