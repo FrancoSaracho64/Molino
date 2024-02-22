@@ -2,6 +2,7 @@ package ar.edu.unlu.poo.online;
 
 import ar.edu.unlu.poo.controladores.Controlador;
 import ar.edu.unlu.poo.interfaces.IVista;
+import ar.edu.unlu.poo.vistas.MenuMolino;
 import ar.edu.unlu.poo.vistas.VistaConsola;
 import ar.edu.unlu.poo.vistas.VistaConsolaMejorada;
 import ar.edu.unlu.poo.vistas.VistaInterfazGrafica;
@@ -75,6 +76,8 @@ public class ClienteMolino {
             cliente.iniciar(controlador);
             vista.iniciarVista();
         } catch (RemoteException | RMIMVCException e) {
+            JOptionPane.showMessageDialog(JOptionPane.getRootFrame(), "Uno de los puertos seleccionados ya se encuentra en uso. Vuelva a intentar unirse con otro.", "Error al unirse el servidor", JOptionPane.ERROR_MESSAGE);
+            new MenuMolino();
             e.printStackTrace();
         }
     }
