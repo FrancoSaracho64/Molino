@@ -35,7 +35,7 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
         setIconImage(icono);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(750, 350);
+        setSize(900, 500);
         setLocationRelativeTo(null);
         setResizable(false);
 
@@ -78,11 +78,13 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
             }
         });
         setVisible(false);
-        textAreaTablero = new JTextArea(28, 28);
+        textAreaTablero = new JTextArea();
+        textAreaTablero.setSize(250, 250);
         textAreaTablero.setEditable(false);
+        textAreaTablero.setFont(new java.awt.Font("Monospaced", Font.PLAIN, 14));
         add(textAreaTablero, BorderLayout.WEST);
         rightPanel = new JPanel(new BorderLayout());
-        textAreaMensajes = new JTextArea(10, 35);
+        textAreaMensajes = new JTextArea(25, 40);
         textAreaMensajes.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textAreaMensajes);
         rightPanel.add(scrollPane, BorderLayout.NORTH);
@@ -153,15 +155,15 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
     @Override
     public void mostrarTablero() throws RemoteException {
         StringBuilder tablero = new StringBuilder();
-        String letras = "          A        B        C        D        E        F        G\n";
-        tablero.append("\n\n");
+        String letras = "     A     B     C     D     E     F     G\n";
+        tablero.append("\n\n\n\n");
         tablero.append(letras);
         for (int fila = 0; fila < 13; fila++) {
-            tablero.append("     ");
+            tablero.append("  ");
             if (fila % 2 == 0) {
                 tablero.append(formatoCelda(numeroFila(fila / 2))).append(" "); // Número de fila
             } else {
-                tablero.append("   ");
+                tablero.append("  ");
             }
             for (int columna = 0; columna < 13; columna++) {
                 String contenidoCelda = "";
@@ -192,27 +194,12 @@ public class VistaConsolaMejorada extends JFrame implements IVista {
                     if ((columna == 4 || columna == 8) && (fila >= 4 && fila <= 8))
                         contenidoCelda = "|";
                     if ((columna == 6) && ((fila == 1) || (fila == 3) || (fila == 9) || (fila == 11)))
-                        contenidoCelda = "    |";
+                        contenidoCelda = "|";
                 }
-                if (fila != 6) {
-                    if ((fila == 0 || fila == 12) && columna == 6) {
-                        tablero.append(" ").append(formatoCelda(contenidoCelda)).append(" ");
-                    } else {
-                        if ((fila == 1 || fila == 11) && columna == 12) tablero.append(" ");
-                        if ((fila == 3 || fila == 9) && columna == 10) tablero.append(" ");
-                        tablero.append("  ").append(formatoCelda(contenidoCelda)).append("  ");
-                        if (fila == 5 && columna == 7) tablero.append("     ");
-                        if (fila == 7 && columna == 7) tablero.append("     ");
-                    }
-                } else {
-                    tablero.append("  ").append(formatoCelda(contenidoCelda)).append(" ");
-                    if (columna == 7) tablero.append("        ");
-                }
+                tablero.append(" ").append(formatoCelda(contenidoCelda)).append(" ");
             }
             if (fila % 2 == 0) {
-                tablero.append("  ").append(formatoCelda(numeroFila(fila / 2))).append("  ");
-            } else {
-                tablero.append("     ");
+                tablero.append(" ").append(formatoCelda(numeroFila(fila / 2))).append("  ");
             }
             tablero.append("\n");
         }

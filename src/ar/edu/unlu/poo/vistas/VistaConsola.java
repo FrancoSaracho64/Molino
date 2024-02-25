@@ -37,14 +37,12 @@ public class VistaConsola extends JFrame implements IVista {
         setSize(700, 700);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
         textArea = new JTextArea();
         textArea.setEditable(false);
+        textArea.setFont(new java.awt.Font("Monospaced", Font.PLAIN, 15));
         JScrollPane scrollPane = new JScrollPane(textArea);
         add(scrollPane, BorderLayout.CENTER);
-
         bottomPanel = new JPanel(new BorderLayout());
-
         optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         JPanel textFieldsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -154,15 +152,15 @@ public class VistaConsola extends JFrame implements IVista {
     @Override
     public void mostrarTablero() throws RemoteException {
         StringBuilder tablero = new StringBuilder();
-        String letras = "          A        B        C        D        E        F        G\n";
+        String letras = "                 A     B     C     D     E     F     G\n";
         tablero.append("\n\n\n");
         tablero.append(letras);
         for (int fila = 0; fila < 13; fila++) {
-            tablero.append("     ");
+            tablero.append("              ");
             if (fila % 2 == 0) {
                 tablero.append(formatoCelda(numeroFila(fila / 2))).append(" "); // Número de fila
             } else {
-                tablero.append("   ");
+                tablero.append("  ");
             }
             for (int columna = 0; columna < 13; columna++) {
                 String contenidoCelda = "";
@@ -193,32 +191,17 @@ public class VistaConsola extends JFrame implements IVista {
                     if ((columna == 4 || columna == 8) && (fila >= 4 && fila <= 8))
                         contenidoCelda = "|";
                     if ((columna == 6) && ((fila == 1) || (fila == 3) || (fila == 9) || (fila == 11)))
-                        contenidoCelda = "    |";
+                        contenidoCelda = "|";
                 }
-                if (fila != 6) {
-                    if ((fila == 0 || fila == 12) && columna == 6) {
-                        tablero.append(" ").append(formatoCelda(contenidoCelda)).append(" ");
-                    } else {
-                        if ((fila == 1 || fila == 11) && columna == 12) tablero.append(" ");
-                        if ((fila == 3 || fila == 9) && columna == 10) tablero.append(" ");
-                        tablero.append("  ").append(formatoCelda(contenidoCelda)).append("  ");
-                        if (fila == 5 && columna == 7) tablero.append("     ");
-                        if (fila == 7 && columna == 7) tablero.append("     ");
-                    }
-                } else {
-                    tablero.append("  ").append(formatoCelda(contenidoCelda)).append(" ");
-                    if (columna == 7) tablero.append("        ");
-                }
+                tablero.append(" ").append(formatoCelda(contenidoCelda)).append(" ");
             }
             if (fila % 2 == 0) {
-                tablero.append("  ").append(formatoCelda(numeroFila(fila / 2))).append("  ");
-            } else {
-                tablero.append("     ");
+                tablero.append(" ").append(formatoCelda(numeroFila(fila / 2)));
             }
             tablero.append("\n");
         }
         tablero.append(letras);
-        tablero.append("\n\n\n");
+        tablero.append("\n\n");
         textArea.append(tablero.toString());
     }
 
